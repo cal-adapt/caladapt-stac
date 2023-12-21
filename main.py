@@ -1,6 +1,3 @@
-import os
-import asyncio
-from contextlib import asynccontextmanager
 from functools import lru_cache
 
 import attr
@@ -54,15 +51,7 @@ EXTENSIONS = (
 SearchGETRequest = create_get_request_model(EXTENSIONS)
 SearchPOSTRequest = create_post_request_model(EXTENSIONS, base_model=PgstacSearch)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """FastAPI Lifespan."""
-    await connect_to_db(app)
-    yield
-    await close_db_connection(app)
-
 api = StacApi(
-    app=FastAPI(title='Cal-Adapt STAC API', lifespan=lifespan),
     title='Cal-Adapt STAC API',
     description='Searchable spatiotemporal catalog describing datasets hosted on Cal-Adapt',
     settings=settings,
@@ -78,8 +67,9 @@ async def startup_event() -> None:
     """Connect to database on startup."""
     await connect_to_db(app)
 
-handler = Mangum(app, lifespan='off')
+@app.on_event('shutdown')
+async def shutdown_event() -> None:
+    """Close database connection."""
+    await close_db_connection(app)
 
-if 'AWS_EXECUTION_ENV' in os.environ:
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(app.router.startup())
+handler = Mangum(app)
