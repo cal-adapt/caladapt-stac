@@ -1,5 +1,11 @@
+import os
+import asyncio
+from contextlib import asynccontextmanager
+from functools import lru_cache
+
 import attr
 from fastapi import FastAPI
+from fastapi.responses import ORJSONResponse
 from stac_fastapi.api.app import StacApi
 from stac_fastapi.api.models import create_get_request_model, create_post_request_model
 from stac_fastapi.extensions.core.filter.request import FilterExtensionGetRequest, FilterLang
@@ -8,7 +14,6 @@ from stac_fastapi.pgstac.config import Settings
 from stac_fastapi.pgstac.db import close_db_connection, connect_to_db
 from stac_fastapi.pgstac.extensions.filter import FiltersClient
 from stac_fastapi.pgstac.types.search import PgstacSearch
-from stac_fastapi.types import config, core
 from stac_fastapi.extensions.core import (
     FieldsExtension,
     FilterExtension,
@@ -16,19 +21,20 @@ from stac_fastapi.extensions.core import (
     SortExtension,
     TokenPaginationExtension,
 )
-from stac_fastapi.extensions.core.filter.filter import FilterConformanceClasses
+from mangum import Mangum
 
-EXTENSIONS = [
-    QueryExtension(),
-    SortExtension(),
-    FieldsExtension(),
-    FilterExtension(
-        client=FiltersClient(),
-    ),
-    TokenPaginationExtension(),
-]
-search_get_request_model = create_get_request_model(EXTENSIONS)
-search_post_request_model = create_post_request_model(EXTENSIONS, base_model=PgstacSearch)
+
+class _Settings(Settings):
+    # Use single connections for lambdas, one per request
+    db_max_conn_size: int = 1
+    db_min_conn_size: int = 1
+
+
+@lru_cache
+def Settings() -> _Settings:
+    return _Settings()
+
+settings = _Settings()
 
 
 @attr.s
@@ -38,14 +44,32 @@ class FilterExtensionGetRequest(FilterExtensionGetRequest):
 
 FilterExtension.GET = FilterExtensionGetRequest
 
+EXTENSIONS = (
+    QueryExtension(),
+    SortExtension(),
+    FieldsExtension(),
+    FilterExtension(client=FiltersClient()),
+    TokenPaginationExtension(),
+)
+SearchGETRequest = create_get_request_model(EXTENSIONS)
+SearchPOSTRequest = create_post_request_model(EXTENSIONS, base_model=PgstacSearch)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """FastAPI Lifespan."""
+    await connect_to_db(app)
+    yield
+    await close_db_connection(app)
+
 api = StacApi(
+    app=FastAPI(title='Cal-Adapt STAC API', lifespan=lifespan),
     title='Cal-Adapt STAC API',
     description='Searchable spatiotemporal catalog describing datasets hosted on Cal-Adapt',
-    settings=Settings(debug=True),
-    client=CoreCrudClient(post_request_model=search_post_request_model),
+    settings=settings,
+    client=CoreCrudClient(post_request_model=SearchPOSTRequest),
     extensions=EXTENSIONS,
-    search_get_request_model=search_get_request_model,
-    search_post_request_model=search_post_request_model,
+    search_get_request_model=SearchGETRequest,
+    search_post_request_model=SearchPOSTRequest,
 )
 app = api.app
 
@@ -54,7 +78,8 @@ async def startup_event() -> None:
     """Connect to database on startup."""
     await connect_to_db(app)
 
-@app.on_event('shutdown')
-async def shutdown_event() -> None:
-    """Close database connection."""
-    await close_db_connection(app)
+handler = Mangum(app, lifespan='off')
+
+if 'AWS_EXECUTION_ENV' in os.environ:
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(app.router.startup())
