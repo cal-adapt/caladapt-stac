@@ -51,16 +51,18 @@ EXTENSIONS = (
 SearchGETRequest = create_get_request_model(EXTENSIONS)
 SearchPOSTRequest = create_post_request_model(EXTENSIONS, base_model=PgstacSearch)
 
+app = FastAPI(title='Cal-Adapt STAC API', default_response_class=ORJSONResponse)
 api = StacApi(
-    title='Cal-Adapt STAC API',
+    app=app,
+    title=app.title,
     description='Searchable spatiotemporal catalog describing datasets hosted on Cal-Adapt',
     settings=settings,
     client=CoreCrudClient(post_request_model=SearchPOSTRequest),
     extensions=EXTENSIONS,
     search_get_request_model=SearchGETRequest,
     search_post_request_model=SearchPOSTRequest,
+    response_class=ORJSONResponse,
 )
-app = api.app
 
 @app.on_event('startup')
 async def startup_event() -> None:
