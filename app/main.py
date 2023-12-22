@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from functools import lru_cache
 
 import attr
@@ -41,18 +42,27 @@ class FilterExtensionGetRequest(FilterExtensionGetRequest):
 
 
 FilterExtension.GET = FilterExtensionGetRequest
-
-EXTENSIONS = (
+EXTENSIONS = [
     QueryExtension(),
     SortExtension(),
     FieldsExtension(),
     FilterExtension(client=FiltersClient()),
     TokenPaginationExtension(),
-)
+]
 SearchGETRequest = create_get_request_model(EXTENSIONS)
 SearchPOSTRequest = create_post_request_model(EXTENSIONS, base_model=PgstacSearch)
 
-app = FastAPI(title='Cal-Adapt STAC API', default_response_class=ORJSONResponse)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await connect_to_db(app)
+    yield
+    await close_db_connection(app)
+
+app = FastAPI(
+    title='Cal-Adapt STAC API',
+    lifespan=lifespan,
+    default_response_class=ORJSONResponse
+)
 api = StacApi(
     app=app,
     title=app.title,
@@ -64,15 +74,11 @@ api = StacApi(
     search_post_request_model=SearchPOSTRequest,
     response_class=ORJSONResponse,
 )
-
-@app.on_event('startup')
-async def startup_event() -> None:
-    """Connect to database on startup."""
-    await connect_to_db(app)
-
-@app.on_event('shutdown')
-async def shutdown_event() -> None:
-    """Close database connection."""
-    await close_db_connection(app)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=['GET', 'POST', 'OPTIONS'],
+    allow_headers=['*']
+)
 
 handler = Mangum(app)
