@@ -18,6 +18,7 @@ from stac_fastapi.extensions.core import (
     SortExtension,
     TokenPaginationExtension,
 )
+from starlette.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
 
