@@ -1,4 +1,5 @@
-from contextlib import asynccontextmanager
+import os
+import asyncio
 from functools import lru_cache
 
 import attr
@@ -9,7 +10,7 @@ from stac_fastapi.api.models import create_get_request_model, create_post_reques
 from stac_fastapi.extensions.core.filter.request import FilterExtensionGetRequest, FilterLang
 from stac_fastapi.pgstac.core import CoreCrudClient
 from stac_fastapi.pgstac.config import Settings
-from stac_fastapi.pgstac.db import close_db_connection, connect_to_db
+from stac_fastapi.pgstac.db import DB, get_connection
 from stac_fastapi.pgstac.extensions.filter import FiltersClient
 from stac_fastapi.pgstac.types.search import PgstacSearch
 from stac_fastapi.extensions.core import (
@@ -21,6 +22,11 @@ from stac_fastapi.extensions.core import (
 )
 from starlette.middleware.cors import CORSMiddleware
 from mangum import Mangum
+
+async def connect_pool(app: FastAPI) -> None:
+    db = DB()
+    readpool = settings.reader_connection_string
+    app.state.readpool = await db.create_pool(readpool, settings)
 
 
 class _Settings(Settings):
@@ -52,17 +58,13 @@ EXTENSIONS = [
 SearchGETRequest = create_get_request_model(EXTENSIONS)
 SearchPOSTRequest = create_post_request_model(EXTENSIONS, base_model=PgstacSearch)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await connect_to_db(app)
-    yield
-    await close_db_connection(app)
+app = FastAPI(title='Cal-Adapt STAC API', default_response_class=ORJSONResponse)
+app.state.get_connection = get_connection
 
-app = FastAPI(
-    title='Cal-Adapt STAC API',
-    lifespan=lifespan,
-    default_response_class=ORJSONResponse
-)
+@app.on_event('startup')
+async def startup_event():
+    await connect_pool(app)
+
 api = StacApi(
     app=app,
     title=app.title,
@@ -80,5 +82,8 @@ app.add_middleware(
     allow_methods=['GET', 'POST', 'OPTIONS'],
     allow_headers=['*']
 )
+handler = Mangum(app, lifespan='off')
 
-handler = Mangum(app)
+if 'AWS_EXECUTION_ENV' in os.environ:
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(app.router.startup())
