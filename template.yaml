@@ -6,6 +6,7 @@ Resources:
   Function:
     Type: AWS::Serverless::Function
     Properties:
+      MemorySize: 256
       Timeout: 5
       FunctionName: 'CalAdaptStacApi'
       CodeUri: app
