@@ -14,6 +14,14 @@ Basic Usage
 -----------
 Run a local development server with uvicorn:
     
-	uvicorn app.main:app --reload
+    uvicorn app.main:app --reload
+
+Or, just use the Makefile:
+
+    make run
 
 Point your browser to  the interactive, OpenAPI-based, API documentation with a list of endpoints and filtering capabilities at http://localhost:8000/docs.
+
+Run the test suite:
+
+    make check
