@@ -8,7 +8,7 @@ Shared constants for building and ingesting STAC items.
 BUCKET_CADCAT = "cadcat"
 
 # STAC API endpoint
-API_ENDPOINT = "http://localhost:8000"
+API_ENDPOINT = os.environ.get("STAC_API_ENDPOINT", "http://localhost:8000")
 
 # S3 prefixes for collections
 TMY_PREFIX = "climate-profiles/typical-met-year/"
