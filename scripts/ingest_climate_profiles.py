@@ -25,7 +25,7 @@ import pystac
 from datetime import datetime, timezone
 from urllib.parse import urljoin
 
-from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, SMY_PREFIX, TMY_PREFIX
+from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CA_BBOX, CA_GEOMETRY, SMY_PREFIX, TMY_PREFIX
 from scripts.utils import build_item, list_keys, post_or_put
 
 def parse_tmy_key(key):
@@ -106,7 +106,7 @@ def build_tmy_collection():
         ext = "epw" if key.endswith(".epw") else "csv"
         media_type = "application/octet-stream" if ext == "epw" else "text/csv"
         item_id = f"tmy-{props['location']}-{props['model']}-{props['time_period']}-{ext}"
-        item = build_item(item_id, props, key, BUCKET_CADCAT, media_type)
+        item = build_item(item_id, props, key, BUCKET_CADCAT, media_type, geometry=CA_GEOMETRY, bbox=CA_BBOX)
         collection.add_item(item)
     return collection
 
@@ -133,7 +133,7 @@ def build_smy_collection():
         if props is None:
             continue
         item_id = f"smy-{props['location']}-{props['variable']}-{props['percentile']}-{props['time_period']}"
-        item = build_item(item_id, props, key, BUCKET_CADCAT, "text/csv")
+        item = build_item(item_id, props, key, BUCKET_CADCAT, "text/csv", geometry=CA_GEOMETRY, bbox=CA_BBOX)
         collection.add_item(item)
     return collection
 

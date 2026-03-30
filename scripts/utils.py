@@ -13,14 +13,21 @@ s3 = boto3.client("s3")
 
 def post_or_put(url: str, data: dict):
     """Post or put data to url."""
+    # pystac generates links with null hrefs when items are added to a collection;
+    # the API rejects these, so strip them before posting
+    if "links" in data:
+        data["links"] = [l for l in data["links"] if l.get("href") is not None]
     res = requests.post(url, json=data, timeout=500)
     if res.status_code == 409:
-        new_url = url if data["type"] == "Collection" else url + f"/{data['id']}"
+        new_url = url + f"/{data['id']}"
         # Exists, so update
         res = requests.put(new_url, json=data, timeout=500)
         # Unchanged may throw a 404
         if not res.status_code == 404:
-            res.raise_for_status()
+            if not res.ok:
+                raise Exception(f"PUT {new_url} failed {res.status_code}: {res.text}")
+    elif not res.ok:
+        raise Exception(f"POST {url} failed {res.status_code}: {res.text}")
     else:
         res.raise_for_status()
 

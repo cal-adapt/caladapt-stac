@@ -30,7 +30,7 @@ from urllib.parse import urljoin
 
 import pystac
 
-from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, LOCA2_COUNTY_NETCDF_PREFIX
+from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CA_BBOX, CA_GEOMETRY, LOCA2_COUNTY_NETCDF_PREFIX
 from scripts.utils import list_keys, post_or_put
 
 
@@ -123,8 +123,8 @@ def build_loca2_county_collection():
         }
         item = pystac.Item(
             id=item_id,
-            geometry=None,
-            bbox=None,
+            geometry=CA_GEOMETRY,
+            bbox=CA_BBOX,
             datetime=datetime.now(timezone.utc),
             properties=props,
         )
@@ -146,7 +146,9 @@ def main():
     collection = build_loca2_county_collection()
 
     # POST collection to API
-    post_or_put(urljoin(API_ENDPOINT, "/collections"), collection.to_dict())
+    collection_dict = collection.to_dict()
+    collection_dict["links"] = []
+    post_or_put(urljoin(API_ENDPOINT, "/collections"), collection_dict)
 
     # POST each item individually to API
     for item in collection.get_items():
