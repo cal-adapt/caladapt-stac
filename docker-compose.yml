@@ -1,0 +1,60 @@
+services:
+  app:
+    # DockerHub image for stac-fastapi API server
+    image: ghcr.io/stac-utils/stac-fastapi-pgstac
+    environment:
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8082
+      - ENVIRONMENT=local
+      - PGUSER=username
+      - PGPASSWORD=password
+      - PGDATABASE=postgis
+      - PGHOST=database
+      - PGPORT=5432
+      - DB_MIN_CONN_SIZE=1
+      - DB_MAX_CONN_SIZE=1
+      - ENABLE_TRANSACTIONS_EXTENSIONS=TRUE
+    ports:
+      # Routes traffic from your local machine's port 8082 to the app container's port 8082
+      - "8082:8082"
+    depends_on:
+      database:
+        condition: service_healthy
+    # Start the API server inside the container
+    # Runs the stac-fastapi app as a Python module
+    # This is already pre-installed in the Docker image
+    command: python -m stac_fastapi.pgstac.app
+
+  database:
+    # Use pre-built pgSTAC Docker image
+    # pgSTAC is Postgres with the STAC database schema pre-installed
+    image: ghcr.io/stac-utils/pgstac
+    environment:
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postgis
+      - PGUSER=username
+      - PGPASSWORD=password
+      - PGDATABASE=postgis
+    ports:
+      # Exposes the database port to your local machine
+      # Not neccessary for the app to connect to the database
+      # Useful for testing purposes 
+      - "5432:5432"
+    # Define number of connections Postgres can handle (default is 100)
+    command: postgres -N 500
+    healthcheck:
+      # pg_isready is a Postgres tool that checks if the database is accepting connections
+      # While the Postgres containing is starting up, it takes some time to initialize 
+      # Docker will wait until the healthcheck passes before starting the app container
+      test: ["CMD-SHELL", "pg_isready -U username -d postgis"]
+      interval: 5s # Check every 5 seconds
+      timeout: 5s # If pg_isready doesn't respond within 5 seconds, consider it a failure
+      retries: 5 # After 5 failed attempts, mark the service as unhealthy
+
+# This defines the internal Docker network 
+# This network connects the two containers (app and database) together
+# This allows them to communicate with each other using their service names (e.g., "database" for the database container)
+networks:
+  default:
+    name: caladapt-stac
