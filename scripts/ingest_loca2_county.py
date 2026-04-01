@@ -28,9 +28,10 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from urllib.parse import urljoin
 
+import geopandas as gpd
 import pystac
 
-from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CA_BBOX, CA_GEOMETRY, LOCA2_COUNTY_NETCDF_PREFIX
+from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CA_COUNTY_FIPS, CA_COUNTIES_URL, LOCA2_COUNTY_NETCDF_PREFIX
 from scripts.utils import list_keys, post_or_put
 
 
@@ -67,6 +68,23 @@ def parse_loca2_county_key(key):
     }
 
 
+def get_county_geometries():
+    """
+    Load California county geometries from S3 parquet.
+
+    Returns
+    -------
+    dict
+        Mapping of county name (e.g. "Yuba") to (geometry, bbox) tuples,
+        where geometry is a GeoJSON-compatible dict and bbox is [west, south, east, north].
+    """
+    gdf = gpd.read_parquet(CA_COUNTIES_URL)
+    return {
+        row["NAME"].replace(" County", ""): (row.geometry.__geo_interface__, list(row.geometry.bounds))
+        for _, row in gdf.iterrows()
+    }
+
+
 def build_loca2_county_collection():
     """
     Build a pystac Collection for LOCA2 county-level NetCDF data.
@@ -93,6 +111,8 @@ def build_loca2_county_collection():
         ),
     )
 
+    county_geometries = get_county_geometries()
+
     # Group keys by (county_code, frequency, model, scenario, member_id)
     # defaultdict(dict) is like a regular dict, but automatically creates an empty
     # dict for any new key — so we can do groups[group_key][variable] = key
@@ -114,18 +134,23 @@ def build_loca2_county_collection():
     # Build one item per group with one asset per variable
     for (county_code, frequency, model, scenario, member_id), variables in groups.items():
         item_id = f"loca2-county-{county_code}-{model}-{scenario}-{member_id}-{frequency}"
+        countyname = CA_COUNTY_FIPS[county_code]
+        geometry, bbox = county_geometries[countyname]
         props = {
             "cmip6:source_id": model,
             "cmip6:experiment_id": scenario,
             "cmip6:member_id": member_id,
             "cmip6:table_id": frequency,
             "county_code": county_code,
+            "countyname": countyname,
+            "start_datetime": datetime(1950, 1, 1, tzinfo=timezone.utc).isoformat(),
+            "end_datetime": datetime(2100, 12, 31, tzinfo=timezone.utc).isoformat(),
         }
         item = pystac.Item(
             id=item_id,
-            geometry=CA_GEOMETRY,
-            bbox=CA_BBOX,
-            datetime=datetime.now(timezone.utc),
+            geometry=geometry,
+            bbox=bbox,
+            datetime=datetime(1950, 1, 1, tzinfo=timezone.utc),
             properties=props,
         )
         for variable, key in variables.items():

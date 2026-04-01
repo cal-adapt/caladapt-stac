@@ -2,5 +2,10 @@
 name = "caladapt-stac"
 version = "0.1.0"
 dependencies = [
+    "geopandas>=1.1.3",
+    "pandas>=3.0.2",
+    "pyarrow>=23.0.1",
     "requests>=2.33.1",
+    "s3fs>=2026.3.0",
+    "shapely>=2.1.2",
 ]

@@ -54,7 +54,7 @@ def list_keys(prefix, bucket):
             yield obj["Key"]
 
 
-def build_item(item_id, props, href, bucket, media_type, geometry=None, bbox=None):
+def build_item(item_id, props, href, bucket, media_type, geometry=None, bbox=None, item_datetime=None):
     """
     Build a pystac Item.
 
@@ -75,6 +75,9 @@ def build_item(item_id, props, href, bucket, media_type, geometry=None, bbox=Non
         GeoJSON geometry. Defaults to None for point/station-based data.
     bbox : list, optional
         Bounding box [west, south, east, north]. Defaults to None.
+    item_datetime : datetime or None, optional
+        Item datetime. Defaults to current UTC time if not provided. Pass None
+        explicitly when start_datetime/end_datetime are set in props instead.
 
     Returns
     -------
@@ -84,7 +87,7 @@ def build_item(item_id, props, href, bucket, media_type, geometry=None, bbox=Non
         id=item_id,
         geometry=geometry,
         bbox=bbox,
-        datetime=datetime.now(timezone.utc),
+        datetime=item_datetime or datetime.now(timezone.utc),
         properties=props,
     )
     item.add_asset(

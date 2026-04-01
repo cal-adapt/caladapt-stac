@@ -22,10 +22,11 @@ Requires:
 """
 
 import pystac
+import pandas as pd 
 from datetime import datetime, timezone
 from urllib.parse import urljoin
 
-from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CA_BBOX, CA_GEOMETRY, SMY_PREFIX, TMY_PREFIX
+from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CLIM_PROF_GWL_PERIOD_DATES, HADISD_STATIONS_URL, SMY_PREFIX, TMY_PREFIX
 from scripts.utils import build_item, list_keys, post_or_put
 
 def parse_tmy_key(key):
@@ -81,7 +82,6 @@ def parse_smy_key(key):
     }
 
 
-
 def build_tmy_collection():
     """
     Build pystac Collection for TMY profiles.
@@ -99,6 +99,7 @@ def build_tmy_collection():
             temporal=pystac.TemporalExtent(intervals=[[datetime(1980, 1, 1, tzinfo=timezone.utc), datetime(2100, 12, 31, tzinfo=timezone.utc)]]), # WRF time extent
         ),
     )
+    stations = get_hadisd_formatted_table().set_index("station_clim_prof_formatted")
     for key in list_keys(TMY_PREFIX, BUCKET_CADCAT):
         props = parse_tmy_key(key)
         if props is None:
@@ -106,8 +107,23 @@ def build_tmy_collection():
         ext = "epw" if key.endswith(".epw") else "csv"
         media_type = "application/octet-stream" if ext == "epw" else "text/csv"
         item_id = f"tmy-{props['location']}-{props['model']}-{props['time_period']}-{ext}"
-        item = build_item(item_id, props, key, BUCKET_CADCAT, media_type, geometry=CA_GEOMETRY, bbox=CA_BBOX)
+
+        # Get the time period from the profiles lookup table 
+        start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
+        props["start_datetime"] = start.isoformat()
+        props["end_datetime"] = end.isoformat()
+
+        # Get geometry from HadISD station table based on location name
+        row = stations.loc[props["location"]]
+        lat, lon = row["LAT_Y"], row["LON_X"]
+        props["lat"] = lat
+        props["lon"] = lon
+        geometry = {"type": "Point", "coordinates": [lon, lat]}
+        bbox = [lon, lat, lon, lat]
+
+        item = build_item(item_id, props, key, BUCKET_CADCAT, media_type, geometry=geometry, bbox=bbox, item_datetime=start)
         collection.add_item(item)
+
     return collection
 
 
@@ -128,14 +144,50 @@ def build_smy_collection():
             temporal=pystac.TemporalExtent(intervals=[[datetime(1980, 1, 1, tzinfo=timezone.utc), datetime(2100, 12, 31, tzinfo=timezone.utc)]]), # WRF time extent
         ),
     )
+    stations = get_hadisd_formatted_table().set_index("station_clim_prof_formatted")
     for key in list_keys(SMY_PREFIX, BUCKET_CADCAT):
         props = parse_smy_key(key)
         if props is None:
             continue
         item_id = f"smy-{props['location']}-{props['variable']}-{props['percentile']}-{props['time_period']}"
-        item = build_item(item_id, props, key, BUCKET_CADCAT, "text/csv", geometry=CA_GEOMETRY, bbox=CA_BBOX)
+
+        # Get the time period from the profiles lookup table 
+        start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
+        props["start_datetime"] = start.isoformat()
+        props["end_datetime"] = end.isoformat()
+
+        # Get geometry from HadISD station table based on location name
+        row = stations.loc[props["location"]]
+        lat, lon = row["LAT_Y"], row["LON_X"]
+        props["lat"] = lat
+        props["lon"] = lon
+        geometry = {"type": "Point", "coordinates": [lon, lat]}
+        bbox = [lon, lat, lon, lat]
+
+        item = build_item(item_id, props, key, BUCKET_CADCAT, "text/csv", geometry=geometry, bbox=bbox, item_datetime=start)
         collection.add_item(item)
     return collection
+
+def get_hadisd_formatted_table():
+    """
+    Load HadISD station table from S3 and format station names to match climate profile location names.
+
+    Reads the HadISD stations CSV, adds a formatted station name column that matches
+    the location naming convention used in the climate profile S3 keys (lowercase,
+    spaces replaced with underscores, punctuation removed), and returns the relevant columns.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with columns: station_clim_prof_formatted, LAT_Y, LON_X.
+    """
+    hadisd_df = pd.read_csv(HADISD_STATIONS_URL, index_col=[0])
+    
+    # Get new column with station names formatted to match climate profile location names
+    hadisd_df["station_clim_prof_formatted"] = hadisd_df["station"].str.replace(r"[^\w\s-]", "", regex=True).str.lower().str.replace(" ", "_")
+
+    return hadisd_df[["station_clim_prof_formatted", "LAT_Y", "LON_X"]]
+
 
 def main(): 
 
