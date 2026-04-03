@@ -45,12 +45,10 @@ def build_hdp_collection():
         Collection containing one item per weather station.
     """
     collection = pystac.Collection(
-        id="hdp",
+        id="historical-data-platform",
         description=(
             "Cloud-optimized, standardized, and quality-controlled historical weather "
-            "station data for the U.S. Western Electricity Coordinating Council (WECC) "
-            "region, covering the period from 1980 to 2022. Methods documented at "
-            "https://github.com/Eagle-Rock-Analytics/historical-obs-platform."
+            "station data for the U.S. Western Electricity Coordinating Council (WECC) region"
         ),
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[[-125.0, 25.0, -100.0, 52.0]]),
@@ -79,11 +77,13 @@ def build_hdp_collection():
         network = row["network"]
         lat, lon = float(row["latitude"]), float(row["longitude"])
 
-        start = pd.Timestamp(row["start-date"]).to_pydatetime()
-        end = pd.Timestamp(row["end-date"]).to_pydatetime()
-        if start.tzinfo is None:
+        start_raw = row["start-date"]
+        end_raw = row["end-date"]
+        start = pd.Timestamp(start_raw).to_pydatetime() if pd.notna(start_raw) else None
+        end = pd.Timestamp(end_raw).to_pydatetime() if pd.notna(end_raw) else None
+        if start and start.tzinfo is None:
             start = start.replace(tzinfo=timezone.utc)
-        if end.tzinfo is None:
+        if end and end.tzinfo is None:
             end = end.replace(tzinfo=timezone.utc)
 
         props = {
@@ -93,15 +93,17 @@ def build_hdp_collection():
             "state": row["state"],
             "elevation": float(row["elevation"]) if pd.notna(row["elevation"]) else None,
             "total_nobs": int(row["total_nobs"]) if pd.notna(row["total_nobs"]) else None,
-            "start_datetime": start.isoformat(),
-            "end_datetime": end.isoformat(),
         }
+        if start:
+            props["start_datetime"] = start.isoformat()
+        if end:
+            props["end_datetime"] = end.isoformat()
 
         item = pystac.Item(
             id=era_id,
             geometry={"type": "Point", "coordinates": [lon, lat]},
             bbox=[lon, lat, lon, lat],
-            datetime=None,
+            datetime=start,
             properties=props,
         )
         item.add_asset(
