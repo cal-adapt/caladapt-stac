@@ -19,6 +19,7 @@ PGDSN = os.environ.get("PGDSN")
 # S3 HTTPS URLs for geometry GeoJSON files (upload manually after running generate_geometries.py)
 CA_COUNTIES_GEOMETRIES_URL = "https://cadcat.s3.amazonaws.com/geometries/ca-counties-geometries.geojson"
 HADISD_STATION_COORDS_URL = "https://cadcat.s3.amazonaws.com/geometries/hadisd-station-coords.geojson"
+HDP_STATION_COORDS_URL = "https://cadcat.s3.amazonaws.com/geometries/hdp-station-coords.geojson"
 
 
 # S3 prefixes for collections

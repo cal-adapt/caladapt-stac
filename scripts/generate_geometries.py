@@ -26,6 +26,7 @@ DATA_DIR = Path(__file__).parent.parent / "data" / "geometries"
 
 CA_COUNTIES_URL = "s3://cadcat/parquet/ca_counties.parquet"
 HADISD_STATIONS_URL = "https://cadcat.s3.amazonaws.com/hadisd/hadisd_stations.csv"
+HDP_STATIONS_CSV_URL = "https://cadcat.s3.amazonaws.com/histwxstns/historical_wx_stations.csv"
 
 
 def generate_ca_counties():
@@ -80,6 +81,25 @@ def generate_hadisd_stations():
     return {"type": "FeatureCollection", "features": features}
 
 
+def generate_hdp_stations():
+    """
+    Load HDP weather station coordinates from S3 CSV and return as a GeoJSON FeatureCollection.
+
+    Each feature is a Point with an era_id property uniquely identifying the station.
+    """
+    print("  Loading HDP station coordinates from S3...")
+    df = pd.read_csv(HDP_STATIONS_CSV_URL)
+    features = []
+    for _, row in df.iterrows():
+        lon, lat = float(row["longitude"]), float(row["latitude"])
+        features.append({
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [lon, lat]},
+            "properties": {"era_id": row["era-id"]},
+        })
+    return {"type": "FeatureCollection", "features": features}
+
+
 def main():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -94,6 +114,12 @@ def main():
     with open(path, "w") as f:
         json.dump(stations, f)
     print(f"  Wrote {len(stations['features'])} stations to {path}")
+
+    hdp = generate_hdp_stations()
+    path = DATA_DIR / "hdp-station-coords.geojson"
+    with open(path, "w") as f:
+        json.dump(hdp, f)
+    print(f"  Wrote {len(hdp['features'])} stations to {path}")
 
 
 if __name__ == "__main__":
