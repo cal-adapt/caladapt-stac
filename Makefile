@@ -3,7 +3,7 @@ format:
 
 build:
 	uv export --no-dev --no-hashes -o app/requirements.txt
-	sam build --cached --parallel
+	sam build --use-container --cached --parallel
 
 deploy: build
 	sam deploy --profile era-de
