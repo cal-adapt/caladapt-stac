@@ -26,14 +26,19 @@ Requires:
 
 from collections import defaultdict
 from datetime import datetime, timezone
-from urllib.parse import urljoin
 
 import requests
 import pystac
 
-from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CA_COUNTY_FIPS, CA_COUNTIES_GEOMETRIES_URL, CALADAPT_DATA_LICENSE, LOCA2_COUNTY_NETCDF_PREFIX, PGDSN
-from scripts.utils import list_keys, load_direct, post_items, post_or_put
-from scripts.register_queryables import main as register_queryables
+from scripts.constants import (
+    BUCKET_CADCAT,
+    CA_COUNTY_FIPS,
+    CA_COUNTIES_GEOMETRIES_URL,
+    CALADAPT_DATA_LICENSE,
+    LOCA2_COUNTY_NETCDF_PREFIX,
+    PGDSN,
+)
+from scripts.utils import list_keys, load_direct
 
 
 def parse_loca2_county_key(key):
@@ -105,10 +110,12 @@ def build_loca2_county_collection():
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[[-124.4, 32.5, -114.1, 42.0]]),
             temporal=pystac.TemporalExtent(
-                intervals=[[
-                    datetime(1950, 1, 1, tzinfo=timezone.utc),
-                    datetime(2100, 12, 31, tzinfo=timezone.utc),
-                ]]
+                intervals=[
+                    [
+                        datetime(1950, 1, 1, tzinfo=timezone.utc),
+                        datetime(2100, 12, 31, tzinfo=timezone.utc),
+                    ]
+                ]
             ),
         ),
     )
@@ -143,8 +150,16 @@ def build_loca2_county_collection():
         groups[group_key][parsed["variable"]] = key
 
     # Build one item per group with one asset per variable
-    for (county_code, frequency, model, scenario, member_id), variables in groups.items():
-        item_id = f"loca2-county-{county_code}-{model}-{scenario}-{member_id}-{frequency}"
+    for (
+        county_code,
+        frequency,
+        model,
+        scenario,
+        member_id,
+    ), variables in groups.items():
+        item_id = (
+            f"loca2-county-{county_code}-{model}-{scenario}-{member_id}-{frequency}"
+        )
         countyname = CA_COUNTY_FIPS[county_code]
         geometry, bbox = county_geometries[countyname]
         props = {
@@ -178,25 +193,10 @@ def build_loca2_county_collection():
 
 
 def main():
-    # Build collection with all LOCA2 county items
     print("  Building LOCA2 county collection...")
     collection = build_loca2_county_collection()
-
-    if PGDSN:
-        # Fast path: load directly into pgSTAC via bulk SQL (bypasses HTTP API)
-        print("  Loading LOCA2 county collection and items directly into pgSTAC...")
-        load_direct(collection, PGDSN)
-    else:
-        # Fallback: POST to HTTP API
-        print("  Posting LOCA2 county collection and items via HTTP API...")
-        collection_dict = collection.to_dict()
-        collection_dict["links"] = []
-        collection_dict["features"] = []  # strip items — posted separately below
-        post_or_put(urljoin(API_ENDPOINT, "/collections"), collection_dict)
-        post_items(collection, urljoin(API_ENDPOINT, f"/collections/{collection.id}/items"))
-
-    print("  Registering queryables...")
-    register_queryables()
+    print("  Loading directly into pgSTAC...")
+    load_direct(collection, PGDSN)
 
 
 if __name__ == "__main__":

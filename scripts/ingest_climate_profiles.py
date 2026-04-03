@@ -16,7 +16,7 @@ Usage:
 
 Requires:
     - AWS credentials with read access to the cadcat S3 bucket
-    - A running STAC API at API_ENDPOINT (this can be a local endpoint 
+    - A running STAC API at API_ENDPOINT (this can be a local endpoint
     for testing, or a a deployed STAC API endpoint)
 
 """
@@ -24,11 +24,18 @@ Requires:
 import pystac
 import requests
 from datetime import datetime, timezone
-from urllib.parse import urljoin
 
-from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CALADAPT_DATA_LICENSE, CLIM_PROF_GWL_PERIOD_DATES, HADISD_STATION_COORDS_URL, SMY_PREFIX, TMY_PREFIX, PGDSN
-from scripts.utils import build_item, list_keys, load_direct, post_items, post_or_put
-from scripts.register_queryables import main as register_queryables
+from scripts.constants import (
+    BUCKET_CADCAT,
+    CALADAPT_DATA_LICENSE,
+    CLIM_PROF_GWL_PERIOD_DATES,
+    HADISD_STATION_COORDS_URL,
+    PGDSN,
+    SMY_PREFIX,
+    TMY_PREFIX,
+)
+from scripts.utils import build_item, list_keys, load_direct
+
 
 def parse_tmy_key(key):
     """
@@ -97,8 +104,17 @@ def build_tmy_collection():
         description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(bboxes=[[-124.4, 32.5, -114.1, 42.0]]), # CA spatial extent
-            temporal=pystac.TemporalExtent(intervals=[[datetime(1980, 1, 1, tzinfo=timezone.utc), datetime(2100, 12, 31, tzinfo=timezone.utc)]]), # WRF time extent
+            spatial=pystac.SpatialExtent(
+                bboxes=[[-124.4, 32.5, -114.1, 42.0]]
+            ),  # CA spatial extent
+            temporal=pystac.TemporalExtent(
+                intervals=[
+                    [
+                        datetime(1980, 1, 1, tzinfo=timezone.utc),
+                        datetime(2100, 12, 31, tzinfo=timezone.utc),
+                    ]
+                ]
+            ),  # WRF time extent
         ),
     )
     collection.add_asset(
@@ -118,7 +134,9 @@ def build_tmy_collection():
             continue
         ext = "epw" if key.endswith(".epw") else "csv"
         media_type = "application/octet-stream" if ext == "epw" else "text/csv"
-        item_id = f"tmy-{props['location']}-{props['model']}-{props['time_period']}-{ext}"
+        item_id = (
+            f"tmy-{props['location']}-{props['model']}-{props['time_period']}-{ext}"
+        )
 
         # Get the time period from the profiles lookup table
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
@@ -131,7 +149,17 @@ def build_tmy_collection():
         geometry = {"type": "Point", "coordinates": [lon, lat]}
         bbox = [lon, lat, lon, lat]
 
-        item = build_item(item_id, props, key, BUCKET_CADCAT, media_type, geometry=geometry, bbox=bbox, item_datetime=start, asset_key=ext)
+        item = build_item(
+            item_id,
+            props,
+            key,
+            BUCKET_CADCAT,
+            media_type,
+            geometry=geometry,
+            bbox=bbox,
+            item_datetime=start,
+            asset_key=ext,
+        )
         collection.add_item(item)
 
     return collection
@@ -150,8 +178,17 @@ def build_smy_collection():
         id="climate-profiles-smy",
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(bboxes=[[-124.4, 32.5, -114.1, 42.0]]), # CA spatial extent
-            temporal=pystac.TemporalExtent(intervals=[[datetime(1980, 1, 1, tzinfo=timezone.utc), datetime(2100, 12, 31, tzinfo=timezone.utc)]]), # WRF time extent
+            spatial=pystac.SpatialExtent(
+                bboxes=[[-124.4, 32.5, -114.1, 42.0]]
+            ),  # CA spatial extent
+            temporal=pystac.TemporalExtent(
+                intervals=[
+                    [
+                        datetime(1980, 1, 1, tzinfo=timezone.utc),
+                        datetime(2100, 12, 31, tzinfo=timezone.utc),
+                    ]
+                ]
+            ),  # WRF time extent
         ),
     )
     collection.add_asset(
@@ -182,7 +219,16 @@ def build_smy_collection():
         geometry = {"type": "Point", "coordinates": [lon, lat]}
         bbox = [lon, lat, lon, lat]
 
-        item = build_item(item_id, props, key, BUCKET_CADCAT, "text/csv", geometry=geometry, bbox=bbox, item_datetime=start)
+        item = build_item(
+            item_id,
+            props,
+            key,
+            BUCKET_CADCAT,
+            "text/csv",
+            geometry=geometry,
+            bbox=bbox,
+            item_datetime=start,
+        )
         collection.add_item(item)
     return collection
 
@@ -202,31 +248,17 @@ def get_station_coords():
     }
 
 
-def main(): 
-
-    # Parse thru s3 catalog and build pystac items for each TMY and SMY profile
-    # Returns a psytac collection object for each profile type, which we can then POST to the API
+def main():
     print("  Building TMY collection...")
     tmy_collection = build_tmy_collection()
+    print("  Loading TMY directly into pgSTAC...")
+    load_direct(tmy_collection, PGDSN)
+
     print("  Building SMY collection...")
     smy_collection = build_smy_collection()
+    print("  Loading SMY directly into pgSTAC...")
+    load_direct(smy_collection, PGDSN)
 
-    if PGDSN:
-        print("  Loading TMY collection and items directly into pgSTAC...")
-        load_direct(tmy_collection, PGDSN)
-        print("  Loading SMY collection and items directly into pgSTAC...")
-        load_direct(smy_collection, PGDSN)
-    else:
-        print("  Posting TMY collection and items...")
-        post_or_put(urljoin(API_ENDPOINT, "/collections"), tmy_collection.to_dict())
-        post_items(tmy_collection, urljoin(API_ENDPOINT, f"/collections/{tmy_collection.id}/items"))
-
-        print("  Posting SMY collection and items...")
-        post_or_put(urljoin(API_ENDPOINT, "/collections"), smy_collection.to_dict())
-        post_items(smy_collection, urljoin(API_ENDPOINT, f"/collections/{smy_collection.id}/items"))
-
-    print("  Registering queryables...")
-    register_queryables()
 
 if __name__ == "__main__":
     main()
