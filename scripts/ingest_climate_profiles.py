@@ -27,6 +27,7 @@ from datetime import datetime, timezone
 
 from scripts.constants import (
     BUCKET_CADCAT,
+    CA_BBOX,
     CALADAPT_DATA_LICENSE,
     CLIM_PROF_GWL_PERIOD_DATES,
     HADISD_STATION_COORDS_URL,
@@ -105,7 +106,7 @@ def build_tmy_collection():
         license=CALADAPT_DATA_LICENSE,
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(
-                bboxes=[[-124.4, 32.5, -114.1, 42.0]]
+                bboxes=[CA_BBOX]
             ),  # CA spatial extent
             temporal=pystac.TemporalExtent(
                 intervals=[
@@ -179,7 +180,7 @@ def build_smy_collection():
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(
-                bboxes=[[-124.4, 32.5, -114.1, 42.0]]
+                bboxes=[CA_BBOX]
             ),  # CA spatial extent
             temporal=pystac.TemporalExtent(
                 intervals=[

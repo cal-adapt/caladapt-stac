@@ -26,7 +26,7 @@ import pandas as pd
 import pystac
 from datetime import datetime, timezone
 
-from scripts.constants import BUCKET_CADCAT, HDP_PREFIX, HDP_STATION_COORDS_URL, PGDSN
+from scripts.constants import BUCKET_CADCAT, HDP_PREFIX, HDP_STATION_COORDS_URL, PGDSN, WECC_BBOX
 from scripts.utils import load_direct
 
 HDP_STATIONS_CSV_URL = f"https://{BUCKET_CADCAT}.s3.amazonaws.com/{HDP_PREFIX}historical_wx_stations.csv"
@@ -51,7 +51,7 @@ def build_hdp_collection():
             "station data for the U.S. Western Electricity Coordinating Council (WECC) region"
         ),
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(bboxes=[[-125.0, 25.0, -100.0, 52.0]]),
+            spatial=pystac.SpatialExtent(bboxes=[WECC_BBOX]),
             temporal=pystac.TemporalExtent(
                 intervals=[[
                     datetime(1980, 1, 1, tzinfo=timezone.utc),

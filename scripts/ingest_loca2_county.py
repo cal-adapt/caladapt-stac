@@ -32,6 +32,7 @@ import pystac
 
 from scripts.constants import (
     BUCKET_CADCAT,
+    CA_BBOX,
     CA_COUNTY_FIPS,
     CA_COUNTIES_GEOMETRIES_URL,
     CALADAPT_DATA_LICENSE,
@@ -105,10 +106,10 @@ def build_loca2_county_collection():
     """
     collection = pystac.Collection(
         id="loca2-county",
-        description="California county-level netcdf data for LOCA2 statistically downscaled climate projections.",
+        description="LOCA2 statistically downscaled climate projections.",
         license=CALADAPT_DATA_LICENSE,
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(bboxes=[[-124.4, 32.5, -114.1, 42.0]]),
+            spatial=pystac.SpatialExtent(bboxes=[CA_BBOX]),
             temporal=pystac.TemporalExtent(
                 intervals=[
                     [

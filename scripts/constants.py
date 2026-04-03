@@ -117,8 +117,9 @@ CLIM_PROF_GWL_PERIOD_DATES = {
     ),  # centered_year=2069
 }
 
-# California spatial extent — used as a placeholder geometry for non-spatial datasets
+# Spatial extents
 CA_BBOX = [-124.4, 32.5, -114.1, 42.0]
+WECC_BBOX = [-125.0, 25.0, -100.0, 52.0]
 CA_GEOMETRY = {
     "type": "Polygon",
     "coordinates": [
