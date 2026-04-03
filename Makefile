@@ -1,3 +1,6 @@
+format:
+	uv run black .
+
 build:
 	uv export --no-dev --no-hashes -o app/requirements.txt
 	sam build --cached --parallel
