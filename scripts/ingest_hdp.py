@@ -26,7 +26,7 @@ import pandas as pd
 import pystac
 from datetime import datetime, timezone
 
-from scripts.constants import BUCKET_CADCAT, HDP_PREFIX, PGDSN
+from scripts.constants import BUCKET_CADCAT, HDP_PREFIX, HDP_STATION_COORDS_URL, PGDSN
 from scripts.utils import load_direct
 
 HDP_STATIONS_CSV_URL = f"https://{BUCKET_CADCAT}.s3.amazonaws.com/{HDP_PREFIX}historical_wx_stations.csv"
@@ -60,6 +60,15 @@ def build_hdp_collection():
                     datetime(2022, 12, 31, tzinfo=timezone.utc),
                 ]]
             ),
+        ),
+    )
+    collection.add_asset(
+        "item-geometries",
+        pystac.Asset(
+            href=HDP_STATION_COORDS_URL,
+            media_type="application/geo+json",
+            roles=["item-geometries"],
+            title="Item geometries",
         ),
     )
 
