@@ -40,29 +40,6 @@ HDP_PREFIX = "histwxstns/"
 CALADAPT_DATA_LICENSE = "CC-BY-4.0"
 CALADAPT_DATA_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
 
-# Metadata for STAC providers
-CALADAPT_HOST = pystac.Provider(
-    name="Cal-Adapt",
-    roles=[pystac.ProviderRole.HOST],
-    url="https://cal-adapt.org/",
-)
-CALADAPT_PROVIDER_AND_HOST = pystac.Provider(
-    name="Cal-Adapt",
-    roles=[
-        pystac.ProviderRole.HOST,
-        pystac.ProviderRole.PRODUCER,
-        pystac.ProviderRole.PROCESSOR,
-    ],
-    url="https://cal-adapt.org/",
-)
-
-ERA_PROVIDER = pystac.Provider(
-    name="Eagle Rock Analytics",
-    roles=[pystac.ProviderRole.PRODUCER, pystac.ProviderRole.PROCESSOR],
-    url="https://eaglerockanalytics.com/",
-)
-
-
 # Mapping of California county FIPS codes to county names (without "County" suffix)
 # Matches the countyname property used in STAC items and the cal-adapt-de-website data download tool
 CA_COUNTY_FIPS = {

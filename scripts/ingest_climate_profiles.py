@@ -30,7 +30,6 @@ from scripts.constants import (
     BUCKET_CADCAT,
     CA_BBOX,
     CALADAPT_DATA_LICENSE,
-    CALADAPT_PROVIDER_AND_HOST,
     CLIM_PROF_GWL_PERIOD_DATES,
     HADISD_STATION_COORDS_URL,
     PGDSN,
@@ -106,7 +105,16 @@ def build_tmy_collection():
         id="typical-met-year",
         description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
-        providers=[CALADAPT_PROVIDER_AND_HOST],
+        providers=[
+            pystac.Provider(
+                name="Cal-Adapt",
+                roles=[
+                    pystac.ProviderRole.HOST,
+                    pystac.ProviderRole.PROCESSOR,
+                ],
+                url="https://cal-adapt.org/",
+            )
+        ],
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[CA_BBOX]),  # CA spatial extent
             temporal=pystac.TemporalExtent(
@@ -183,7 +191,16 @@ def build_smy_collection():
         id="standard-met-year",
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
-        providers=[CALADAPT_PROVIDER_AND_HOST],
+        providers=[
+            pystac.Provider(
+                name="Cal-Adapt",
+                roles=[
+                    pystac.ProviderRole.HOST,
+                    pystac.ProviderRole.PROCESSOR,
+                ],
+                url="https://cal-adapt.org/",
+            )
+        ],
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[CA_BBOX]),  # CA spatial extent
             temporal=pystac.TemporalExtent(

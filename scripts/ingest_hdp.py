@@ -29,8 +29,6 @@ from datetime import datetime, timezone
 from scripts.constants import (
     BUCKET_CADCAT,
     CALADAPT_DATA_LICENSE,
-    CALADAPT_HOST,
-    ERA_PROVIDER,
     HDP_PREFIX,
     HDP_STATION_COORDS_URL,
     PGDSN,
@@ -74,7 +72,18 @@ def build_hdp_collection():
             ),
         ),
         license=CALADAPT_DATA_LICENSE,
-        providers=[ERA_PROVIDER, CALADAPT_HOST],
+        providers=[
+            pystac.Provider(
+                name="Eagle Rock Analytics",
+                roles=[pystac.ProviderRole.PROCESSOR],
+                url="https://eaglerockanalytics.com/",
+            ),
+            pystac.Provider(
+                name="Cal-Adapt",
+                roles=[pystac.ProviderRole.HOST],
+                url="https://cal-adapt.org/",
+            ),
+        ],
     )
     collection.add_link(
         pystac.Link(

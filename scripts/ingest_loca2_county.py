@@ -36,7 +36,6 @@ from scripts.constants import (
     CA_COUNTY_FIPS,
     CA_COUNTIES_GEOMETRIES_URL,
     CALADAPT_DATA_LICENSE,
-    CALADAPT_PROVIDER_AND_HOST,
     LOCA2_COUNTY_NETCDF_PREFIX,
     PGDSN,
 )
@@ -109,7 +108,16 @@ def build_loca2_county_collection():
         id="loca2-county",
         description="County-level NetCDF data for LOCA2 statistically downscaled climate projections covering California.",
         license=CALADAPT_DATA_LICENSE,
-        providers=[CALADAPT_PROVIDER_AND_HOST],
+        providers=[
+            pystac.Provider(
+                name="Cal-Adapt",
+                roles=[
+                    pystac.ProviderRole.HOST,
+                    pystac.ProviderRole.PROCESSOR,
+                ],
+                url="https://cal-adapt.org/",
+            )
+        ],
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[CA_BBOX]),
             temporal=pystac.TemporalExtent(
