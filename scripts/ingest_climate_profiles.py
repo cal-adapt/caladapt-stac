@@ -101,7 +101,7 @@ def build_tmy_collection():
         Collection containing one item per TMY CSV file in S3.
     """
     collection = pystac.Collection(
-        id="climate-profiles-tmy",
+        id="typical-met-year",
         description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
         extent=pystac.Extent(
@@ -176,7 +176,7 @@ def build_smy_collection():
         Collection containing one item per SMY CSV file in S3.
     """
     collection = pystac.Collection(
-        id="climate-profiles-smy",
+        id="standard-met-year",
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(
