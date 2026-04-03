@@ -14,6 +14,7 @@ Requires:
 from scripts.ingest_climate_profiles import main as ingest_climate_profiles
 from scripts.ingest_hdp import main as ingest_hdp
 from scripts.ingest_loca2_county import main as ingest_loca2_county
+from scripts.register_queryables import main as register_queryables
 
 
 def main():
@@ -29,6 +30,8 @@ def main():
     ingest_hdp()
     print("HDP complete.")
 
+    print("Registering queryables...")
+    register_queryables()
     print("Done.")
 
 
