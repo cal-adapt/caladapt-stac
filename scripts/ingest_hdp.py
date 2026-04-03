@@ -26,10 +26,22 @@ import pandas as pd
 import pystac
 from datetime import datetime, timezone
 
-from scripts.constants import BUCKET_CADCAT, HDP_PREFIX, HDP_STATION_COORDS_URL, PGDSN, WECC_BBOX
+from scripts.constants import (
+    BUCKET_CADCAT,
+    CALADAPT_DATA_LICENSE,
+    CALADAPT_HOST,
+    ERA_PROVIDER,
+    HDP_PREFIX,
+    HDP_STATION_COORDS_URL,
+    PGDSN,
+    WECC_BBOX,
+)
 from scripts.utils import load_direct
+from pystac.extensions.scientific import Publication
 
-HDP_STATIONS_CSV_URL = f"https://{BUCKET_CADCAT}.s3.amazonaws.com/{HDP_PREFIX}historical_wx_stations.csv"
+HDP_STATIONS_CSV_URL = (
+    f"https://{BUCKET_CADCAT}.s3.amazonaws.com/{HDP_PREFIX}historical_wx_stations.csv"
+)
 
 
 def build_hdp_collection():
@@ -53,12 +65,24 @@ def build_hdp_collection():
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[WECC_BBOX]),
             temporal=pystac.TemporalExtent(
-                intervals=[[
-                    datetime(1980, 1, 1, tzinfo=timezone.utc),
-                    datetime(2022, 12, 31, tzinfo=timezone.utc),
-                ]]
+                intervals=[
+                    [
+                        datetime(1980, 1, 1, tzinfo=timezone.utc),
+                        datetime(2022, 12, 31, tzinfo=timezone.utc),
+                    ]
+                ]
             ),
         ),
+        license=CALADAPT_DATA_LICENSE,
+        providers=[ERA_PROVIDER, CALADAPT_HOST],
+    )
+    collection.add_link(
+        pystac.Link(
+            rel="code",
+            target="https://zenodo.org/records/18705444",
+            media_type="text/html",
+            title="Archived source code for dataset production (Zenodo DOI)",
+        )
     )
     collection.add_asset(
         "item-geometries",
@@ -86,24 +110,29 @@ def build_hdp_collection():
         if end and end.tzinfo is None:
             end = end.replace(tzinfo=timezone.utc)
 
+        # Fall back to collection date range if station dates are missing
+        item_start = start or datetime(1980, 1, 1, tzinfo=timezone.utc)
+        item_end = end or datetime(2022, 12, 31, tzinfo=timezone.utc)
+
         props = {
             "era_id": era_id,
-            "source_id": row["source-id"],
             "network": network,
             "state": row["state"],
-            "elevation": float(row["elevation"]) if pd.notna(row["elevation"]) else None,
-            "total_nobs": int(row["total_nobs"]) if pd.notna(row["total_nobs"]) else None,
+            "elevation": (
+                float(row["elevation"]) if pd.notna(row["elevation"]) else None
+            ),
+            "total_nobs": (
+                int(row["total_nobs"]) if pd.notna(row["total_nobs"]) else None
+            ),
+            "start_datetime": item_start.isoformat(),
+            "end_datetime": item_end.isoformat(),
         }
-        if start:
-            props["start_datetime"] = start.isoformat()
-        if end:
-            props["end_datetime"] = end.isoformat()
 
         item = pystac.Item(
             id=era_id,
             geometry={"type": "Point", "coordinates": [lon, lat]},
             bbox=[lon, lat, lon, lat],
-            datetime=start,
+            datetime=None,
             properties=props,
         )
         item.add_asset(

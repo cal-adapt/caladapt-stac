@@ -55,6 +55,38 @@ from starlette.middleware.cors import CORSMiddleware
 from stac_fastapi.pgstac.config import Settings
 from stac_fastapi.pgstac.core import CoreCrudClient, health_check
 from stac_fastapi.pgstac.db import close_db_connection, connect_to_db
+
+# Additional links shown under "Additional Resources" in STAC Browser
+EXTRA_LINKS = [
+    {
+        "rel": "related",
+        "href": "https://cal-adapt.org",
+        "title": "Cal-Adapt website",
+        "type": "text/html",
+    },
+    {
+        "rel": "related",
+        "href": "https://cal-adapt.org/dashboard/data-download-tool",
+        "title": "Cal-Adapt data download tool",
+        "type": "text/html",
+    },
+    {
+        "rel": "related",
+        "href": "https://analytics.cal-adapt.org/",
+        "title": "Cal-Adapt: Analytics Engine website",
+        "type": "text/html",
+    },
+]
+
+
+class CalAdaptCrudClient(CoreCrudClient):
+    async def landing_page(self, **kwargs):
+        # Extend the default landing page links with Cal-Adapt specific resources
+        response = await super().landing_page(**kwargs)
+        response["links"].extend(EXTRA_LINKS)
+        return response
+
+
 from stac_fastapi.pgstac.extensions import FreeTextExtension, QueryExtension
 from stac_fastapi.pgstac.extensions.filter import FiltersClient
 from stac_fastapi.pgstac.transactions import BulkTransactionsClient, TransactionsClient
@@ -65,6 +97,10 @@ from stac_fastapi.pgstac.types.search import PgstacSearch
 class LambdaSettings(Settings):
     db_max_conn_size: int = 1
     db_min_conn_size: int = 1
+    stac_fastapi_title: str = "Cal-Adapt STAC API"
+    stac_fastapi_description: str = (
+        "Searchable spatiotemporal catalog of climate datasets hosted on Cal-Adapt. For more information on how to access the data, see the Cal Adapt: Analytics Engine website."
+    )
 
 
 IS_LAMBDA = "AWS_EXECUTION_ENV" in os.environ
@@ -83,7 +119,9 @@ search_extensions_map: dict[str, ApiExtension] = {
 cs_extensions_map: dict[str, ApiExtension] = {
     "query": QueryExtension(conformance_classes=[QueryConformanceClasses.COLLECTIONS]),
     "sort": SortExtension(conformance_classes=[SortConformanceClasses.COLLECTIONS]),
-    "fields": FieldsExtension(conformance_classes=[FieldsConformanceClasses.COLLECTIONS]),
+    "fields": FieldsExtension(
+        conformance_classes=[FieldsConformanceClasses.COLLECTIONS]
+    ),
     "filter": CollectionSearchFilterExtension(client=FiltersClient()),
     "free_text": FreeTextExtension(
         conformance_classes=[FreeTextConformanceClasses.COLLECTIONS],
@@ -111,12 +149,14 @@ enabled_extensions: set[str] = {
     "collection_search",
 }
 
-if ext := settings.enabled_extensions:
+if ext := os.environ.get("ENABLED_EXTENSIONS"):
     enabled_extensions = set(ext.split(","))
 
 application_extensions: list[ApiExtension] = []
 
-with_transactions = settings.enable_transactions_extensions
+with_transactions = (
+    os.environ.get("ENABLE_TRANSACTIONS_EXTENSIONS", "").upper() == "TRUE"
+)
 if with_transactions:
     application_extensions.append(
         TransactionExtension(
@@ -135,7 +175,9 @@ search_extensions = [
     for key, extension in search_extensions_map.items()
     if key in enabled_extensions
 ]
-post_request_model = create_post_request_model(search_extensions, base_model=PgstacSearch)
+post_request_model = create_post_request_model(
+    search_extensions, base_model=PgstacSearch
+)
 get_request_model = create_get_request_model(search_extensions)
 application_extensions.extend(search_extensions)
 
@@ -166,7 +208,9 @@ if "collection_search" in enabled_extensions:
         for key, extension in cs_extensions_map.items()
         if key in enabled_extensions
     ]
-    collection_search_extension = CollectionSearchExtension.from_extensions(cs_extensions)
+    collection_search_extension = CollectionSearchExtension.from_extensions(
+        cs_extensions
+    )
     collections_get_request_model = collection_search_extension.GET
     application_extensions.append(collection_search_extension)
 
@@ -195,7 +239,7 @@ api = StacApi(
     router=APIRouter(prefix=settings.prefix_path),
     settings=settings,
     extensions=application_extensions,
-    client=CoreCrudClient(pgstac_search_model=post_request_model),  # type: ignore [arg-type]
+    client=CalAdaptCrudClient(pgstac_search_model=post_request_model),  # type: ignore [arg-type]
     response_class=JSONResponse,
     items_get_request_model=items_get_request_model,
     search_get_request_model=get_request_model,
@@ -220,7 +264,9 @@ app = api.app
 # Lambda: manually trigger startup on cold start
 if IS_LAMBDA:
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(connect_to_db(app, add_write_connection_pool=with_transactions))
+    loop.run_until_complete(
+        connect_to_db(app, add_write_connection_pool=with_transactions)
+    )
 
 # Lambda handler — lifespan="off" since startup is managed manually above
 handler = Mangum(app, lifespan="off")

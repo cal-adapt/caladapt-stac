@@ -26,7 +26,9 @@ DATA_DIR = Path(__file__).parent.parent / "data" / "geometries"
 
 CA_COUNTIES_URL = "s3://cadcat/parquet/ca_counties.parquet"
 HADISD_STATIONS_URL = "https://cadcat.s3.amazonaws.com/hadisd/hadisd_stations.csv"
-HDP_STATIONS_CSV_URL = "https://cadcat.s3.amazonaws.com/histwxstns/historical_wx_stations.csv"
+HDP_STATIONS_CSV_URL = (
+    "https://cadcat.s3.amazonaws.com/histwxstns/historical_wx_stations.csv"
+)
 
 
 def generate_ca_counties():
@@ -40,12 +42,14 @@ def generate_ca_counties():
     features = []
     for _, row in gdf.iterrows():
         county_name = row["NAME"].replace(" County", "")
-        features.append({
-            "type": "Feature",
-            "bbox": list(row.geometry.bounds),  # [west, south, east, north]
-            "geometry": row.geometry.__geo_interface__,
-            "properties": {"county_name": county_name},
-        })
+        features.append(
+            {
+                "type": "Feature",
+                "bbox": list(row.geometry.bounds),  # [west, south, east, north]
+                "geometry": row.geometry.__geo_interface__,
+                "properties": {"county_name": county_name},
+            }
+        )
     return {"type": "FeatureCollection", "features": features}
 
 
@@ -73,11 +77,13 @@ def generate_hadisd_stations():
             continue
         seen.add(location)
         lon, lat = float(row["LON_X"]), float(row["LAT_Y"])
-        features.append({
-            "type": "Feature",
-            "geometry": {"type": "Point", "coordinates": [lon, lat]},
-            "properties": {"location": location},
-        })
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [lon, lat]},
+                "properties": {"location": location},
+            }
+        )
     return {"type": "FeatureCollection", "features": features}
 
 
@@ -92,11 +98,13 @@ def generate_hdp_stations():
     features = []
     for _, row in df.iterrows():
         lon, lat = float(row["longitude"]), float(row["latitude"])
-        features.append({
-            "type": "Feature",
-            "geometry": {"type": "Point", "coordinates": [lon, lat]},
-            "properties": {"era_id": row["era-id"]},
-        })
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": {"type": "Point", "coordinates": [lon, lat]},
+                "properties": {"era_id": row["era-id"]},
+            }
+        )
     return {"type": "FeatureCollection", "features": features}
 
 

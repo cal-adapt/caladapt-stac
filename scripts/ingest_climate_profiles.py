@@ -24,11 +24,13 @@ Requires:
 import pystac
 import requests
 from datetime import datetime, timezone
+from pystac.extensions.scientific import ScientificExtension
 
 from scripts.constants import (
     BUCKET_CADCAT,
     CA_BBOX,
     CALADAPT_DATA_LICENSE,
+    CALADAPT_PROVIDER_AND_HOST,
     CLIM_PROF_GWL_PERIOD_DATES,
     HADISD_STATION_COORDS_URL,
     PGDSN,
@@ -104,10 +106,9 @@ def build_tmy_collection():
         id="typical-met-year",
         description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
+        providers=[CALADAPT_PROVIDER_AND_HOST],
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(
-                bboxes=[CA_BBOX]
-            ),  # CA spatial extent
+            spatial=pystac.SpatialExtent(bboxes=[CA_BBOX]),  # CA spatial extent
             temporal=pystac.TemporalExtent(
                 intervals=[
                     [
@@ -126,6 +127,9 @@ def build_tmy_collection():
             roles=["item-geometries"],
             title="Item geometries",
         ),
+    )
+    ScientificExtension.ext(collection, add_if_missing=True).doi = (
+        "10.5281/zenodo.18135273"
     )
 
     station_coords = get_station_coords()
@@ -178,10 +182,10 @@ def build_smy_collection():
     collection = pystac.Collection(
         id="standard-met-year",
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
+        license=CALADAPT_DATA_LICENSE,
+        providers=[CALADAPT_PROVIDER_AND_HOST],
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(
-                bboxes=[CA_BBOX]
-            ),  # CA spatial extent
+            spatial=pystac.SpatialExtent(bboxes=[CA_BBOX]),  # CA spatial extent
             temporal=pystac.TemporalExtent(
                 intervals=[
                     [
@@ -200,6 +204,9 @@ def build_smy_collection():
             roles=["item-geometries"],
             title="Item geometries",
         ),
+    )
+    ScientificExtension.ext(collection, add_if_missing=True).doi = (
+        "10.5281/zenodo.18135273"
     )
 
     station_coords = get_station_coords()
@@ -232,6 +239,7 @@ def build_smy_collection():
         )
         collection.add_item(item)
     return collection
+
 
 def get_station_coords():
     """
