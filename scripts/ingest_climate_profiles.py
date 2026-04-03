@@ -16,18 +16,25 @@ Usage:
 
 Requires:
     - AWS credentials with read access to the cadcat S3 bucket
-    - A running STAC API at API_ENDPOINT (this can be a local endpoint 
+    - A running STAC API at API_ENDPOINT (this can be a local endpoint
     for testing, or a a deployed STAC API endpoint)
 
 """
 
 import pystac
-import pandas as pd 
+import pandas as pd
 from datetime import datetime, timezone
-from urllib.parse import urljoin
 
-from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CLIM_PROF_GWL_PERIOD_DATES, HADISD_STATIONS_URL, SMY_PREFIX, TMY_PREFIX
-from scripts.utils import build_item, list_keys, post_or_put
+from scripts.constants import (
+    BUCKET_CADCAT,
+    CLIM_PROF_GWL_PERIOD_DATES,
+    HADISD_STATIONS_URL,
+    PGDSN,
+    SMY_PREFIX,
+    TMY_PREFIX,
+)
+from scripts.utils import build_item, list_keys, load_direct
+
 
 def parse_tmy_key(key):
     """
@@ -95,8 +102,17 @@ def build_tmy_collection():
         id="climate-profiles-tmy",
         description="Typical Meteorological Year climate profiles",
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(bboxes=[[-124.4, 32.5, -114.1, 42.0]]), # CA spatial extent
-            temporal=pystac.TemporalExtent(intervals=[[datetime(1980, 1, 1, tzinfo=timezone.utc), datetime(2100, 12, 31, tzinfo=timezone.utc)]]), # WRF time extent
+            spatial=pystac.SpatialExtent(
+                bboxes=[[-124.4, 32.5, -114.1, 42.0]]
+            ),  # CA spatial extent
+            temporal=pystac.TemporalExtent(
+                intervals=[
+                    [
+                        datetime(1980, 1, 1, tzinfo=timezone.utc),
+                        datetime(2100, 12, 31, tzinfo=timezone.utc),
+                    ]
+                ]
+            ),  # WRF time extent
         ),
     )
     stations = get_hadisd_formatted_table().set_index("station_clim_prof_formatted")
@@ -106,9 +122,11 @@ def build_tmy_collection():
             continue
         ext = "epw" if key.endswith(".epw") else "csv"
         media_type = "application/octet-stream" if ext == "epw" else "text/csv"
-        item_id = f"tmy-{props['location']}-{props['model']}-{props['time_period']}-{ext}"
+        item_id = (
+            f"tmy-{props['location']}-{props['model']}-{props['time_period']}-{ext}"
+        )
 
-        # Get the time period from the profiles lookup table 
+        # Get the time period from the profiles lookup table
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
@@ -121,7 +139,16 @@ def build_tmy_collection():
         geometry = {"type": "Point", "coordinates": [lon, lat]}
         bbox = [lon, lat, lon, lat]
 
-        item = build_item(item_id, props, key, BUCKET_CADCAT, media_type, geometry=geometry, bbox=bbox, item_datetime=start)
+        item = build_item(
+            item_id,
+            props,
+            key,
+            BUCKET_CADCAT,
+            media_type,
+            geometry=geometry,
+            bbox=bbox,
+            item_datetime=start,
+        )
         collection.add_item(item)
 
     return collection
@@ -140,8 +167,17 @@ def build_smy_collection():
         id="climate-profiles-smy",
         description="Standard Meteorological Year climate profiles",
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(bboxes=[[-124.4, 32.5, -114.1, 42.0]]), # CA spatial extent
-            temporal=pystac.TemporalExtent(intervals=[[datetime(1980, 1, 1, tzinfo=timezone.utc), datetime(2100, 12, 31, tzinfo=timezone.utc)]]), # WRF time extent
+            spatial=pystac.SpatialExtent(
+                bboxes=[[-124.4, 32.5, -114.1, 42.0]]
+            ),  # CA spatial extent
+            temporal=pystac.TemporalExtent(
+                intervals=[
+                    [
+                        datetime(1980, 1, 1, tzinfo=timezone.utc),
+                        datetime(2100, 12, 31, tzinfo=timezone.utc),
+                    ]
+                ]
+            ),  # WRF time extent
         ),
     )
     stations = get_hadisd_formatted_table().set_index("station_clim_prof_formatted")
@@ -151,7 +187,7 @@ def build_smy_collection():
             continue
         item_id = f"smy-{props['location']}-{props['variable']}-{props['percentile']}-{props['time_period']}"
 
-        # Get the time period from the profiles lookup table 
+        # Get the time period from the profiles lookup table
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
@@ -164,9 +200,19 @@ def build_smy_collection():
         geometry = {"type": "Point", "coordinates": [lon, lat]}
         bbox = [lon, lat, lon, lat]
 
-        item = build_item(item_id, props, key, BUCKET_CADCAT, "text/csv", geometry=geometry, bbox=bbox, item_datetime=start)
+        item = build_item(
+            item_id,
+            props,
+            key,
+            BUCKET_CADCAT,
+            "text/csv",
+            geometry=geometry,
+            bbox=bbox,
+            item_datetime=start,
+        )
         collection.add_item(item)
     return collection
+
 
 def get_hadisd_formatted_table():
     """
@@ -182,31 +228,29 @@ def get_hadisd_formatted_table():
         DataFrame with columns: station_clim_prof_formatted, LAT_Y, LON_X.
     """
     hadisd_df = pd.read_csv(HADISD_STATIONS_URL, index_col=[0])
-    
+
     # Get new column with station names formatted to match climate profile location names
-    hadisd_df["station_clim_prof_formatted"] = hadisd_df["station"].str.replace(r"[^\w\s-]", "", regex=True).str.lower().str.replace(" ", "_")
+    hadisd_df["station_clim_prof_formatted"] = (
+        hadisd_df["station"]
+        .str.replace(r"[^\w\s-]", "", regex=True)
+        .str.lower()
+        .str.replace(" ", "_")
+    )
 
     return hadisd_df[["station_clim_prof_formatted", "LAT_Y", "LON_X"]]
 
 
-def main(): 
-
-    # Parse thru s3 catalog and build pystac items for each TMY and SMY profile
-    # Returns a psytac collection object for each profile type, which we can then POST to the API
+def main():
+    print("  Building TMY collection...")
     tmy_collection = build_tmy_collection()
-    smy_collection = build_smy_collection() 
+    print("  Loading TMY directly into pgSTAC...")
+    load_direct(tmy_collection, PGDSN)
 
-    # POST collections to API
-    post_or_put(urljoin(API_ENDPOINT, "/collections"), tmy_collection.to_dict())
-    post_or_put(urljoin(API_ENDPOINT, "/collections"), smy_collection.to_dict())
+    print("  Building SMY collection...")
+    smy_collection = build_smy_collection()
+    print("  Loading SMY directly into pgSTAC...")
+    load_direct(smy_collection, PGDSN)
 
-    # POST items from each collection to API individually
-    # Each item is a pystac Item representing a single climate profile CSV or EPW file in S3
-    # By calling item.to_dict(), we convert the pystac Item to a dict that can be JSON-serialized and sent in the POST request body
-    for item in tmy_collection.get_items():
-        post_or_put(urljoin(API_ENDPOINT, f"/collections/{tmy_collection.id}/items"), item.to_dict())
-    for item in smy_collection.get_items():
-        post_or_put(urljoin(API_ENDPOINT, f"/collections/{smy_collection.id}/items"), item.to_dict())
 
 if __name__ == "__main__":
     main()
