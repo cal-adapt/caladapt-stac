@@ -28,11 +28,12 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from urllib.parse import urljoin
 
-import geopandas as gpd
+import requests
 import pystac
 
-from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CA_COUNTY_FIPS, CA_COUNTIES_URL, LOCA2_COUNTY_NETCDF_PREFIX
-from scripts.utils import list_keys, post_or_put
+from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CA_COUNTY_FIPS, CA_COUNTIES_GEOMETRIES_URL, CALADAPT_DATA_LICENSE, LOCA2_COUNTY_NETCDF_PREFIX, PGDSN
+from scripts.utils import list_keys, load_direct, post_items, post_or_put
+from scripts.register_queryables import main as register_queryables
 
 
 def parse_loca2_county_key(key):
@@ -70,7 +71,7 @@ def parse_loca2_county_key(key):
 
 def get_county_geometries():
     """
-    Load California county geometries from S3 parquet.
+    Load California county geometries from S3.
 
     Returns
     -------
@@ -78,10 +79,10 @@ def get_county_geometries():
         Mapping of county name (e.g. "Yuba") to (geometry, bbox) tuples,
         where geometry is a GeoJSON-compatible dict and bbox is [west, south, east, north].
     """
-    gdf = gpd.read_parquet(CA_COUNTIES_URL)
+    fc = requests.get(CA_COUNTIES_GEOMETRIES_URL).json()
     return {
-        row["NAME"].replace(" County", ""): (row.geometry.__geo_interface__, list(row.geometry.bounds))
-        for _, row in gdf.iterrows()
+        feature["properties"]["county_name"]: (feature["geometry"], feature["bbox"])
+        for feature in fc["features"]
     }
 
 
@@ -99,7 +100,8 @@ def build_loca2_county_collection():
     """
     collection = pystac.Collection(
         id="loca2-county",
-        description="LOCA2 statistically downscaled climate projections for California subset by county",
+        description="California county-level netcdf data for LOCA2 statistically downscaled climate projections.",
+        license=CALADAPT_DATA_LICENSE,
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[[-124.4, 32.5, -114.1, 42.0]]),
             temporal=pystac.TemporalExtent(
@@ -108,6 +110,15 @@ def build_loca2_county_collection():
                     datetime(2100, 12, 31, tzinfo=timezone.utc),
                 ]]
             ),
+        ),
+    )
+    collection.add_asset(
+        "item-geometries",
+        pystac.Asset(
+            href=CA_COUNTIES_GEOMETRIES_URL,
+            media_type="application/geo+json",
+            roles=["item-geometries"],
+            title="Item geometries",
         ),
     )
 
@@ -142,7 +153,7 @@ def build_loca2_county_collection():
             "cmip6:member_id": member_id,
             "cmip6:table_id": frequency,
             "county_code": county_code,
-            "countyname": countyname,
+            "county_name": countyname,
             "start_datetime": datetime(1950, 1, 1, tzinfo=timezone.utc).isoformat(),
             "end_datetime": datetime(2100, 12, 31, tzinfo=timezone.utc).isoformat(),
         }
@@ -168,19 +179,24 @@ def build_loca2_county_collection():
 
 def main():
     # Build collection with all LOCA2 county items
+    print("  Building LOCA2 county collection...")
     collection = build_loca2_county_collection()
 
-    # POST collection to API
-    collection_dict = collection.to_dict()
-    collection_dict["links"] = []
-    post_or_put(urljoin(API_ENDPOINT, "/collections"), collection_dict)
+    if PGDSN:
+        # Fast path: load directly into pgSTAC via bulk SQL (bypasses HTTP API)
+        print("  Loading LOCA2 county collection and items directly into pgSTAC...")
+        load_direct(collection, PGDSN)
+    else:
+        # Fallback: POST to HTTP API
+        print("  Posting LOCA2 county collection and items via HTTP API...")
+        collection_dict = collection.to_dict()
+        collection_dict["links"] = []
+        collection_dict["features"] = []  # strip items — posted separately below
+        post_or_put(urljoin(API_ENDPOINT, "/collections"), collection_dict)
+        post_items(collection, urljoin(API_ENDPOINT, f"/collections/{collection.id}/items"))
 
-    # POST each item individually to API
-    for item in collection.get_items():
-        post_or_put(
-            urljoin(API_ENDPOINT, f"/collections/{collection.id}/items"),
-            item.to_dict(),
-        )
+    print("  Registering queryables...")
+    register_queryables()
 
 
 if __name__ == "__main__":

@@ -22,12 +22,13 @@ Requires:
 """
 
 import pystac
-import pandas as pd 
+import requests
 from datetime import datetime, timezone
 from urllib.parse import urljoin
 
-from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CLIM_PROF_GWL_PERIOD_DATES, HADISD_STATIONS_URL, SMY_PREFIX, TMY_PREFIX
-from scripts.utils import build_item, list_keys, post_or_put
+from scripts.constants import API_ENDPOINT, BUCKET_CADCAT, CALADAPT_DATA_LICENSE, CLIM_PROF_GWL_PERIOD_DATES, HADISD_STATION_COORDS_URL, SMY_PREFIX, TMY_PREFIX, PGDSN
+from scripts.utils import build_item, list_keys, load_direct, post_items, post_or_put
+from scripts.register_queryables import main as register_queryables
 
 def parse_tmy_key(key):
     """
@@ -93,13 +94,24 @@ def build_tmy_collection():
     """
     collection = pystac.Collection(
         id="climate-profiles-tmy",
-        description="Typical Meteorological Year climate profiles",
+        description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
+        license=CALADAPT_DATA_LICENSE,
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[[-124.4, 32.5, -114.1, 42.0]]), # CA spatial extent
             temporal=pystac.TemporalExtent(intervals=[[datetime(1980, 1, 1, tzinfo=timezone.utc), datetime(2100, 12, 31, tzinfo=timezone.utc)]]), # WRF time extent
         ),
     )
-    stations = get_hadisd_formatted_table().set_index("station_clim_prof_formatted")
+    collection.add_asset(
+        "item-geometries",
+        pystac.Asset(
+            href=HADISD_STATION_COORDS_URL,
+            media_type="application/geo+json",
+            roles=["item-geometries"],
+            title="Item geometries",
+        ),
+    )
+
+    station_coords = get_station_coords()
     for key in list_keys(TMY_PREFIX, BUCKET_CADCAT):
         props = parse_tmy_key(key)
         if props is None:
@@ -108,20 +120,18 @@ def build_tmy_collection():
         media_type = "application/octet-stream" if ext == "epw" else "text/csv"
         item_id = f"tmy-{props['location']}-{props['model']}-{props['time_period']}-{ext}"
 
-        # Get the time period from the profiles lookup table 
+        # Get the time period from the profiles lookup table
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
 
-        # Get geometry from HadISD station table based on location name
-        row = stations.loc[props["location"]]
-        lat, lon = row["LAT_Y"], row["LON_X"]
+        lon, lat = station_coords[props["location"]]
         props["lat"] = lat
         props["lon"] = lon
         geometry = {"type": "Point", "coordinates": [lon, lat]}
         bbox = [lon, lat, lon, lat]
 
-        item = build_item(item_id, props, key, BUCKET_CADCAT, media_type, geometry=geometry, bbox=bbox, item_datetime=start)
+        item = build_item(item_id, props, key, BUCKET_CADCAT, media_type, geometry=geometry, bbox=bbox, item_datetime=start, asset_key=ext)
         collection.add_item(item)
 
     return collection
@@ -138,27 +148,35 @@ def build_smy_collection():
     """
     collection = pystac.Collection(
         id="climate-profiles-smy",
-        description="Standard Meteorological Year climate profiles",
+        description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[[-124.4, 32.5, -114.1, 42.0]]), # CA spatial extent
             temporal=pystac.TemporalExtent(intervals=[[datetime(1980, 1, 1, tzinfo=timezone.utc), datetime(2100, 12, 31, tzinfo=timezone.utc)]]), # WRF time extent
         ),
     )
-    stations = get_hadisd_formatted_table().set_index("station_clim_prof_formatted")
+    collection.add_asset(
+        "item-geometries",
+        pystac.Asset(
+            href=HADISD_STATION_COORDS_URL,
+            media_type="application/geo+json",
+            roles=["item-geometries"],
+            title="Item geometries",
+        ),
+    )
+
+    station_coords = get_station_coords()
     for key in list_keys(SMY_PREFIX, BUCKET_CADCAT):
         props = parse_smy_key(key)
         if props is None:
             continue
         item_id = f"smy-{props['location']}-{props['variable']}-{props['percentile']}-{props['time_period']}"
 
-        # Get the time period from the profiles lookup table 
+        # Get the time period from the profiles lookup table
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
 
-        # Get geometry from HadISD station table based on location name
-        row = stations.loc[props["location"]]
-        lat, lon = row["LAT_Y"], row["LON_X"]
+        lon, lat = station_coords[props["location"]]
         props["lat"] = lat
         props["lon"] = lon
         geometry = {"type": "Point", "coordinates": [lon, lat]}
@@ -168,45 +186,47 @@ def build_smy_collection():
         collection.add_item(item)
     return collection
 
-def get_hadisd_formatted_table():
+def get_station_coords():
     """
-    Load HadISD station table from S3 and format station names to match climate profile location names.
-
-    Reads the HadISD stations CSV, adds a formatted station name column that matches
-    the location naming convention used in the climate profile S3 keys (lowercase,
-    spaces replaced with underscores, punctuation removed), and returns the relevant columns.
+    Load HadISD station coordinates from S3.
 
     Returns
     -------
-    pd.DataFrame
-        DataFrame with columns: station_clim_prof_formatted, LAT_Y, LON_X.
+    dict
+        Mapping of location name (e.g. "sacramento") to [lon, lat].
     """
-    hadisd_df = pd.read_csv(HADISD_STATIONS_URL, index_col=[0])
-    
-    # Get new column with station names formatted to match climate profile location names
-    hadisd_df["station_clim_prof_formatted"] = hadisd_df["station"].str.replace(r"[^\w\s-]", "", regex=True).str.lower().str.replace(" ", "_")
-
-    return hadisd_df[["station_clim_prof_formatted", "LAT_Y", "LON_X"]]
+    fc = requests.get(HADISD_STATION_COORDS_URL).json()
+    return {
+        feature["properties"]["location"]: feature["geometry"]["coordinates"]
+        for feature in fc["features"]
+    }
 
 
 def main(): 
 
     # Parse thru s3 catalog and build pystac items for each TMY and SMY profile
     # Returns a psytac collection object for each profile type, which we can then POST to the API
+    print("  Building TMY collection...")
     tmy_collection = build_tmy_collection()
-    smy_collection = build_smy_collection() 
+    print("  Building SMY collection...")
+    smy_collection = build_smy_collection()
 
-    # POST collections to API
-    post_or_put(urljoin(API_ENDPOINT, "/collections"), tmy_collection.to_dict())
-    post_or_put(urljoin(API_ENDPOINT, "/collections"), smy_collection.to_dict())
+    if PGDSN:
+        print("  Loading TMY collection and items directly into pgSTAC...")
+        load_direct(tmy_collection, PGDSN)
+        print("  Loading SMY collection and items directly into pgSTAC...")
+        load_direct(smy_collection, PGDSN)
+    else:
+        print("  Posting TMY collection and items...")
+        post_or_put(urljoin(API_ENDPOINT, "/collections"), tmy_collection.to_dict())
+        post_items(tmy_collection, urljoin(API_ENDPOINT, f"/collections/{tmy_collection.id}/items"))
 
-    # POST items from each collection to API individually
-    # Each item is a pystac Item representing a single climate profile CSV or EPW file in S3
-    # By calling item.to_dict(), we convert the pystac Item to a dict that can be JSON-serialized and sent in the POST request body
-    for item in tmy_collection.get_items():
-        post_or_put(urljoin(API_ENDPOINT, f"/collections/{tmy_collection.id}/items"), item.to_dict())
-    for item in smy_collection.get_items():
-        post_or_put(urljoin(API_ENDPOINT, f"/collections/{smy_collection.id}/items"), item.to_dict())
+        print("  Posting SMY collection and items...")
+        post_or_put(urljoin(API_ENDPOINT, "/collections"), smy_collection.to_dict())
+        post_items(smy_collection, urljoin(API_ENDPOINT, f"/collections/{smy_collection.id}/items"))
+
+    print("  Registering queryables...")
+    register_queryables()
 
 if __name__ == "__main__":
     main()
