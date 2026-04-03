@@ -27,13 +27,15 @@ Requires:
 from collections import defaultdict
 from datetime import datetime, timezone
 
-import geopandas as gpd
+import requests
 import pystac
 
 from scripts.constants import (
     BUCKET_CADCAT,
+    CA_BBOX,
     CA_COUNTY_FIPS,
-    CA_COUNTIES_URL,
+    CA_COUNTIES_GEOMETRIES_URL,
+    CALADAPT_DATA_LICENSE,
     LOCA2_COUNTY_NETCDF_PREFIX,
     PGDSN,
 )
@@ -75,7 +77,7 @@ def parse_loca2_county_key(key):
 
 def get_county_geometries():
     """
-    Load California county geometries from S3 parquet.
+    Load California county geometries from S3.
 
     Returns
     -------
@@ -83,13 +85,10 @@ def get_county_geometries():
         Mapping of county name (e.g. "Yuba") to (geometry, bbox) tuples,
         where geometry is a GeoJSON-compatible dict and bbox is [west, south, east, north].
     """
-    gdf = gpd.read_parquet(CA_COUNTIES_URL)
+    fc = requests.get(CA_COUNTIES_GEOMETRIES_URL).json()
     return {
-        row["NAME"].replace(" County", ""): (
-            row.geometry.__geo_interface__,
-            list(row.geometry.bounds),
-        )
-        for _, row in gdf.iterrows()
+        feature["properties"]["county_name"]: (feature["geometry"], feature["bbox"])
+        for feature in fc["features"]
     }
 
 
@@ -107,9 +106,20 @@ def build_loca2_county_collection():
     """
     collection = pystac.Collection(
         id="loca2-county",
-        description="LOCA2 statistically downscaled climate projections for California subset by county",
+        description="County-level NetCDF data for LOCA2 statistically downscaled climate projections covering California.",
+        license=CALADAPT_DATA_LICENSE,
+        providers=[
+            pystac.Provider(
+                name="Cal-Adapt",
+                roles=[
+                    pystac.ProviderRole.HOST,
+                    pystac.ProviderRole.PROCESSOR,
+                ],
+                url="https://cal-adapt.org/",
+            )
+        ],
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(bboxes=[[-124.4, 32.5, -114.1, 42.0]]),
+            spatial=pystac.SpatialExtent(bboxes=[CA_BBOX]),
             temporal=pystac.TemporalExtent(
                 intervals=[
                     [
@@ -118,6 +128,15 @@ def build_loca2_county_collection():
                     ]
                 ]
             ),
+        ),
+    )
+    collection.add_asset(
+        "item-geometries",
+        pystac.Asset(
+            href=CA_COUNTIES_GEOMETRIES_URL,
+            media_type="application/geo+json",
+            roles=["item-geometries"],
+            title="Item geometries",
         ),
     )
 
@@ -160,7 +179,7 @@ def build_loca2_county_collection():
             "cmip6:member_id": member_id,
             "cmip6:table_id": frequency,
             "county_code": county_code,
-            "countyname": countyname,
+            "county_name": countyname,
             "start_datetime": datetime(1950, 1, 1, tzinfo=timezone.utc).isoformat(),
             "end_datetime": datetime(2100, 12, 31, tzinfo=timezone.utc).isoformat(),
         }

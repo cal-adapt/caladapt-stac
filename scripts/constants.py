@@ -7,6 +7,8 @@ Shared constants for building and ingesting STAC items.
 import os
 from datetime import datetime, timezone
 
+import pystac
+
 # S3 buckets
 BUCKET_CADCAT = "cadcat"
 
@@ -16,15 +18,27 @@ API_ENDPOINT = os.environ.get("STAC_API_ENDPOINT", "http://localhost:8082")
 # PostgreSQL DSN for direct DB access
 PGDSN = os.environ.get("PGDSN")
 
+# S3 HTTPS URLs for geometry GeoJSON files (upload manually after running generate_geometries.py)
+CA_COUNTIES_GEOMETRIES_URL = (
+    "https://cadcat.s3.amazonaws.com/geometries/ca-counties-geometries.geojson"
+)
+HADISD_STATION_COORDS_URL = (
+    "https://cadcat.s3.amazonaws.com/geometries/hadisd-station-coords.geojson"
+)
+HDP_STATION_COORDS_URL = (
+    "https://cadcat.s3.amazonaws.com/geometries/hdp-station-coords.geojson"
+)
+
+
 # S3 prefixes for collections
 TMY_PREFIX = "climate-profiles/typical-met-year/"
 SMY_PREFIX = "climate-profiles/standard-met-year/"
 LOCA2_COUNTY_NETCDF_PREFIX = "loca2/ucb/netcdf/county/"
 HDP_PREFIX = "histwxstns/"
 
-# URLs for singular files
-HADISD_STATIONS_URL = "https://cadcat.s3.amazonaws.com/hadisd/hadisd_stations.csv"
-CA_COUNTIES_URL = "s3://cadcat/parquet/ca_counties.parquet"
+# License for all Cal-Adapt data (CMIP6-derived products)
+CALADAPT_DATA_LICENSE = "CC-BY-4.0"
+CALADAPT_DATA_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
 
 # Mapping of California county FIPS codes to county names (without "County" suffix)
 # Matches the countyname property used in STAC items and the cal-adapt-de-website data download tool
@@ -110,8 +124,9 @@ CLIM_PROF_GWL_PERIOD_DATES = {
     ),  # centered_year=2069
 }
 
-# California spatial extent — used as a placeholder geometry for non-spatial datasets
+# Spatial extents
 CA_BBOX = [-124.4, 32.5, -114.1, 42.0]
+WECC_BBOX = [-125.0, 25.0, -100.0, 52.0]
 CA_GEOMETRY = {
     "type": "Polygon",
     "coordinates": [

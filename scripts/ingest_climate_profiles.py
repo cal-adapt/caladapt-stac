@@ -22,13 +22,16 @@ Requires:
 """
 
 import pystac
-import pandas as pd
+import requests
 from datetime import datetime, timezone
+from pystac.extensions.scientific import ScientificExtension
 
 from scripts.constants import (
     BUCKET_CADCAT,
+    CA_BBOX,
+    CALADAPT_DATA_LICENSE,
     CLIM_PROF_GWL_PERIOD_DATES,
-    HADISD_STATIONS_URL,
+    HADISD_STATION_COORDS_URL,
     PGDSN,
     SMY_PREFIX,
     TMY_PREFIX,
@@ -99,12 +102,21 @@ def build_tmy_collection():
         Collection containing one item per TMY CSV file in S3.
     """
     collection = pystac.Collection(
-        id="climate-profiles-tmy",
-        description="Typical Meteorological Year climate profiles",
+        id="typical-met-year",
+        description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
+        license=CALADAPT_DATA_LICENSE,
+        providers=[
+            pystac.Provider(
+                name="Cal-Adapt",
+                roles=[
+                    pystac.ProviderRole.HOST,
+                    pystac.ProviderRole.PROCESSOR,
+                ],
+                url="https://cal-adapt.org/",
+            )
+        ],
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(
-                bboxes=[[-124.4, 32.5, -114.1, 42.0]]
-            ),  # CA spatial extent
+            spatial=pystac.SpatialExtent(bboxes=[CA_BBOX]),  # CA spatial extent
             temporal=pystac.TemporalExtent(
                 intervals=[
                     [
@@ -115,7 +127,20 @@ def build_tmy_collection():
             ),  # WRF time extent
         ),
     )
-    stations = get_hadisd_formatted_table().set_index("station_clim_prof_formatted")
+    collection.add_asset(
+        "item-geometries",
+        pystac.Asset(
+            href=HADISD_STATION_COORDS_URL,
+            media_type="application/geo+json",
+            roles=["item-geometries"],
+            title="Item geometries",
+        ),
+    )
+    ScientificExtension.ext(collection, add_if_missing=True).doi = (
+        "10.5281/zenodo.18135273"
+    )
+
+    station_coords = get_station_coords()
     for key in list_keys(TMY_PREFIX, BUCKET_CADCAT):
         props = parse_tmy_key(key)
         if props is None:
@@ -131,9 +156,7 @@ def build_tmy_collection():
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
 
-        # Get geometry from HadISD station table based on location name
-        row = stations.loc[props["location"]]
-        lat, lon = row["LAT_Y"], row["LON_X"]
+        lon, lat = station_coords[props["location"]]
         props["lat"] = lat
         props["lon"] = lon
         geometry = {"type": "Point", "coordinates": [lon, lat]}
@@ -148,6 +171,7 @@ def build_tmy_collection():
             geometry=geometry,
             bbox=bbox,
             item_datetime=start,
+            asset_key=ext,
         )
         collection.add_item(item)
 
@@ -164,12 +188,21 @@ def build_smy_collection():
         Collection containing one item per SMY CSV file in S3.
     """
     collection = pystac.Collection(
-        id="climate-profiles-smy",
-        description="Standard Meteorological Year climate profiles",
+        id="standard-met-year",
+        description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
+        license=CALADAPT_DATA_LICENSE,
+        providers=[
+            pystac.Provider(
+                name="Cal-Adapt",
+                roles=[
+                    pystac.ProviderRole.HOST,
+                    pystac.ProviderRole.PROCESSOR,
+                ],
+                url="https://cal-adapt.org/",
+            )
+        ],
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(
-                bboxes=[[-124.4, 32.5, -114.1, 42.0]]
-            ),  # CA spatial extent
+            spatial=pystac.SpatialExtent(bboxes=[CA_BBOX]),  # CA spatial extent
             temporal=pystac.TemporalExtent(
                 intervals=[
                     [
@@ -180,7 +213,20 @@ def build_smy_collection():
             ),  # WRF time extent
         ),
     )
-    stations = get_hadisd_formatted_table().set_index("station_clim_prof_formatted")
+    collection.add_asset(
+        "item-geometries",
+        pystac.Asset(
+            href=HADISD_STATION_COORDS_URL,
+            media_type="application/geo+json",
+            roles=["item-geometries"],
+            title="Item geometries",
+        ),
+    )
+    ScientificExtension.ext(collection, add_if_missing=True).doi = (
+        "10.5281/zenodo.18135273"
+    )
+
+    station_coords = get_station_coords()
     for key in list_keys(SMY_PREFIX, BUCKET_CADCAT):
         props = parse_smy_key(key)
         if props is None:
@@ -192,9 +238,7 @@ def build_smy_collection():
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
 
-        # Get geometry from HadISD station table based on location name
-        row = stations.loc[props["location"]]
-        lat, lon = row["LAT_Y"], row["LON_X"]
+        lon, lat = station_coords[props["location"]]
         props["lat"] = lat
         props["lon"] = lon
         geometry = {"type": "Point", "coordinates": [lon, lat]}
@@ -214,30 +258,20 @@ def build_smy_collection():
     return collection
 
 
-def get_hadisd_formatted_table():
+def get_station_coords():
     """
-    Load HadISD station table from S3 and format station names to match climate profile location names.
-
-    Reads the HadISD stations CSV, adds a formatted station name column that matches
-    the location naming convention used in the climate profile S3 keys (lowercase,
-    spaces replaced with underscores, punctuation removed), and returns the relevant columns.
+    Load HadISD station coordinates from S3.
 
     Returns
     -------
-    pd.DataFrame
-        DataFrame with columns: station_clim_prof_formatted, LAT_Y, LON_X.
+    dict
+        Mapping of location name (e.g. "sacramento") to [lon, lat].
     """
-    hadisd_df = pd.read_csv(HADISD_STATIONS_URL, index_col=[0])
-
-    # Get new column with station names formatted to match climate profile location names
-    hadisd_df["station_clim_prof_formatted"] = (
-        hadisd_df["station"]
-        .str.replace(r"[^\w\s-]", "", regex=True)
-        .str.lower()
-        .str.replace(" ", "_")
-    )
-
-    return hadisd_df[["station_clim_prof_formatted", "LAT_Y", "LON_X"]]
+    fc = requests.get(HADISD_STATION_COORDS_URL).json()
+    return {
+        feature["properties"]["location"]: feature["geometry"]["coordinates"]
+        for feature in fc["features"]
+    }
 
 
 def main():
