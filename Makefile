@@ -1,6 +1,3 @@
-check:
-	python -Wall -m unittest -v
-
 build:
 	uv export --no-dev --no-hashes -o app/requirements.txt
 	sam build --cached --parallel
