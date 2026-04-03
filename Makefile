@@ -14,5 +14,8 @@ run:
 ingest:
 	uv run python -m scripts.ingest_all
 
+queryables:
+	uv run python -m scripts.register_queryables
+
 geometries:
 	uv run python -m scripts.generate_geometries
