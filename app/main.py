@@ -93,7 +93,7 @@ class LambdaSettings(Settings):
     db_min_conn_size: int = 1
     stac_fastapi_title: str = "Cal-Adapt STAC API"
     stac_fastapi_description: str = (
-        "Searchable spatiotemporal catalog of climate datasets hosted on Cal-Adapt. For more information on how to access the data, see the Cal Adapt: Analytics Engine website."
+        "Searchable spatiotemporal catalog of climate datasets hosted on Cal-Adapt."
     )
 
 
