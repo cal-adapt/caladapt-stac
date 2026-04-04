@@ -110,7 +110,7 @@ def build_tmy_collection():
                 name="Cal-Adapt",
                 roles=[
                     pystac.ProviderRole.HOST,
-                    pystac.ProviderRole.PROCESSOR,
+                    pystac.ProviderRole.PRODUCER,
                 ],
                 url="https://cal-adapt.org/",
             )
@@ -196,7 +196,7 @@ def build_smy_collection():
                 name="Cal-Adapt",
                 roles=[
                     pystac.ProviderRole.HOST,
-                    pystac.ProviderRole.PROCESSOR,
+                    pystac.ProviderRole.PRODUCER,
                 ],
                 url="https://cal-adapt.org/",
             )

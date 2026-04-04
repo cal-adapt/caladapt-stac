@@ -35,7 +35,6 @@ from scripts.constants import (
     WECC_BBOX,
 )
 from scripts.utils import load_direct
-from pystac.extensions.scientific import Publication
 
 HDP_STATIONS_CSV_URL = (
     f"https://{BUCKET_CADCAT}.s3.amazonaws.com/{HDP_PREFIX}historical_wx_stations.csv"
@@ -84,14 +83,6 @@ def build_hdp_collection():
                 url="https://cal-adapt.org/",
             ),
         ],
-    )
-    collection.add_link(
-        pystac.Link(
-            rel="code",
-            target="https://zenodo.org/records/18705444",
-            media_type="text/html",
-            title="Archived source code for dataset production (Zenodo DOI)",
-        )
     )
     collection.add_asset(
         "item-geometries",
@@ -147,7 +138,7 @@ def build_hdp_collection():
         item.add_asset(
             "data",
             pystac.Asset(
-                href=f"s3://{BUCKET_CADCAT}/{HDP_PREFIX}{network}/{era_id}",
+                href=f"s3://{BUCKET_CADCAT}/{HDP_PREFIX}{network}/{era_id}.zarr",
                 media_type="application/vnd+zarr",
             ),
         )
