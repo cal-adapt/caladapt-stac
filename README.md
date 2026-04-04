@@ -1,34 +1,45 @@
-CalAdapt-STAC
-=============
-CalAdapt-STAC is a SpatioTemporal Asset Catalog (STAC) compliant [web API](https://stac.cal-adapt.org/docs) built with [stac-fastapi](https://stac-utils.github.io/stac-fastapi/) to serve the latest catalog of gridded climate data for Cal-Adapt, namely LOCA2 and WRF-CMIP6.
+# caladapt-stac
 
+STAC API for Cal-Adapt climate datasets, built with [stac-fastapi](https://github.com/stac-utils/stac-fastapi) and [pgSTAC](https://github.com/stac-utils/pgstac).
 
-Installation
-------------
-Create a virtualenv first, and then install project dependencies with pip:
+## Setup
 
-    pip install -r app/requirements.txt
+Install dependencies with [uv](https://docs.astral.sh/uv/):
 
+```bash
+uv sync
+```
 
-Basic Usage
------------
-Run a local development server with uvicorn:
-    
-    uvicorn app.main:app --reload
+## Local Testing
 
-Or, just use the Makefile:
+Local testing requires [Docker](https://docs.docker.com/get-docker/) to run a pgSTAC Postgres database. In production, this is replaced by RDS.
 
-    make run
+**1. Start the database**
 
-Point your browser to  the interactive, OpenAPI-based, API documentation with a list of endpoints and filtering capabilities at http://localhost:8000/docs.
+```bash
+docker run -p 5432:5432 \
+  -e POSTGRES_PASSWORD=password \
+  ghcr.io/stac-utils/pgstac:latest
+```
 
-Run the test suite:
+**2. Run the API**
 
-    make check
+```bash
+uvicorn app.main:app --reload
+```
 
+API will be available at `http://localhost:8000`.
 
-Deployment
-----------
-The API is deployed to AWS Lambda with the AWS Serverless Application Model ([SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)). After [installing the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html#install-sam-cli-instructions), the API can be deployed with:
+**3. Ingest data**
 
-    make deploy
+```bash
+uv run python scripts/ingest_climate_profiles.py
+```
+
+**4. Browse**
+
+Point [STAC Browser](https://radiantearth.github.io/stac-browser/) at your local API:
+
+```
+https://radiantearth.github.io/stac-browser/#/external/localhost:8000
+```
