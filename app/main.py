@@ -66,12 +66,6 @@ EXTRA_LINKS = [
     },
     {
         "rel": "related",
-        "href": "https://cal-adapt.org/dashboard/data-download-tool",
-        "title": "Cal-Adapt data download tool",
-        "type": "text/html",
-    },
-    {
-        "rel": "related",
         "href": "https://analytics.cal-adapt.org/",
         "title": "Cal-Adapt: Analytics Engine website",
         "type": "text/html",
