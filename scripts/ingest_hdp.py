@@ -121,7 +121,7 @@ def build_hdp_collection():
             "elevation": (
                 float(row["elevation"]) if pd.notna(row["elevation"]) else None
             ),
-            "total_nobs": (
+            "total_observations": (
                 int(row["total_nobs"]) if pd.notna(row["total_nobs"]) else None
             ),
             "start_datetime": item_start.isoformat(),
