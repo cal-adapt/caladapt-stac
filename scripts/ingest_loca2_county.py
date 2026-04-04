@@ -38,6 +38,7 @@ from scripts.constants import (
     CALADAPT_DATA_LICENSE,
     LOCA2_COUNTY_NETCDF_PREFIX,
     PGDSN,
+    VARIABLE_TITLES,
 )
 from scripts.utils import list_keys, load_direct
 
@@ -196,6 +197,7 @@ def build_loca2_county_collection():
                 pystac.Asset(
                     href=f"s3://{BUCKET_CADCAT}/{key}",
                     media_type="application/netcdf",
+                    title=VARIABLE_TITLES.get(variable),
                 ),
             )
         collection.add_item(item)

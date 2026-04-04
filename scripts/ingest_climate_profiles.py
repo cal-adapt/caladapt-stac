@@ -35,6 +35,7 @@ from scripts.constants import (
     PGDSN,
     SMY_PREFIX,
     TMY_PREFIX,
+    VARIABLE_TITLES,
 )
 from scripts.utils import build_item, list_keys, load_direct
 
@@ -253,6 +254,7 @@ def build_smy_collection():
             geometry=geometry,
             bbox=bbox,
             item_datetime=start,
+            title=VARIABLE_TITLES.get(props["variable"]),
         )
         collection.add_item(item)
     return collection

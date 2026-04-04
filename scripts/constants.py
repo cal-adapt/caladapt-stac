@@ -124,6 +124,20 @@ CLIM_PROF_GWL_PERIOD_DATES = {
     ),  # centered_year=2069
 }
 
+# Variable long names, sourced from cal-adapt-de-website/src/data/lookup-tables.ts
+VARIABLE_TITLES = {
+    "pr": "Precipitation",
+    "rsds": "Surface downward solar shortwave radiation",
+    "tasmax": "Air temperature maximum",
+    "tasmin": "Air temperature minimum",
+    "uas": "10 m U component of wind speed",
+    "vas": "10 m V component of wind speed",
+    "wspeed": "10 m wind speed",
+    "hursmin": "Relative humidity minimum",
+    "hursmax": "Relative humidity maximum",
+    "huss": "Specific humidity",
+}
+
 # Spatial extents
 CA_BBOX = [-124.4, 32.5, -114.1, 42.0]
 WECC_BBOX = [-125.0, 25.0, -100.0, 52.0]

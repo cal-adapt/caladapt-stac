@@ -128,6 +128,7 @@ def build_item(
     bbox=None,
     item_datetime=None,
     asset_key="data",
+    title=None,
 ):
     """
     Build a pystac Item.
@@ -166,6 +167,6 @@ def build_item(
     )
     item.add_asset(
         asset_key,
-        pystac.Asset(href=f"s3://{bucket}/{href}", media_type=media_type),
+        pystac.Asset(href=f"s3://{bucket}/{href}", media_type=media_type, title=title),
     )
     return item
