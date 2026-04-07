@@ -61,7 +61,6 @@ def parse_tmy_key(key):
         "location": parts[2],
         "model": parts[3],
         "time_period": parts[4],
-        "profile_type": "tmy",
     }
 
 
@@ -88,7 +87,6 @@ def parse_smy_key(key):
         "variable": parts[3],
         "percentile": parts[4],
         "time_period": parts[5],
-        "profile_type": "smy",
     }
 
 
