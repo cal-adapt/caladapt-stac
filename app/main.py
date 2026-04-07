@@ -95,6 +95,8 @@ class LambdaSettings(Settings):
     stac_fastapi_description: str = (
         "Searchable spatiotemporal catalog of climate datasets hosted on Cal-Adapt."
     )
+    openapi_url: str = "/openapi.json"
+    docs_url: str = "/docs"
 
 
 IS_LAMBDA = "AWS_EXECUTION_ENV" in os.environ
