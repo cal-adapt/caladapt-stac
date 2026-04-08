@@ -102,7 +102,7 @@ def build_loca2_county_collection():
     """
     collection = pystac.Collection(
         id="loca2-county",
-        title="LOCA2 county (NetCDF)",
+        title="LOCA2 County (NetCDF)",
         description="County-level NetCDF data for LOCA2 statistically downscaled climate projections covering California.",
         license=CALADAPT_DATA_LICENSE,
         providers=[

@@ -37,6 +37,10 @@ HDP_STATION_COORDS_URL = (
 TMY_PREFIX = "climate-profiles/typical-met-year/"
 SMY_PREFIX = "climate-profiles/standard-met-year/"
 LOCA2_COUNTY_NETCDF_PREFIX = "loca2/ucb/netcdf/county/"
+LOCA2_GRIDDED_PREFIX = "loca2/ucsd/"
+WRF_UCLA_PREFIX = "wrf/ucla/"
+WRF_UCSD_PREFIX = "wrf/ucsd/"
+
 HDP_PREFIX = "histwxstns/"
 HADISD_PREFIX = "hadisd/"
 
@@ -140,16 +144,4 @@ WRF_UCSD_GRID_BBOXES = {
 WRF_UCLA_GRID_BBOXES = {
     "d01": [-154.6164, 9.4756, -87.2352, 64.4245],
     "d02": [-136.3039, 22.2671, -96.2959, 55.1834],
-}
-CA_GEOMETRY = {
-    "type": "Polygon",
-    "coordinates": [
-        [
-            [-124.4, 32.5],
-            [-114.1, 32.5],
-            [-114.1, 42.0],
-            [-124.4, 42.0],
-            [-124.4, 32.5],
-        ]
-    ],
 }

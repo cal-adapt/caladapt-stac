@@ -14,6 +14,19 @@ from datetime import datetime, timezone
 s3 = boto3.client("s3")
 
 
+def bbox_to_geometry(bbox):
+    """
+    Convert a [west, south, east, north] bbox to a GeoJSON Polygon dict.
+    """
+    west, south, east, north = bbox
+    return {
+        "type": "Polygon",
+        "coordinates": [
+            [[west, south], [east, south], [east, north], [west, north], [west, south]]
+        ],
+    }
+
+
 def post_or_put(url: str, data: dict, retries: int = 3):
     """Post or put data to url, retrying on failure with exponential backoff."""
     # pystac generates links with null hrefs when items are added to a collection;
@@ -42,6 +55,36 @@ def post_or_put(url: str, data: dict, retries: int = 3):
             backoff = 2**attempt  # 1s, 2s, 4s...
             print(f"  Retrying ({attempt + 1}/{retries}) in {backoff}s: {e}")
             time.sleep(backoff)
+
+
+def list_zarr_stores(prefix, bucket, depth):
+    """
+    List Zarr store paths at a fixed directory depth using delimiter-based listing.
+
+    Much faster than list_keys for Zarr data — navigates S3 "directories" level
+    by level without listing individual chunk files.
+
+    Parameters
+    ----------
+    prefix : str
+        S3 prefix to start from, e.g. "wrf/" or "loca2/ucsd/".
+    bucket : str
+        S3 bucket name.
+    depth : int
+        Number of directory levels to descend before yielding paths.
+
+    Yields
+    ------
+    str
+        S3 prefix for each Zarr store, e.g. "wrf/ucla/cesm2/historical/1hr/pr/d03/".
+    """
+    if depth == 0:
+        yield prefix
+        return
+    paginator = s3.get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=bucket, Prefix=prefix, Delimiter="/"):
+        for cp in page.get("CommonPrefixes", []):
+            yield from list_zarr_stores(cp["Prefix"], bucket, depth - 1)
 
 
 def list_keys(prefix, bucket):

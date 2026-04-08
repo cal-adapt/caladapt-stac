@@ -7,12 +7,12 @@ historical weather station data for the U.S. Western Electricity Coordinating
 Council (WECC) region, covering the period from 1980 to 2022. Methods documented
 at https://github.com/Eagle-Rock-Analytics/historical-obs-platform.
 
-Station data are stored as Zarr archives at s3://cadcat/histwxstns/{network}/{era_id}.
+Station data are stored as zarr archives at s3://cadcat/histwxstns/{network}/{era_id}.
 There are 27 networks totaling 14,927 stations.
 
 Workflow:
 1. Read station metadata from historical_wx_stations.csv in S3
-2. Build one pystac Item per station with a Zarr asset
+2. Build one pystac Item per station with a zarr asset
 3. Load directly into pgSTAC
 
 Usage:
@@ -43,7 +43,7 @@ HDP_STATIONS_CSV_URL = (
 
 def build_hdp_collection():
     """
-    Build a pystac Collection for HDP weather station Zarr data.
+    Build a pystac Collection for HDP weather station zarr data.
 
     Reads station metadata from historical_wx_stations.csv and builds
     one item per station.
