@@ -1,21 +1,11 @@
-format:
-	uv run black .
+check:
+	python -Wall -m unittest -v
 
 build:
-	uv export --no-dev --no-hashes -o app/requirements.txt
-	sam build --use-container --cached --parallel
+	sam build --cached --parallel
 
 deploy: build
-	sam deploy --profile era-de
+	sam deploy
 
 run:
 	uvicorn app.main:app --reload
-
-ingest:
-	uv run python -m scripts.ingest_all
-
-queryables:
-	uv run python -m scripts.register_queryables
-
-geometries:
-	uv run python -m scripts.generate_geometries

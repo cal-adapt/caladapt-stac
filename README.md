@@ -1,45 +1,34 @@
-# caladapt-stac
+CalAdapt-STAC
+=============
+CalAdapt-STAC is a SpatioTemporal Asset Catalog (STAC) compliant [web API](https://stac.cal-adapt.org/docs) built with [stac-fastapi](https://stac-utils.github.io/stac-fastapi/) to serve the latest catalog of gridded climate data for Cal-Adapt, namely LOCA2 and WRF-CMIP6.
 
-STAC API for Cal-Adapt climate datasets, built with [stac-fastapi](https://github.com/stac-utils/stac-fastapi) and [pgSTAC](https://github.com/stac-utils/pgstac).
 
-## Setup
+Installation
+------------
+Create a virtualenv first, and then install project dependencies with pip:
 
-Install dependencies with [uv](https://docs.astral.sh/uv/):
+    pip install -r app/requirements.txt
 
-```bash
-uv sync
-```
 
-## Local Testing
+Basic Usage
+-----------
+Run a local development server with uvicorn:
+    
+    uvicorn app.main:app --reload
 
-Local testing requires [Docker](https://docs.docker.com/get-docker/) to run a pgSTAC Postgres database. In production, this is replaced by RDS.
+Or, just use the Makefile:
 
-**1. Start the database**
+    make run
 
-```bash
-docker run -p 5432:5432 \
-  -e POSTGRES_PASSWORD=password \
-  ghcr.io/stac-utils/pgstac:latest
-```
+Point your browser to  the interactive, OpenAPI-based, API documentation with a list of endpoints and filtering capabilities at http://localhost:8000/docs.
 
-**2. Run the API**
+Run the test suite:
 
-```bash
-uvicorn app.main:app --reload
-```
+    make check
 
-API will be available at `http://localhost:8000`.
 
-**3. Ingest data**
+Deployment
+----------
+The API is deployed to AWS Lambda with the AWS Serverless Application Model ([SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html)). After [installing the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html#install-sam-cli-instructions), the API can be deployed with:
 
-```bash
-uv run python scripts/ingest_climate_profiles.py
-```
-
-**4. Browse**
-
-Point [STAC Browser](https://radiantearth.github.io/stac-browser/) at your local API:
-
-```
-https://radiantearth.github.io/stac-browser/#/external/localhost:8000
-```
+    make deploy
