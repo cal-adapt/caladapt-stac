@@ -101,6 +101,7 @@ def build_tmy_collection():
     """
     collection = pystac.Collection(
         id="typical-met-year",
+        title="Typical Meteorological Year",
         description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -187,6 +188,7 @@ def build_smy_collection():
     """
     collection = pystac.Collection(
         id="standard-met-year",
+        title="Standard Meteorological Year",
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
         providers=[

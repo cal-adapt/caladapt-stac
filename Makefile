@@ -9,7 +9,7 @@ deploy: build
 	sam deploy --profile era-de
 
 run:
-	uvicorn app.main:app --reload
+	uv run python -m uvicorn app.main:app --reload
 
 ingest:
 	uv run python -m scripts.ingest_all

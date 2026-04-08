@@ -6,12 +6,11 @@ from S3 keys and POSTing them to the STAC API.
 Workflow:
 1. List S3 keys under the LOCA2 county NetCDF prefix
 2. Parse filenames into components (county, variable, frequency, model, scenario, member_id)
-3. Group files by (county, frequency, model, scenario, member_id) — one item per group
-4. Build pystac Items with one asset per variable
-5. POST the collection to the STAC API
-6. POST each item individually to the STAC API
+3. Build one pystac Item per file (one per variable)
+4. POST the collection to the STAC API
+5. POST each item individually to the STAC API
 
-Each item represents all variables for a given county, model, scenario,
+Each item represents one variable for a given county, model, scenario,
 ensemble member, and temporal frequency (day or mon).
 
 Usage:
@@ -24,7 +23,6 @@ Requires:
 
 """
 
-from collections import defaultdict
 from datetime import datetime, timezone
 
 import requests
@@ -96,17 +94,18 @@ def build_loca2_county_collection():
     """
     Build a pystac Collection for LOCA2 county-level NetCDF data.
 
-    Groups S3 keys by (county_code, frequency, model, scenario, member_id) and builds
-    one item per group with one asset per variable.
+    Builds one item per NetCDF file (one per variable) with variable as a
+    queryable property.
 
     Returns
     -------
     pystac.Collection
-        Collection containing one item per county/model/scenario/frequency combination.
+        Collection containing one item per county/variable/model/scenario/frequency combination.
     """
     collection = pystac.Collection(
         id="loca2-county",
-        description="County-level NetCDF data for LOCA2 statistically downscaled climate projections covering California.",
+        title="LOCA2 County",
+        description="County-level NetCDF data for LOCA2 downscaled climate projections covering California.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
             pystac.Provider(
@@ -116,7 +115,14 @@ def build_loca2_county_collection():
                     pystac.ProviderRole.PROCESSOR,
                 ],
                 url="https://cal-adapt.org/",
-            )
+            ),
+            pystac.Provider(
+                name="UCSD",
+                roles=[
+                    pystac.ProviderRole.PRODUCER,
+                ],
+                url="https://loca.ucsd.edu/",
+            ),
         ],
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[CA_BBOX]),
@@ -142,35 +148,18 @@ def build_loca2_county_collection():
 
     county_geometries = get_county_geometries()
 
-    # Group keys by (county_code, frequency, model, scenario, member_id)
-    # defaultdict(dict) is like a regular dict, but automatically creates an empty
-    # dict for any new key — so we can do groups[group_key][variable] = key
-    # without checking if group_key exists first
-    groups = defaultdict(dict)
     for key in list_keys(LOCA2_COUNTY_NETCDF_PREFIX, BUCKET_CADCAT):
         parsed = parse_loca2_county_key(key)
         if parsed is None:
             continue
-        group_key = (
-            parsed["county_code"],
-            parsed["frequency"],
-            parsed["model"],
-            parsed["scenario"],
-            parsed["member_id"],
-        )
-        groups[group_key][parsed["variable"]] = key
+        county_code = parsed["county_code"]
+        variable = parsed["variable"]
+        frequency = parsed["frequency"]
+        model = parsed["model"]
+        scenario = parsed["scenario"]
+        member_id = parsed["member_id"]
 
-    # Build one item per group with one asset per variable
-    for (
-        county_code,
-        frequency,
-        model,
-        scenario,
-        member_id,
-    ), variables in groups.items():
-        item_id = (
-            f"loca2-county-{county_code}-{model}-{scenario}-{member_id}-{frequency}"
-        )
+        item_id = f"loca2-county-{county_code}-{model}-{scenario}-{member_id}-{frequency}-{variable}"
         countyname = CA_COUNTY_FIPS[county_code]
         geometry, bbox = county_geometries[countyname]
         props = {
@@ -180,6 +169,7 @@ def build_loca2_county_collection():
             "cmip6:table_id": frequency,
             "county_code": county_code,
             "county_name": countyname,
+            "variable": variable,
             "start_datetime": datetime(1950, 1, 1, tzinfo=timezone.utc).isoformat(),
             "end_datetime": datetime(2100, 12, 31, tzinfo=timezone.utc).isoformat(),
         }
@@ -187,17 +177,16 @@ def build_loca2_county_collection():
             id=item_id,
             geometry=geometry,
             bbox=bbox,
-            datetime=datetime(1950, 1, 1, tzinfo=timezone.utc),
+            datetime=None,
             properties=props,
         )
-        for variable, key in variables.items():
-            item.add_asset(
-                variable,
-                pystac.Asset(
-                    href=f"s3://{BUCKET_CADCAT}/{key}",
-                    media_type="application/netcdf",
-                ),
-            )
+        item.add_asset(
+            "data",
+            pystac.Asset(
+                href=f"s3://{BUCKET_CADCAT}/{key}",
+                media_type="application/netcdf",
+            ),
+        )
         collection.add_item(item)
 
     return collection

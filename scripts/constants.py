@@ -34,6 +34,10 @@ HDP_STATION_COORDS_URL = (
 TMY_PREFIX = "climate-profiles/typical-met-year/"
 SMY_PREFIX = "climate-profiles/standard-met-year/"
 LOCA2_COUNTY_NETCDF_PREFIX = "loca2/ucb/netcdf/county/"
+LOCA2_GRIDDED_PREFIX = "loca2/ucsd/"
+WRF_UCLA_PREFIX = "wrf/ucla/"
+WRF_UCSD_PREFIX = "wrf/ucsd/"
+
 HDP_PREFIX = "histwxstns/"
 
 # License for all Cal-Adapt data (CMIP6-derived products)
@@ -127,15 +131,8 @@ CLIM_PROF_GWL_PERIOD_DATES = {
 # Spatial extents
 CA_BBOX = [-124.4, 32.5, -114.1, 42.0]
 WECC_BBOX = [-125.0, 25.0, -100.0, 52.0]
-CA_GEOMETRY = {
-    "type": "Polygon",
-    "coordinates": [
-        [
-            [-124.4, 32.5],
-            [-114.1, 32.5],
-            [-114.1, 42.0],
-            [-124.4, 42.0],
-            [-124.4, 32.5],
-        ]
-    ],
-}
+# Derived from lat/lon coordinate arrays in representative Zarr stores
+LOCA2_GRIDDED_BBOX = [-128.4219, 29.5781, -110.9844, 45.0156]
+
+# WRF d01 bounds (outermost domain, covers full simulation extent)
+WRF_BBOX = [-156.8232, 9.4756, -84.187, 67.3287]
