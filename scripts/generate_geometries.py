@@ -17,10 +17,14 @@ Requires:
 """
 
 import json
+import struct
 from pathlib import Path
 
+import boto3
 import geopandas as gpd
 import pandas as pd
+
+s3 = boto3.client("s3")
 
 DATA_DIR = Path(__file__).parent.parent / "data" / "geometries"
 
@@ -53,15 +57,16 @@ def generate_ca_counties():
     return {"type": "FeatureCollection", "features": features}
 
 
-def generate_hadisd_stations():
+def generate_hadisd_ca_stations():
     """
-    Load HadISD station coordinates from S3 CSV and return as a GeoJSON FeatureCollection.
+    Load CA HadISD station coordinates from S3 CSV and return as a GeoJSON FeatureCollection.
 
+    These are the CA-only stations used by TMY/SMY climate profiles.
     Each feature is a Point with a location property matching the naming convention
     used in climate profile S3 keys (lowercase, spaces replaced with underscores,
     punctuation removed).
     """
-    print("  Loading HadISD station coordinates from S3...")
+    print("  Loading CA HadISD station coordinates from S3 CSV...")
     df = pd.read_csv(HADISD_STATIONS_URL, index_col=[0])
     df["location"] = (
         df["station"]
@@ -84,6 +89,51 @@ def generate_hadisd_stations():
                 "properties": {"location": location},
             }
         )
+    return {"type": "FeatureCollection", "features": features}
+
+
+def generate_hadisd_wecc_stations():
+    """
+    Load WECC-wide HadISD station coordinates from zarr stores in S3 and return as a GeoJSON FeatureCollection.
+
+    Lists all HadISD_*.zarr stores, reads lat/lon scalar variables from each,
+    and returns one Point feature per station with a station_id property.
+    """
+    print("  Listing HadISD zarr stores in S3...")
+    paginator = s3.get_paginator("list_objects_v2")
+    features = []
+    for page in paginator.paginate(Bucket="cadcat", Prefix="hadisd/", Delimiter="/"):
+        for cp in page.get("CommonPrefixes", []):
+            store_prefix = cp["Prefix"]
+            filename = store_prefix.rstrip("/").split("/")[-1]
+            if not (filename.startswith("HadISD_") and filename.endswith(".zarr")):
+                continue
+            station_id = filename.removeprefix("HadISD_").removesuffix(".zarr")
+            lat = struct.unpack(
+                "<d",
+                s3.get_object(Bucket="cadcat", Key=f"{store_prefix}latitude/0")[
+                    "Body"
+                ].read(),
+            )[0]
+            lon = struct.unpack(
+                "<d",
+                s3.get_object(Bucket="cadcat", Key=f"{store_prefix}longitude/0")[
+                    "Body"
+                ].read(),
+            )[0]
+            elev = struct.unpack(
+                "<d",
+                s3.get_object(Bucket="cadcat", Key=f"{store_prefix}elevation/0")[
+                    "Body"
+                ].read(),
+            )[0]
+            features.append(
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "Point", "coordinates": [lon, lat]},
+                    "properties": {"station_id": station_id, "elevation": elev},
+                }
+            )
     return {"type": "FeatureCollection", "features": features}
 
 
@@ -117,11 +167,17 @@ def main():
         json.dump(counties, f)
     print(f"  Wrote {len(counties['features'])} counties to {path}")
 
-    stations = generate_hadisd_stations()
-    path = DATA_DIR / "hadisd-station-coords.geojson"
+    ca_stations = generate_hadisd_ca_stations()
+    path = DATA_DIR / "hadisd-ca-station-coords.geojson"
     with open(path, "w") as f:
-        json.dump(stations, f)
-    print(f"  Wrote {len(stations['features'])} stations to {path}")
+        json.dump(ca_stations, f)
+    print(f"  Wrote {len(ca_stations['features'])} CA stations to {path}")
+
+    wecc_stations = generate_hadisd_wecc_stations()
+    path = DATA_DIR / "hadisd-wecc-station-coords.geojson"
+    with open(path, "w") as f:
+        json.dump(wecc_stations, f)
+    print(f"  Wrote {len(wecc_stations['features'])} WECC stations to {path}")
 
     hdp = generate_hdp_stations()
     path = DATA_DIR / "hdp-station-coords.geojson"

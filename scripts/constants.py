@@ -22,8 +22,11 @@ PGDSN = os.environ.get("PGDSN")
 CA_COUNTIES_GEOMETRIES_URL = (
     "https://cadcat.s3.amazonaws.com/geometries/ca-counties-geometries.geojson"
 )
-HADISD_STATION_COORDS_URL = (
-    "https://cadcat.s3.amazonaws.com/geometries/hadisd-station-coords.geojson"
+HADISD_CA_STATION_COORDS_URL = (
+    "https://cadcat.s3.amazonaws.com/geometries/hadisd-ca-station-coords.geojson"
+)
+HADISD_WECC_STATION_COORDS_URL = (
+    "https://cadcat.s3.amazonaws.com/geometries/hadisd-wecc-station-coords.geojson"
 )
 HDP_STATION_COORDS_URL = (
     "https://cadcat.s3.amazonaws.com/geometries/hdp-station-coords.geojson"
@@ -35,6 +38,7 @@ TMY_PREFIX = "climate-profiles/typical-met-year/"
 SMY_PREFIX = "climate-profiles/standard-met-year/"
 LOCA2_COUNTY_NETCDF_PREFIX = "loca2/ucb/netcdf/county/"
 HDP_PREFIX = "histwxstns/"
+HADISD_PREFIX = "hadisd/"
 
 # License for all Cal-Adapt data (CMIP6-derived products)
 CALADAPT_DATA_LICENSE = "CC-BY-4.0"
@@ -127,6 +131,16 @@ CLIM_PROF_GWL_PERIOD_DATES = {
 # Spatial extents
 CA_BBOX = [-124.4, 32.5, -114.1, 42.0]
 WECC_BBOX = [-125.0, 25.0, -100.0, 52.0]
+
+# Per-grid bboxes derived from actual zarr lat/lon arrays
+LOCA2_GRIDDED_BBOX = [-128.4219, 29.5781, -110.9844, 45.0156]  # d03 only
+WRF_UCSD_GRID_BBOXES = {
+    "d03": [-128.4219, 29.5781, -110.9844, 45.0156],
+}
+WRF_UCLA_GRID_BBOXES = {
+    "d01": [-154.6164, 9.4756, -87.2352, 64.4245],
+    "d02": [-136.3039, 22.2671, -96.2959, 55.1834],
+}
 CA_GEOMETRY = {
     "type": "Polygon",
     "coordinates": [

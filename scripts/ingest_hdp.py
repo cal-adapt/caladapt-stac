@@ -55,6 +55,7 @@ def build_hdp_collection():
     """
     collection = pystac.Collection(
         id="historical-data-platform",
+        title="Historical Data Platform",
         description=(
             "Cloud-optimized, standardized, and quality-controlled historical weather "
             "station data for the U.S. Western Electricity Coordinating Council (WECC) region"

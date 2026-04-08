@@ -12,6 +12,7 @@ Requires:
 """
 
 from scripts.ingest_climate_profiles import main as ingest_climate_profiles
+from scripts.ingest_hadisd import main as ingest_hadisd
 from scripts.ingest_hdp import main as ingest_hdp
 from scripts.ingest_loca2_county import main as ingest_loca2_county
 from scripts.register_queryables import main as register_queryables
@@ -29,6 +30,10 @@ def main():
     print("Ingesting HDP...")
     ingest_hdp()
     print("HDP complete.")
+
+    print("Ingesting HadISD...")
+    ingest_hadisd()
+    print("HadISD complete.")
 
     print("Registering queryables...")
     register_queryables()

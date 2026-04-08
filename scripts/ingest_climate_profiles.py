@@ -31,7 +31,7 @@ from scripts.constants import (
     CA_BBOX,
     CALADAPT_DATA_LICENSE,
     CLIM_PROF_GWL_PERIOD_DATES,
-    HADISD_STATION_COORDS_URL,
+    HADISD_CA_STATION_COORDS_URL,
     PGDSN,
     SMY_PREFIX,
     TMY_PREFIX,
@@ -101,6 +101,7 @@ def build_tmy_collection():
     """
     collection = pystac.Collection(
         id="typical-met-year",
+        title="Typical Met Year",
         description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -128,7 +129,7 @@ def build_tmy_collection():
     collection.add_asset(
         "item-geometries",
         pystac.Asset(
-            href=HADISD_STATION_COORDS_URL,
+            href=HADISD_CA_STATION_COORDS_URL,
             media_type="application/geo+json",
             roles=["item-geometries"],
             title="Item geometries",
@@ -187,6 +188,7 @@ def build_smy_collection():
     """
     collection = pystac.Collection(
         id="standard-met-year",
+        title="Standard Met Year",
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -214,7 +216,7 @@ def build_smy_collection():
     collection.add_asset(
         "item-geometries",
         pystac.Asset(
-            href=HADISD_STATION_COORDS_URL,
+            href=HADISD_CA_STATION_COORDS_URL,
             media_type="application/geo+json",
             roles=["item-geometries"],
             title="Item geometries",
@@ -265,7 +267,7 @@ def get_station_coords():
     dict
         Mapping of location name (e.g. "sacramento") to [lon, lat].
     """
-    fc = requests.get(HADISD_STATION_COORDS_URL).json()
+    fc = requests.get(HADISD_CA_STATION_COORDS_URL).json()
     return {
         feature["properties"]["location"]: feature["geometry"]["coordinates"]
         for feature in fc["features"]
