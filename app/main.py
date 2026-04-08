@@ -66,12 +66,6 @@ EXTRA_LINKS = [
     },
     {
         "rel": "related",
-        "href": "https://cal-adapt.org/dashboard/data-download-tool",
-        "title": "Cal-Adapt data download tool",
-        "type": "text/html",
-    },
-    {
-        "rel": "related",
         "href": "https://analytics.cal-adapt.org/",
         "title": "Cal-Adapt: Analytics Engine website",
         "type": "text/html",
@@ -99,8 +93,10 @@ class LambdaSettings(Settings):
     db_min_conn_size: int = 1
     stac_fastapi_title: str = "Cal-Adapt STAC API"
     stac_fastapi_description: str = (
-        "Searchable spatiotemporal catalog of climate datasets hosted on Cal-Adapt. For more information on how to access the data, see the Cal Adapt: Analytics Engine website."
+        "Searchable spatiotemporal catalog of climate datasets hosted on Cal-Adapt."
     )
+    openapi_url: str = "/openapi.json"
+    docs_url: str = "/docs"
 
 
 IS_LAMBDA = "AWS_EXECUTION_ENV" in os.environ
