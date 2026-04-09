@@ -11,6 +11,7 @@ import pystac
 
 # S3 buckets
 BUCKET_CADCAT = "cadcat"
+BUCKET_REN = "wfclimres"  # renewable data
 
 # STAC API endpoint
 API_ENDPOINT = os.environ.get("STAC_API_ENDPOINT", "http://localhost:8082")

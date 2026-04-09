@@ -55,10 +55,10 @@ def build_hdp_collection():
     """
     collection = pystac.Collection(
         id="historical-data-platform",
-        title="Historical Data Platform",
+        title="Historical Data Platform (zarr)",
         description=(
-            "Cloud-optimized, standardized, and quality-controlled historical weather "
-            "station data for the U.S. Western Electricity Coordinating Council (WECC) region"
+            "Standardized and quality-controlled historical weather "
+            "station data from 27 stations within the U.S. Western Electricity Coordinating Council (WECC) region"
         ),
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[WECC_BBOX]),
@@ -119,7 +119,7 @@ def build_hdp_collection():
             "era_id": era_id,
             "network": network,
             "state": row["state"],
-            "elevation": (
+            "elevation_m": (
                 float(row["elevation"]) if pd.notna(row["elevation"]) else None
             ),
             "total_observations": (

@@ -24,6 +24,7 @@ from datetime import datetime, timezone
 
 import requests
 import pystac
+from pystac.extensions.scientific import ScientificExtension, Publication
 
 from scripts.constants import (
     BUCKET_CADCAT,
@@ -74,7 +75,7 @@ def build_hadisd_collection():
             ),
             pystac.Provider(
                 name="Cal-Adapt",
-                roles=[pystac.ProviderRole.HOST],
+                roles=[pystac.ProviderRole.HOST, pystac.ProviderRole.PROCESSOR],
                 url="https://cal-adapt.org/",
             ),
         ],
@@ -84,6 +85,32 @@ def build_hadisd_collection():
         ),
     )
     collection.add_link(pystac.Link(rel="license", target=HADISD_LICENSE_URL))
+    collection.add_link(
+        pystac.Link(
+            rel="related",
+            target="https://www.metoffice.gov.uk/research/library-and-archive/publications/science/climate-science-technical-notes",
+            title="Dunn, R. J. H. (2019): HadISD version 3: monthly updates. Hadley Centre Technical Note 103.",
+        )
+    )
+    sci_ext = ScientificExtension.ext(collection, add_if_missing=True)
+    sci_ext.publications = [
+        Publication(
+            doi="10.5194/cp-8-1649-2012",
+            citation="Dunn, R. J. H., et al. (2012): HadISD: A Quality Controlled global synoptic report database for selected variables at long-term stations from 1973-2011. Climate of the Past, 8, 1649-1679.",
+        ),
+        Publication(
+            doi="10.5194/cp-10-1501-2014",
+            citation="Dunn, R. J. H., et al. (2014): Pairwise homogeneity assessment of HadISD. Climate of the Past, 10, 1501-1522.",
+        ),
+        Publication(
+            doi="10.5194/gi-5-473-2016",
+            citation="Dunn, R. J. H., et al. (2016): Expanding HadISD: quality-controlled, sub-daily station data from 1931. Geoscientific Instrumentation, Methods and Data Systems, 5, 473-491.",
+        ),
+        Publication(
+            doi="10.1175/2011BAMS3015.1",
+            citation="Smith, A., et al. (2011): The Integrated Surface Database: Recent Developments and Partnerships. Bulletin of the American Meteorological Society, 92, 704-708.",
+        ),
+    ]
     collection.add_asset(
         "item-geometries",
         pystac.Asset(
@@ -106,7 +133,7 @@ def build_hadisd_collection():
             datetime=None,
             properties={
                 "station_id": station_id,
-                "elevation": props_in.get("elevation"),
+                "elevation_m": props_in.get("elevation"),
                 "version": HADISD_VERSION,
                 "start_datetime": HADISD_START.isoformat(),
                 "end_datetime": HADISD_END.isoformat(),

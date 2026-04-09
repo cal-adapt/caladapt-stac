@@ -30,7 +30,7 @@ from scripts.constants import (
     BUCKET_CADCAT,
     CALADAPT_DATA_LICENSE,
     PGDSN,
-    WRF_BBOX,
+    WRF_UCLA_GRID_BBOXES,
     WRF_UCLA_PREFIX,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
@@ -113,7 +113,7 @@ def build_wrf_ucla_collection():
             ),
         ],
         extent=pystac.Extent(
-            spatial=pystac.SpatialExtent(bboxes=[WRF_BBOX]),
+            spatial=pystac.SpatialExtent(bboxes=list(WRF_UCLA_GRID_BBOXES.values())),
             temporal=pystac.TemporalExtent(
                 intervals=[
                     [
@@ -150,6 +150,7 @@ def build_wrf_ucla_collection():
             ),
         )
 
+        bbox = WRF_UCLA_GRID_BBOXES.get(grid_label, WRF_UCLA_GRID_BBOXES["d02"])
         props = {
             "source_id": source_id,
             "experiment_id": experiment_id,
@@ -161,8 +162,8 @@ def build_wrf_ucla_collection():
         }
         item = pystac.Item(
             id=item_id,
-            geometry=bbox_to_geometry(WRF_BBOX),
-            bbox=WRF_BBOX,
+            geometry=bbox_to_geometry(bbox),
+            bbox=bbox,
             datetime=None,
             properties=props,
         )
