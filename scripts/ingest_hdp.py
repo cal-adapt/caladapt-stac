@@ -58,7 +58,7 @@ def build_hdp_collection():
         title="Historical Data Platform (zarr)",
         description=(
             "Standardized and quality-controlled historical weather "
-            "station data from 27 stations within the U.S. Western Electricity Coordinating Council (WECC) region"
+            "station data from 27 stations within the WECC region"
         ),
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[WECC_BBOX]),

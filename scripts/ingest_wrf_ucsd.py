@@ -100,7 +100,7 @@ def build_wrf_ucsd_collection():
     """
     collection = pystac.Collection(
         id="wrf-ucsd",
-        title="WRF UCSD (zarr)",
+        title="WRF on LOCA2 grid (zarr)",
         description="Dynamically downscaled climate projections for California produced by UCSD using the Weather Research & Forecasting Model (WRF)",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -156,6 +156,8 @@ def build_wrf_ucsd_collection():
 
         bbox = WRF_UCSD_GRID_BBOXES.get(grid_label, WRF_UCSD_GRID_BBOXES["d03"])
         props = {
+            "activity_id": "WRF",
+            "institution_id": "UCSD",
             "source_id": source_id,
             "experiment_id": experiment_id,
             "member_id": member_id,

@@ -35,6 +35,9 @@ from scripts.constants import (
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
+# UCLA source_ids (as they appear in S3 paths) without a-priori bias adjustment
+UCLA_NON_BA_SOURCE_IDS = {"fgoals-g3", "cnrm-esm2-1", "cesm2", "ensmean"}
+
 EXPERIMENT_DATE_RANGES = {
     "historical": (
         datetime(1980, 1, 1, tzinfo=timezone.utc),
@@ -95,10 +98,12 @@ def build_wrf_ucla_collection():
     -------
     pystac.Collection
     """
+    THUMBNAIL_URL = "https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/data/icons/wrf_t2_d03_2030.gif"
+
     collection = pystac.Collection(
         id="wrf-ucla",
-        title="WRF UCLA (zarr)",
-        description="Dynamically downscaled climate projections for California produced by UCLA using the Weather Research & Forecasting Model (WRF)",
+        title="WRF (zarr)",
+        description="Dynamically downscaled climate projections for California using the Weather Research & Forecasting Model (WRF)",
         license=CALADAPT_DATA_LICENSE,
         providers=[
             pystac.Provider(
@@ -122,6 +127,16 @@ def build_wrf_ucla_collection():
                     ]
                 ]
             ),
+        ),
+    )
+
+    collection.add_asset(
+        "thumbnail",
+        pystac.Asset(
+            href=THUMBNAIL_URL,
+            media_type="image/gif",
+            roles=["thumbnail"],
+            title="WRF t2 animated preview",
         ),
     )
 
@@ -152,11 +167,14 @@ def build_wrf_ucla_collection():
 
         bbox = WRF_UCLA_GRID_BBOXES.get(grid_label, WRF_UCLA_GRID_BBOXES["d02"])
         props = {
+            "activity_id": "WRF",
+            "institution_id": "UCLA",
             "source_id": source_id,
             "experiment_id": experiment_id,
             "table_id": table_id,
             "variable_id": variable_id,
             "grid_label": grid_label,
+            "bias_adjusted": source_id not in UCLA_NON_BA_SOURCE_IDS,
             "start_datetime": start_dt.isoformat(),
             "end_datetime": end_dt.isoformat(),
         }

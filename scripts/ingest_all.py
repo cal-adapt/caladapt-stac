@@ -18,8 +18,6 @@ from scripts.ingest_loca2_county import main as ingest_loca2_county
 from scripts.ingest_loca2 import main as ingest_loca2_gridded
 from scripts.ingest_ren import main as ingest_ren
 from scripts.ingest_wrf_ucla import main as ingest_wrf_ucla
-from scripts.ingest_wrf_ucsd import main as ingest_wrf_ucsd
-from scripts.register_queryables import main as register_queryables
 
 
 def main():
@@ -39,10 +37,6 @@ def main():
     ingest_wrf_ucla()
     print("WRF UCLA complete.")
 
-    print("Ingesting WRF UCSD...")
-    ingest_wrf_ucsd()
-    print("WRF UCSD complete.")
-
     print("Ingesting HDP...")
     ingest_hdp()
     print("HDP complete.")
@@ -55,8 +49,6 @@ def main():
     ingest_ren()
     print("Renewable energy generation complete.")
 
-    print("Registering queryables...")
-    register_queryables()
     print("Done.")
 
 

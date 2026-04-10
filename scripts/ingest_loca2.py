@@ -160,6 +160,7 @@ def build_loca2_gridded_collection():
         )
 
         props = {
+            "activity_id": "LOCA2",
             "cmip6:source_id": source_id,
             "cmip6:experiment_id": experiment_id,
             "cmip6:member_id": member_id,
