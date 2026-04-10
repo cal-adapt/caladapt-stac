@@ -140,7 +140,7 @@ def build_tmy_collection():
     )
 
     station_coords = get_station_coords()
-    for key in list_keys(TMY_PREFIX, BUCKET_CADCAT):
+    for key, size in list_keys(TMY_PREFIX, BUCKET_CADCAT):
         props = parse_tmy_key(key)
         if props is None:
             continue
@@ -171,6 +171,7 @@ def build_tmy_collection():
             bbox=bbox,
             item_datetime=start,
             asset_key=ext,
+            file_size=size,
         )
         collection.add_item(item)
 
@@ -227,7 +228,7 @@ def build_smy_collection():
     )
 
     station_coords = get_station_coords()
-    for key in list_keys(SMY_PREFIX, BUCKET_CADCAT):
+    for key, size in list_keys(SMY_PREFIX, BUCKET_CADCAT):
         props = parse_smy_key(key)
         if props is None:
             continue
@@ -253,6 +254,7 @@ def build_smy_collection():
             geometry=geometry,
             bbox=bbox,
             item_datetime=start,
+            file_size=size,
         )
         collection.add_item(item)
     return collection

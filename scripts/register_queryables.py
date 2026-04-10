@@ -17,6 +17,7 @@ Requires:
 
 """
 
+import argparse
 import json
 import psycopg
 
@@ -76,11 +77,17 @@ def get_distinct_values(conn, collection_id, key):
         return [row[0] for row in cur.fetchall()]
 
 
-def clear_queryables(conn):
-    """Remove all registered queryables so they can be re-registered cleanly."""
+def clear_queryables(conn, collection_id=None):
+    """Remove registered queryables — scoped to one collection or all."""
     with conn.cursor() as cur:
         cur.execute("SET search_path TO pgstac, public")
-        cur.execute("DELETE FROM queryables")
+        if collection_id:
+            cur.execute(
+                "DELETE FROM queryables WHERE collection_ids @> %s::text[]",
+                ([collection_id],),
+            )
+        else:
+            cur.execute("DELETE FROM queryables")
     conn.commit()
 
 
@@ -109,13 +116,24 @@ def register_queryables(conn, collection_keys):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--collection",
+        help="Only re-register queryables for this collection ID. Omit to update all.",
+    )
+    args = parser.parse_args()
+
     if not PGDSN:
         raise RuntimeError("PGDSN environment variable is required")
 
     with psycopg.connect(PGDSN) as conn:
         print("  Clearing queryables...")
-        clear_queryables(conn)
+        clear_queryables(conn, collection_id=args.collection)
         collection_keys = get_collection_property_keys(conn)
+        if args.collection:
+            collection_keys = {
+                k: v for k, v in collection_keys.items() if k == args.collection
+            }
         print(f"  Registering queryables for {len(collection_keys)} collections...")
         register_queryables(conn, collection_keys)
 

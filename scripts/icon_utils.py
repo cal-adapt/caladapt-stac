@@ -101,7 +101,9 @@ def make_icon_gif(
 
     for i in indices:
         slice_da = da.isel({time_dim: i})
-        timestamp = str(np.datetime_as_string(slice_da[time_dim].values, unit=time_unit))
+        timestamp = str(
+            np.datetime_as_string(slice_da[time_dim].values, unit=time_unit)
+        )
 
         fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi)
         fig.set_facecolor("white")
@@ -125,20 +127,35 @@ def make_icon_gif(
 
         # Overlaid labels inside the plot
         ax.text(
-            0.97, 0.95, title.format(timestamp=timestamp),
-            transform=ax.transAxes, fontsize=6, fontweight="bold",
-            color="black", va="top", ha="right",
+            0.97,
+            0.95,
+            title.format(timestamp=timestamp),
+            transform=ax.transAxes,
+            fontsize=6,
+            fontweight="bold",
+            color="black",
+            va="top",
+            ha="right",
             bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.5),
         )
 
-        ax.tick_params(axis="both", direction="in", colors="black", labelsize=4, pad=-12)
+        ax.tick_params(
+            axis="both", direction="in", colors="black", labelsize=4, pad=-12
+        )
         for spine in ax.spines.values():
             spine.set_visible(False)
 
         plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
         buf = io.BytesIO()
-        fig.savefig(buf, format="png", dpi=dpi, bbox_inches="tight", pad_inches=0, facecolor="white")
+        fig.savefig(
+            buf,
+            format="png",
+            dpi=dpi,
+            bbox_inches="tight",
+            pad_inches=0,
+            facecolor="white",
+        )
         plt.close(fig)
         buf.seek(0)
         img = Image.open(buf).convert("RGB").resize((width, height), Image.LANCZOS)

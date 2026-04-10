@@ -89,7 +89,7 @@ def list_zarr_stores(prefix, bucket, depth):
 
 def list_keys(prefix, bucket):
     """
-    List all S3 keys under a prefix.
+    List all S3 keys under a prefix, yielding (key, size) tuples.
 
     Parameters
     ----------
@@ -100,13 +100,13 @@ def list_keys(prefix, bucket):
 
     Yields
     ------
-    str
-        S3 object key.
+    tuple[str, int]
+        (S3 object key, file size in bytes)
     """
     paginator = s3.get_paginator("list_objects_v2")
     for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
         for obj in page.get("Contents", []):
-            yield obj["Key"]
+            yield obj["Key"], obj["Size"]
 
 
 def post_items(collection, url, max_workers=2):
@@ -171,6 +171,7 @@ def build_item(
     bbox=None,
     item_datetime=None,
     asset_key="data",
+    file_size=None,
 ):
     """
     Build a pystac Item.
@@ -200,6 +201,9 @@ def build_item(
     -------
     pystac.Item
     """
+    if file_size is not None:
+        props["file:size"] = file_size
+
     item = pystac.Item(
         id=item_id,
         geometry=geometry,

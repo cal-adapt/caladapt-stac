@@ -144,7 +144,7 @@ def build_loca2_county_collection():
 
     county_geometries = get_county_geometries()
 
-    for key in list_keys(LOCA2_COUNTY_NETCDF_PREFIX, BUCKET_CADCAT):
+    for key, size in list_keys(LOCA2_COUNTY_NETCDF_PREFIX, BUCKET_CADCAT):
         parsed = parse_loca2_county_key(key)
         if parsed is None:
             continue
@@ -173,6 +173,7 @@ def build_loca2_county_collection():
                 "county_code": county_code,
                 "county_name": countyname,
                 "variable": variable,
+                "file:size": size,
                 "start_datetime": datetime(1950, 1, 1, tzinfo=timezone.utc).isoformat(),
                 "end_datetime": datetime(2100, 12, 31, tzinfo=timezone.utc).isoformat(),
             },
