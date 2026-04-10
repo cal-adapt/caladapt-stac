@@ -32,6 +32,9 @@ HADISD_WECC_STATION_COORDS_URL = (
 HDP_STATION_COORDS_URL = (
     "https://cadcat.s3.amazonaws.com/geometries/hdp-station-coords.geojson"
 )
+SEA_LEVEL_STATION_COORDS_URL = (
+    "https://cadcat.s3.amazonaws.com/geometries/sea-level-station-coords.geojson"
+)
 
 
 # S3 prefixes for collections
@@ -44,6 +47,7 @@ WRF_UCSD_PREFIX = "wrf/ucsd/"
 
 HDP_PREFIX = "histwxstns/"
 HADISD_PREFIX = "hadisd/"
+HMET_PREFIX = "hmet/"
 
 # License for all Cal-Adapt data (CMIP6-derived products)
 CALADAPT_DATA_LICENSE = "CC-BY-4.0"

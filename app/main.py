@@ -257,6 +257,50 @@ api = StacApi(
 )
 app = api.app
 
+
+# Fix OpenAPI spec: stac-fastapi uses snake_case path params (collection_id)
+# but the STAC API spec and client generators expect camelCase (collectionId).
+# The BulkTransactionExtension also omits the path parameter declaration entirely.
+_original_openapi = app.openapi
+
+
+def _patched_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    schema = _original_openapi()
+
+    patched_paths = {}
+    for path, path_item in schema.get("paths", {}).items():
+        new_path = path.replace("{collection_id}", "{collectionId}")
+        for operation in path_item.values():
+            if not isinstance(operation, dict):
+                continue
+            for param in operation.get("parameters", []):
+                if param.get("in") == "path" and param.get("name") == "collection_id":
+                    param["name"] = "collectionId"
+            if "{collectionId}" in new_path:
+                has_param = any(
+                    p.get("in") == "path" and p.get("name") == "collectionId"
+                    for p in operation.get("parameters", [])
+                )
+                if not has_param:
+                    operation.setdefault("parameters", []).append({
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": True,
+                        "schema": {"type": "string", "title": "Collection Id"},
+                    })
+        patched_paths[new_path] = path_item
+
+    schema["paths"] = patched_paths
+    app.openapi_schema = schema
+    return app.openapi_schema
+
+
+app.openapi = _patched_openapi
+
+
 # Lambda: manually trigger startup on cold start
 if IS_LAMBDA:
     loop = asyncio.get_event_loop()

@@ -140,7 +140,7 @@ def load_direct(collection, dsn):
     from pypgstac.load import Loader, Methods
 
     collection_dict = collection.to_dict()
-    collection_dict["links"] = []
+    collection_dict["links"] = [l for l in collection_dict.get("links", []) if l.get("href")]
     collection_dict["features"] = []
 
     items = list(collection.get_items())

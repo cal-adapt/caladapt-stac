@@ -12,23 +12,24 @@ run:
 	uv run python -m uvicorn app.main:app --reload
 
 ingest:
-	$(MAKE) typical-met-year
-	$(MAKE) standard-met-year
+	$(MAKE) tmy
+	$(MAKE) smy
 	$(MAKE) loca2-county
-	$(MAKE) loca2-gridded
+	$(MAKE) loca2
 	$(MAKE) wrf-ucla
 	$(MAKE) hadisd
 	$(MAKE) hdp
-	$(MAKE) renewables
+	$(MAKE) ren
+	$(MAKE) slr
 
 queryables:
 	uv run python -m scripts.register_queryables
 
-typical-met-year:
+tmy:
 	uv run python -m scripts.ingest_climate_profiles
 	uv run python -m scripts.register_queryables --collection typical-met-year
 
-standard-met-year:
+smy:
 	uv run python -m scripts.ingest_climate_profiles
 	uv run python -m scripts.register_queryables --collection standard-met-year
 
@@ -36,7 +37,7 @@ loca2-county:
 	uv run python -m scripts.ingest_loca2_county
 	uv run python -m scripts.register_queryables --collection loca2-county
 
-loca2-gridded:
+loca2:
 	uv run python -m scripts.ingest_loca2
 	uv run python -m scripts.register_queryables --collection loca2-gridded
 
@@ -52,10 +53,14 @@ hdp:
 	uv run python -m scripts.ingest_hdp
 	uv run python -m scripts.register_queryables --collection historical-data-platform
 
-renewables:
+ren:
 	uv run python -m scripts.ingest_ren
 	uv run python -m scripts.register_queryables --collection pv-generation
 	uv run python -m scripts.register_queryables --collection wind-generation
+
+slr:
+	uv run python -m scripts.ingest_sea_level
+	uv run python -m scripts.register_queryables --collection sea-level-projections
 
 geometries:
 	uv run python -m scripts.generate_geometries

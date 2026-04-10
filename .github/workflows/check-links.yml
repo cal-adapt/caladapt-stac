@@ -1,0 +1,61 @@
+name: Check Collection Links
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"  # Every Monday at 9am UTC
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual runs
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check collection related links
+        env:
+          STAC_API_URL: https://8dawjspn5g.execute-api.us-west-2.amazonaws.com
+        run: |
+          python3 - <<'EOF'
+          import sys
+          import urllib.request
+          import urllib.error
+          import json
+
+          api_url = "${{ env.STAC_API_URL }}"
+
+          # Fetch all collections
+          with urllib.request.urlopen(f"{api_url}/collections?limit=100") as r:
+              collections = json.load(r)["collections"]
+
+          failures = []
+
+          for collection in collections:
+              col_id = collection["id"]
+              related = [l for l in collection.get("links", []) if l.get("rel") == "related"]
+              for link in related:
+                  href = link.get("href")
+                  title = link.get("title", href)
+                  try:
+                      req = urllib.request.Request(href, headers={"User-Agent": "caladapt-link-checker/1.0"})
+                      with urllib.request.urlopen(req, timeout=15) as r:
+                          status = r.status
+                      if status >= 400:
+                          failures.append(f"  [{col_id}] {status} {href} ({title})")
+                      else:
+                          print(f"  ✓ [{col_id}] {status} {href}")
+                  except urllib.error.HTTPError as e:
+                      failures.append(f"  [{col_id}] {e.code} {href} ({title})")
+                  except Exception as e:
+                      failures.append(f"  [{col_id}] ERROR {href} — {e}")
+
+          if failures:
+              print("\n❌ Broken links found:")
+              for f in failures:
+                  print(f)
+              sys.exit(1)
+          else:
+              print(f"\n✅ All {sum(len([l for l in c.get('links',[]) if l.get('rel')=='related']) for c in collections)} links OK")
+          EOF
