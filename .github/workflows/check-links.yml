@@ -30,32 +30,52 @@ jobs:
           with urllib.request.urlopen(f"{api_url}/collections?limit=100") as r:
               collections = json.load(r)["collections"]
 
+          # Skip auto-generated API links that point back to the API itself
+          SKIP_RELS = {"self", "root", "items", "collection", "parent"}
+
           failures = []
+          checked = 0
+
+          def check_url(url, label):
+              global checked
+              try:
+                  req = urllib.request.Request(url, headers={"User-Agent": "caladapt-link-checker/1.0"})
+                  with urllib.request.urlopen(req, timeout=15) as r:
+                      status = r.status
+                  if status >= 400:
+                      failures.append(f"  {status} {url} ({label})")
+                  else:
+                      print(f"  ✓ {status} {url}")
+                  checked += 1
+              except urllib.error.HTTPError as e:
+                  failures.append(f"  {e.code} {url} ({label})")
+                  checked += 1
+              except Exception as e:
+                  failures.append(f"  ERROR {url} ({label}): {e}")
+                  checked += 1
 
           for collection in collections:
               col_id = collection["id"]
-              related = [l for l in collection.get("links", []) if l.get("rel") == "related"]
-              for link in related:
-                  href = link.get("href")
-                  title = link.get("title", href)
-                  try:
-                      req = urllib.request.Request(href, headers={"User-Agent": "caladapt-link-checker/1.0"})
-                      with urllib.request.urlopen(req, timeout=15) as r:
-                          status = r.status
-                      if status >= 400:
-                          failures.append(f"  [{col_id}] {status} {href} ({title})")
-                      else:
-                          print(f"  ✓ [{col_id}] {status} {href}")
-                  except urllib.error.HTTPError as e:
-                      failures.append(f"  [{col_id}] {e.code} {href} ({title})")
-                  except Exception as e:
-                      failures.append(f"  [{col_id}] ERROR {href} — {e}")
+
+              # Check all links except internal API links
+              for link in collection.get("links", []):
+                  if link.get("rel") not in SKIP_RELS:
+                      check_url(link["href"], f"{col_id} link[rel={link.get('rel')}]")
+
+              # Check all asset hrefs
+              for asset_key, asset in collection.get("assets", {}).items():
+                  check_url(asset["href"], f"{col_id} asset[{asset_key}]")
+
+              # Check provider URLs
+              for provider in collection.get("providers", []):
+                  if url := provider.get("url"):
+                      check_url(url, f"{col_id} provider[{provider.get('name')}]")
 
           if failures:
-              print("\n❌ Broken links found:")
+              print(f"\n❌ {len(failures)} broken link(s) found:")
               for f in failures:
                   print(f)
               sys.exit(1)
           else:
-              print(f"\n✅ All {sum(len([l for l in c.get('links',[]) if l.get('rel')=='related']) for c in collections)} links OK")
+              print(f"\n✅ All {checked} links OK")
           EOF
