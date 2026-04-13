@@ -55,7 +55,8 @@ def build_hdp_collection():
     """
     collection = pystac.Collection(
         id="historical-data-platform",
-        title="Historical Data Platform (zarr)",
+        title="Historical data platform",
+        extra_fields={"caladapt:spatial_type": "point"},
         description=(
             "Standardized and quality-controlled historical weather "
             "station data from 27 stations within the WECC region"

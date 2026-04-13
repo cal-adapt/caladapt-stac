@@ -44,6 +44,7 @@ LOCA2_COUNTY_NETCDF_PREFIX = "loca2/ucb/netcdf/county/"
 LOCA2_GRIDDED_PREFIX = "loca2/ucsd/"
 WRF_UCLA_PREFIX = "wrf/ucla/"
 WRF_UCSD_PREFIX = "wrf/ucsd/"
+WRF_CAE_PREFIX = "wrf/cae/"
 
 HDP_PREFIX = "histwxstns/"
 HADISD_PREFIX = "hadisd/"

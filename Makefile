@@ -11,12 +11,12 @@ deploy: build
 run:
 	uv run python -m uvicorn app.main:app --reload
 
-ingest:
-	$(MAKE) tmy
-	$(MAKE) smy
+ingest-all:
+	$(MAKE) clim-prof
 	$(MAKE) loca2-county
 	$(MAKE) loca2
 	$(MAKE) wrf-ucla
+	$(MAKE) wrf-cae
 	$(MAKE) hadisd
 	$(MAKE) hdp
 	$(MAKE) ren
@@ -25,12 +25,9 @@ ingest:
 queryables:
 	uv run python -m scripts.register_queryables
 
-tmy:
+clim-prof:
 	uv run python -m scripts.ingest_climate_profiles
 	uv run python -m scripts.register_queryables --collection typical-met-year
-
-smy:
-	uv run python -m scripts.ingest_climate_profiles
 	uv run python -m scripts.register_queryables --collection standard-met-year
 
 loca2-county:
@@ -44,6 +41,10 @@ loca2:
 wrf-ucla:
 	uv run python -m scripts.ingest_wrf_ucla
 	uv run python -m scripts.register_queryables --collection wrf-ucla
+
+wrf-cae:
+	uv run python -m scripts.ingest_wrf_cae
+	uv run python -m scripts.register_queryables --collection wrf-cae
 
 hadisd:
 	uv run python -m scripts.ingest_hadisd

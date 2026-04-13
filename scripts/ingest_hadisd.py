@@ -64,7 +64,8 @@ def build_hadisd_collection():
 
     collection = pystac.Collection(
         id="hadisd-station-zarrs",
-        title="HadISD (zarr)",
+        title="HadISD",
+        extra_fields={"caladapt:spatial_type": "point"},
         description=("Met Office HadISD sub-daily station data for the WECC region."),
         license=HADISD_LICENSE,
         providers=[

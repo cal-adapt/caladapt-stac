@@ -101,7 +101,8 @@ def build_tmy_collection():
     """
     collection = pystac.Collection(
         id="typical-met-year",
-        title="Typical Meteorological Year (csv, epw)",
+        title="Typical meteorological year",
+        extra_fields={"caladapt:spatial_type": "point"},
         description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -133,6 +134,15 @@ def build_tmy_collection():
             media_type="application/geo+json",
             roles=["item-geometries"],
             title="Item geometries",
+        ),
+    )
+    collection.add_asset(
+        "thumbnail",
+        pystac.Asset(
+            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/data/icons/tmy_icon.png",
+            media_type="image/png",
+            roles=["thumbnail"],
+            title="TMY preview",
         ),
     )
     ScientificExtension.ext(collection, add_if_missing=True).doi = (
@@ -189,7 +199,8 @@ def build_smy_collection():
     """
     collection = pystac.Collection(
         id="standard-met-year",
-        title="Standard Meteorological Year (csv)",
+        title="Standard meteorological year",
+        extra_fields={"caladapt:spatial_type": "point"},
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -221,6 +232,15 @@ def build_smy_collection():
             media_type="application/geo+json",
             roles=["item-geometries"],
             title="Item geometries",
+        ),
+    )
+    collection.add_asset(
+        "thumbnail",
+        pystac.Asset(
+            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/data/icons/smy_icon.png",
+            media_type="image/png",
+            roles=["thumbnail"],
+            title="SMY preview",
         ),
     )
     ScientificExtension.ext(collection, add_if_missing=True).doi = (

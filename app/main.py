@@ -285,12 +285,14 @@ def _patched_openapi():
                     for p in operation.get("parameters", [])
                 )
                 if not has_param:
-                    operation.setdefault("parameters", []).append({
-                        "name": "collectionId",
-                        "in": "path",
-                        "required": True,
-                        "schema": {"type": "string", "title": "Collection Id"},
-                    })
+                    operation.setdefault("parameters", []).append(
+                        {
+                            "name": "collectionId",
+                            "in": "path",
+                            "required": True,
+                            "schema": {"type": "string", "title": "Collection Id"},
+                        }
+                    )
         patched_paths[new_path] = path_item
 
     schema["paths"] = patched_paths

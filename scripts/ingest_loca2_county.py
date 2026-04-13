@@ -1,16 +1,13 @@
 """ingest_loca2_county.py
 
-Ingest LOCA2 county-level NetCDF data into pgSTAC by building pystac items
-from S3 keys and loading them directly into pgSTAC.
+Ingest LOCA2 county-level NetCDF data into pgSTAC.
 
-Workflow:
-1. List S3 keys under the LOCA2 county NetCDF prefix
-2. Parse filenames into components (county, variable, frequency, model, scenario, member_id)
-3. Build one pystac Item per file (one per variable)
-4. Load directly into pgSTAC
+Each STAC item represents one county × model × scenario × member_id × frequency
+combination, with one asset per variable. This keeps item count manageable
+(~1-2K items) while preserving full queryability by county, model, and scenario.
 
-Each item represents one variable for a given county, model, scenario,
-ensemble member, and temporal frequency (day or mon).
+S3 path structure:
+    loca2/ucb/netcdf/county/{frequency}/{county_code}_{variable}_{frequency}_{model}_{scenario}_{member_id}.nc
 
 Usage:
     uv run python -m scripts.ingest_loca2_county
@@ -18,9 +15,9 @@ Usage:
 Requires:
     - AWS credentials with read access to the cadcat S3 bucket
     - PGDSN environment variable with a valid PostgreSQL DSN
-
 """
 
+from collections import defaultdict
 from datetime import datetime, timezone
 
 import requests
@@ -55,7 +52,6 @@ def parse_loca2_county_key(key):
     if not key.endswith(".nc"):
         return None
     filename = key.split("/")[-1].replace(".nc", "")
-    # filename: {county_code}_{variable}_{frequency}_{model}_{scenario}_{member_id}
     parts = filename.split("_", 5)
     if len(parts) != 6:
         return None
@@ -78,8 +74,7 @@ def get_county_geometries():
     Returns
     -------
     dict
-        Mapping of county name (e.g. "Yuba") to (geometry, bbox) tuples,
-        where geometry is a GeoJSON-compatible dict and bbox is [west, south, east, north].
+        Mapping of county name to (geometry, bbox) tuples.
     """
     fc = requests.get(CA_COUNTIES_GEOMETRIES_URL).json()
     return {
@@ -92,26 +87,23 @@ def build_loca2_county_collection():
     """
     Build a pystac Collection for LOCA2 county-level NetCDF data.
 
-    Builds one item per NetCDF file (one per variable) with variable as a
-    queryable property.
+    One item per county × model × scenario × member_id × frequency,
+    with one asset per variable.
 
     Returns
     -------
     pystac.Collection
-        Collection containing one item per county/variable/model/scenario/frequency combination.
     """
     collection = pystac.Collection(
         id="loca2-county",
-        title="LOCA2 County (NetCDF)",
-        description="County-level NetCDF data for LOCA2 statistically downscaled climate projections covering California.",
+        title="LOCA2 county",
+        extra_fields={"caladapt:spatial_type": "county"},
+        description="LOCA2 hybrid-statistically downscaled climate projections aggregated by California counties.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
             pystac.Provider(
                 name="Cal-Adapt",
-                roles=[
-                    pystac.ProviderRole.HOST,
-                    pystac.ProviderRole.PROCESSOR,
-                ],
+                roles=[pystac.ProviderRole.HOST, pystac.ProviderRole.PROCESSOR],
                 url="https://cal-adapt.org/",
             ),
             pystac.Provider(
@@ -144,47 +136,58 @@ def build_loca2_county_collection():
 
     county_geometries = get_county_geometries()
 
+    # Group files by (county_code, model, scenario, member_id, frequency)
+    # Each group becomes one item; each variable becomes one asset.
+    groups = defaultdict(dict)  # group_key → {variable: (key, size)}
     for key, size in list_keys(LOCA2_COUNTY_NETCDF_PREFIX, BUCKET_CADCAT):
         parsed = parse_loca2_county_key(key)
         if parsed is None:
             continue
-        county_code = parsed["county_code"]
-        variable = parsed["variable"]
-        frequency = parsed["frequency"]
-        model = parsed["model"]
-        scenario = parsed["scenario"]
-        member_id = parsed["member_id"]
+        group_key = (
+            parsed["county_code"],
+            parsed["model"],
+            parsed["scenario"],
+            parsed["member_id"],
+            parsed["frequency"],
+        )
+        groups[group_key][parsed["variable"]] = (key, size)
 
+    print(f"  Building {len(groups)} items...")
+    for group_key, variables in groups.items():
+        county_code, model, scenario, member_id, frequency = group_key
         countyname = CA_COUNTY_FIPS[county_code]
         geometry, bbox = county_geometries[countyname]
 
-        item_id = f"loca2-county-{county_code}-{model}-{scenario}-{member_id}-{frequency}-{variable}"
+        item_id = (
+            f"loca2-county-{county_code}-{model}-{scenario}-{member_id}-{frequency}"
+        )
         item = pystac.Item(
             id=item_id,
             geometry=geometry,
             bbox=bbox,
             datetime=None,
             properties={
-                "title": f"{countyname} — {model} — {scenario} — {member_id} — {frequency} — {variable}",
+                "title": item_id,
                 "cmip6:source_id": model,
                 "cmip6:experiment_id": scenario,
                 "cmip6:member_id": member_id,
                 "cmip6:table_id": frequency,
                 "county_code": county_code,
                 "county_name": countyname,
-                "variable": variable,
-                "file:size": size,
                 "start_datetime": datetime(1950, 1, 1, tzinfo=timezone.utc).isoformat(),
                 "end_datetime": datetime(2100, 12, 31, tzinfo=timezone.utc).isoformat(),
             },
         )
-        item.add_asset(
-            "data",
-            pystac.Asset(
-                href=f"s3://{BUCKET_CADCAT}/{key}",
-                media_type="application/netcdf",
-            ),
-        )
+        for variable, (key, size) in variables.items():
+            item.add_asset(
+                variable,
+                pystac.Asset(
+                    href=f"s3://{BUCKET_CADCAT}/{key}",
+                    media_type="application/netcdf",
+                    title=variable,
+                    extra_fields={"file:size": size},
+                ),
+            )
         collection.add_item(item)
 
     return collection

@@ -24,6 +24,10 @@ import boto3
 import geopandas as gpd
 import pandas as pd
 
+from scripts.constants import CA_COUNTY_FIPS
+
+NAME_TO_FIPS = {v: k for k, v in CA_COUNTY_FIPS.items()}
+
 s3 = boto3.client("s3")
 
 DATA_DIR = Path(__file__).parent.parent / "data" / "geometries"
@@ -46,12 +50,13 @@ def generate_ca_counties():
     features = []
     for _, row in gdf.iterrows():
         county_name = row["NAME"].replace(" County", "")
+        fips = NAME_TO_FIPS.get(county_name)
         features.append(
             {
                 "type": "Feature",
                 "bbox": list(row.geometry.bounds),  # [west, south, east, north]
                 "geometry": row.geometry.__geo_interface__,
-                "properties": {"county_name": county_name},
+                "properties": {"county_name": county_name, "fips": fips},
             }
         )
     return {"type": "FeatureCollection", "features": features}
@@ -167,19 +172,97 @@ def generate_sea_level_stations():
     Each feature is a Point with station_code and station_name properties.
     """
     stations = [
-        {"code": "lj", "name": "La Jolla",      "noaa_id": "9410230", "lon": -117.2571, "lat": 32.8669},
-        {"code": "la", "name": "Los Angeles",   "noaa_id": "9410660", "lon": -118.2720, "lat": 33.7200},
-        {"code": "sb", "name": "Santa Barbara", "noaa_id": "9411340", "lon": -119.6925, "lat": 34.4046},
-        {"code": "sl", "name": "San Luis",      "noaa_id": "9412110", "lon": -120.7542, "lat": 35.1689},
-        {"code": "my", "name": "Monterey",      "noaa_id": "9413450", "lon": -121.8914, "lat": 36.6089},
-        {"code": "sf", "name": "San Francisco", "noaa_id": "9414290", "lon": -122.4659, "lat": 37.8063},
-        {"code": "pa", "name": "Point Arena",   "noaa_id": "9416841", "lon": -123.7111, "lat": 38.9146},
-        {"code": "hb", "name": "Humboldt Bay",  "noaa_id": "9418767", "lon": -124.2173, "lat": 40.7669},
-        {"code": "cc", "name": "Crescent City", "noaa_id": "9419750", "lon": -124.1844, "lat": 41.7456},
-        {"code": "pc", "name": "Port Chicago",  "noaa_id": "9415144", "lon": -122.0395, "lat": 38.0560},
-        {"code": "al", "name": "Alameda",       "noaa_id": "9414750", "lon": -122.3003, "lat": 37.7720},
-        {"code": "rc", "name": "Redwood City",  "noaa_id": "9414523", "lon": -122.2119, "lat": 37.5068},
-        {"code": "ri", "name": "Richmond",      "noaa_id": "9414849", "lon": -122.3580, "lat": 37.9100},
+        {
+            "code": "lj",
+            "name": "La Jolla",
+            "noaa_id": "9410230",
+            "lon": -117.2571,
+            "lat": 32.8669,
+        },
+        {
+            "code": "la",
+            "name": "Los Angeles",
+            "noaa_id": "9410660",
+            "lon": -118.2720,
+            "lat": 33.7200,
+        },
+        {
+            "code": "sb",
+            "name": "Santa Barbara",
+            "noaa_id": "9411340",
+            "lon": -119.6925,
+            "lat": 34.4046,
+        },
+        {
+            "code": "sl",
+            "name": "San Luis",
+            "noaa_id": "9412110",
+            "lon": -120.7542,
+            "lat": 35.1689,
+        },
+        {
+            "code": "my",
+            "name": "Monterey",
+            "noaa_id": "9413450",
+            "lon": -121.8914,
+            "lat": 36.6089,
+        },
+        {
+            "code": "sf",
+            "name": "San Francisco",
+            "noaa_id": "9414290",
+            "lon": -122.4659,
+            "lat": 37.8063,
+        },
+        {
+            "code": "pa",
+            "name": "Point Arena",
+            "noaa_id": "9416841",
+            "lon": -123.7111,
+            "lat": 38.9146,
+        },
+        {
+            "code": "hb",
+            "name": "Humboldt Bay",
+            "noaa_id": "9418767",
+            "lon": -124.2173,
+            "lat": 40.7669,
+        },
+        {
+            "code": "cc",
+            "name": "Crescent City",
+            "noaa_id": "9419750",
+            "lon": -124.1844,
+            "lat": 41.7456,
+        },
+        {
+            "code": "pc",
+            "name": "Port Chicago",
+            "noaa_id": "9415144",
+            "lon": -122.0395,
+            "lat": 38.0560,
+        },
+        {
+            "code": "al",
+            "name": "Alameda",
+            "noaa_id": "9414750",
+            "lon": -122.3003,
+            "lat": 37.7720,
+        },
+        {
+            "code": "rc",
+            "name": "Redwood City",
+            "noaa_id": "9414523",
+            "lon": -122.2119,
+            "lat": 37.5068,
+        },
+        {
+            "code": "ri",
+            "name": "Richmond",
+            "noaa_id": "9414849",
+            "lon": -122.3580,
+            "lat": 37.9100,
+        },
     ]
     features = [
         {

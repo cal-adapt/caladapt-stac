@@ -140,7 +140,9 @@ def load_direct(collection, dsn):
     from pypgstac.load import Loader, Methods
 
     collection_dict = collection.to_dict()
-    collection_dict["links"] = [l for l in collection_dict.get("links", []) if l.get("href")]
+    collection_dict["links"] = [
+        l for l in collection_dict.get("links", []) if l.get("href")
+    ]
     collection_dict["features"] = []
 
     items = list(collection.get_items())
@@ -157,6 +159,7 @@ def load_direct(collection, dsn):
         loader = Loader(db=db)
         loader.load_collections(iter([collection_dict]), insert_mode=Methods.upsert)
         loader.load_items(_iter_items(), insert_mode=Methods.upsert)
+        db.run_queued()
 
     print(f"  Done — {len(items)} items loaded.")
 

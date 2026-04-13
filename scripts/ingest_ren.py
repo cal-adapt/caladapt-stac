@@ -171,7 +171,8 @@ def build_pv_collection():
     """
     collection = pystac.Collection(
         id="pv-generation",
-        title="Photovoltaic Power Generation Profiles (zarr)",
+        title="Photovoltaic power generation profiles",
+        extra_fields={"caladapt:spatial_type": "grid"},
         description="Photovoltaic power generation profiles (capacity factor and power output) for utility-scale and distributed solar PV, covering California (3 km) and WECC (9 km).",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -217,7 +218,8 @@ def build_wind_collection():
     """
     collection = pystac.Collection(
         id="wind-generation",
-        title="Wind Power Generation Profiles (zarr)",
+        title="Wind power generation profiles",
+        extra_fields={"caladapt:spatial_type": "grid"},
         description="Wind power generation profiles (capacity factor and power output) for onshore and offshore wind, covering California (3 km) and WECC (9 km).",
         license=CALADAPT_DATA_LICENSE,
         providers=[
