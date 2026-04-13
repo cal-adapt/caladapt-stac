@@ -83,7 +83,7 @@ def build_wrf_cae_collection():
     -------
     pystac.Collection
     """
-    THUMBNAIL_URL = "https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/data/icons/wrf_t2_d03_2030.gif"
+    THUMBNAIL_URL = "https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/images/icons/wrf_t2_d03_2030.gif"
 
     collection = pystac.Collection(
         id="wrf-cae",

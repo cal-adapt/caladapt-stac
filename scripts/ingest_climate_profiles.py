@@ -139,7 +139,7 @@ def build_tmy_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/data/icons/tmy_icon.png",
+            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/images/icons/tmy_icon.png",
             media_type="image/png",
             roles=["thumbnail"],
             title="TMY preview",
@@ -237,7 +237,7 @@ def build_smy_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/data/icons/smy_icon.png",
+            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/images/icons/smy_icon.png",
             media_type="image/png",
             roles=["thumbnail"],
             title="SMY preview",

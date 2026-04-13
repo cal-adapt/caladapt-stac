@@ -136,7 +136,7 @@ def build_loca2_county_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/data/icons/loca2_county_icon.png",
+            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/images/icons/loca2_county_icon.png",
             media_type="image/png",
             roles=["thumbnail"],
             title="LOCA2 county preview",

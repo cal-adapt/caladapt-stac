@@ -2,6 +2,21 @@
 
 STAC API for Cal-Adapt climate datasets, built with [stac-fastapi](https://github.com/stac-utils/stac-fastapi) and [pgSTAC](https://github.com/stac-utils/pgstac).
 
+## Vocabulary
+
+| Term | Meaning |
+|---|---|
+| **STAC** | SpatioTemporal Asset Catalog — a standard for describing geospatial datasets so they're searchable and interoperable. |
+| **Collection** | A group of related STAC items (e.g. all LOCA2 county datasets). |
+| **Item** | A single STAC record representing one dataset, with a location, time range, and links to the actual files (assets). |
+| **Asset** | A file attached to a STAC item — e.g. a Zarr store or NetCDF file on S3. |
+| **Queryable** | An item property registered in pgSTAC as a filterable field, enabling CQL2 search queries (e.g. `cmip6:source_id=CESM2`). |
+| **pgSTAC** | A Postgres schema (tables, indexes, functions) designed for storing STAC catalogs. Installed into the database via `pypgstac migrate`. |
+| **PGDSN** | PostgreSQL Data Source Name — a connection string of the form `postgresql://user:password@host:port/dbname`. Used by ingestion scripts to connect directly to RDS. |
+| **RDS** | AWS Relational Database Service — managed cloud Postgres hosting. |
+| **Lambda** | AWS serverless compute. The STAC API runs as a Lambda function, waking on demand to handle requests. |
+| **SAM** | AWS Serverless Application Model — the tool used to build and deploy the Lambda function (`template.yaml`). |
+
 ## Architecture
 
 ```
@@ -12,9 +27,19 @@ Client → API Gateway → Lambda (stac-fastapi) → RDS Postgres (pgSTAC)
 |---|---|
 | **API Gateway** | Public HTTPS endpoint. Forwards requests to Lambda and returns responses. |
 | **Lambda** (`app/main.py`) | Runs stac-fastapi on demand. Handles STAC requests, queries the database, returns results. Wrapped for Lambda using [Mangum](https://mangum.fastapiexpert.com/). |
-| **RDS Postgres** | Cloud-hosted Postgres with the pgSTAC schema installed — tables, spatial indexes, and functions for storing and querying STAC collections and items. |
 
-The live API is at `https://8dawjspn5g.execute-api.us-west-2.amazonaws.com`.
+![Lambda functions](images/README/lambda_functions.png)
+> To find the Cal-Adapt Lambda functions in the AWS console, make sure you're in the **us-west-2** region. The STAC API function appears here.
+
+![main.py](images/README/code_source_main.png)
+> The Lambda function runs `app/main.py`, which sets up the stac-fastapi application. It configures extensions, connects to the database, and wraps the app with Mangum so it can run inside Lambda.
+
+| **RDS Postgres** | Cloud-hosted Postgres with the pgSTAC schema installed: tables, spatial indexes, and functions for storing and querying STAC collections and items. |
+
+![RDS Database](images/README/rds_db.png)
+> The RDS database can be found in the AWS console under RDS → Databases (make sure you're in **us-west-2**). It runs on a `db.t3.micro` instance, which is the smallest available tier, which defines the CPU and memory allocated to the database. Costs ~$13/month.
+
+The live API is at `https://8dawjspn5g.execute-api.us-west-2.amazonaws.com`. This will eventually be updated to replace v1 of the STAC API, which currently has the url https://stac.cal-adapt.org.
 
 ## Prerequisites
 
@@ -34,6 +59,8 @@ uv sync --all-groups
 ```
 
 ## Local Development
+
+Local development is only needed for testing changes to `app/main.py`. Ingestion and queryable scripts always run against the live RDS instance via `PGDSN`. There is no local equivalent for those.
 
 The local database DSN is:
 
@@ -181,8 +208,13 @@ make queryables
 curl -X DELETE https://8dawjspn5g.execute-api.us-west-2.amazonaws.com/collections/{collection-id}
 ```
 
-**Regenerate item geometry GeoJSON files** (uploaded to S3 and referenced as collection assets):
+**Regenerate item geometry GeoJSON files:**
+
+Some collections (county, station-based) can't embed full geometries in every STAC item because it would be too expensive to render them all in the browser at once. Instead, each collection has a single `item-geometries` asset — a GeoJSON file hosted on S3 — that the browser fetches once to draw all item footprints on the map.
+
+`make geometries` regenerates these files from source data (S3 parquet/CSVs) and writes them to `data/geometries/`. After running it, upload the files to `s3://cadcat/geometries/` so the live URLs stay current:
 
 ```bash
 make geometries
+aws s3 cp data/geometries/ s3://cadcat/geometries/ --recursive --profile era-de
 ```
