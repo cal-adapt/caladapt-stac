@@ -2,44 +2,187 @@
 
 STAC API for Cal-Adapt climate datasets, built with [stac-fastapi](https://github.com/stac-utils/stac-fastapi) and [pgSTAC](https://github.com/stac-utils/pgstac).
 
-## Setup
+## Architecture
 
-Install dependencies with [uv](https://docs.astral.sh/uv/):
-
-```bash
-uv sync
+```
+Client → API Gateway → Lambda (stac-fastapi) → RDS Postgres (pgSTAC)
 ```
 
-## Local Testing
+| Layer | What it does |
+|---|---|
+| **API Gateway** | Public HTTPS endpoint. Forwards requests to Lambda and returns responses. |
+| **Lambda** (`app/main.py`) | Runs stac-fastapi on demand. Handles STAC requests, queries the database, returns results. Wrapped for Lambda using [Mangum](https://mangum.fastapiexpert.com/). |
+| **RDS Postgres** | Cloud-hosted Postgres with the pgSTAC schema installed — tables, spatial indexes, and functions for storing and querying STAC collections and items. |
 
-Local testing requires [Docker](https://docs.docker.com/get-docker/) to run a pgSTAC Postgres database. In production, this is replaced by RDS.
+The live API is at `https://8dawjspn5g.execute-api.us-west-2.amazonaws.com`.
+
+## Prerequisites
+
+- [uv](https://docs.astral.sh/uv/) — Python package manager
+- [Docker](https://docs.docker.com/get-docker/) — required for local development and SAM builds
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) — required for deployment and ingestion
+- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html) — required for deployment
+
+You'll also need an AWS profile named `era-de` configured in `~/.aws/credentials` with access to the ERA AWS account.
+
+## Setup
+
+Install dependencies:
+
+```bash
+uv sync --all-groups
+```
+
+## Local Development
+
+The local database DSN is:
+
+```bash
+export PGDSN='postgresql://postgres@localhost:5432/postgis'
+```
+
+Export this before running any ingestion commands.
 
 **1. Start the database**
 
 ```bash
 docker run -p 5432:5432 \
-  -e POSTGRES_PASSWORD=password \
+  -e POSTGRES_HOST_AUTH_METHOD=trust \
   ghcr.io/stac-utils/pgstac:latest
 ```
 
-**2. Run the API**
+**2. Run the pgSTAC migration**
 
 ```bash
-uvicorn app.main:app --reload
+uv run pypgstac migrate --dsn $PGDSN
+```
+
+**3. Run the API**
+
+```bash
+make run
 ```
 
 API will be available at `http://localhost:8000`.
 
-**3. Ingest data**
+**4. Ingest data**
 
 ```bash
-uv run python scripts/ingest_climate_profiles.py
+make clim-prof
 ```
 
-**4. Browse**
+**5. Browse**
 
-Point [STAC Browser](https://radiantearth.github.io/stac-browser/) at your local API:
+Point [STAC Browser](https://stac-browser.cal-adapt.org) at your local API:
 
 ```
-https://radiantearth.github.io/stac-browser/#/external/localhost:8000
+https://stac-browser.cal-adapt.org/#/external/localhost:8000
+```
+
+## Deployment
+
+The API is deployed to AWS Lambda using [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html). SAM builds inside a Docker container to match Lambda's Linux runtime so native packages compile correctly on a Mac. Make sure Docker is running before deploying.
+
+```bash
+make deploy
+```
+
+This runs `sam build` (exports requirements, builds in Docker) followed by `sam deploy --profile era-de`. Deploy config is saved in `samconfig.toml` so no prompts are needed.
+
+To get the deployed API URL:
+
+```bash
+aws cloudformation describe-stacks --stack-name caladapt-stac-v2 \
+  --profile era-de --region us-west-2 \
+  --query 'Stacks[0].Outputs'
+```
+
+## Database setup (first time only)
+
+Use the CLI for these steps — the AWS console had a bug that prevented RDS from being configured correctly.
+
+Create the RDS instance:
+
+```bash
+aws --profile era-de rds create-db-instance \
+  --db-instance-identifier caladapt-stac-v2 \
+  --db-instance-class db.t3.micro \
+  --engine postgres --engine-version 16 \
+  --master-username postgres --master-user-password "PASSWORD" \
+  --db-name caladapt --allocated-storage 20 --storage-type gp2 \
+  --no-multi-az --region us-west-2
+```
+
+Store the password in SSM:
+
+```bash
+aws --profile era-de ssm put-parameter \
+  --name /caladapt-stac/db-password \
+  --value "PASSWORD" --type SecureString --region us-west-2
+```
+
+Install the pgSTAC schema:
+
+```bash
+uv run pypgstac migrate --dsn 'postgresql://postgres:PASSWORD@<host>:5432/caladapt?sslmode=require'
+```
+
+## Ingestion
+
+Ingestion scripts crawl S3, build pystac items, and load them directly into RDS via `pypgstac`. Direct loading uses SQL `COPY` (bulk insert) and bypasses the HTTP API entirely — this avoids API Gateway's 29-second timeout and is orders of magnitude faster for large collections.
+
+All ingestion scripts require a `PGDSN` environment variable pointing at the RDS instance.
+
+Retrieve the DB password from SSM:
+
+```bash
+aws ssm get-parameter --name /caladapt-stac/db-password \
+  --with-decryption --profile era-de \
+  --query Parameter.Value --output text
+```
+
+Export `PGDSN` for your session (replace `PASSWORD` with the value from above; the hostname is the RDS instance endpoint and is not sensitive):
+
+```bash
+export PGDSN='postgresql://postgres:PASSWORD@caladapt-stac-v2.cpjq6uvykusl.us-west-2.rds.amazonaws.com:5432/caladapt?sslmode=require'
+```
+
+Ingest all collections:
+
+```bash
+make ingest-all
+```
+
+Or ingest a single collection (also registers queryables):
+
+```bash
+make clim-prof       # typical-met-year, standard-met-year
+make loca2-county    # LOCA2 county NetCDF
+make loca2           # LOCA2 gridded Zarr
+make wrf-ucla        # WRF UCLA
+make wrf-cae         # WRF-derived climate metrics
+make hadisd          # HadISD station Zarrs
+make hdp             # Historical Data Platform
+make ren             # PV + wind generation
+make slr             # Sea level projections
+```
+
+Queryables are item properties registered in pgSTAC as filterable fields — they tell the STAC API (and STAC Browser) which properties can be used in search queries (e.g. `countyname=Sacramento` or `cmip6:source_id=CESM2`). Each `make` target above registers queryables automatically after ingestion. To re-register without re-ingesting:
+
+```bash
+make queryables
+```
+
+## Operations
+
+**Delete a collection** (no DB connection needed):
+
+```bash
+curl -X DELETE https://8dawjspn5g.execute-api.us-west-2.amazonaws.com/collections/{collection-id}
+```
+
+**Regenerate item geometry GeoJSON files** (uploaded to S3 and referenced as collection assets):
+
+```bash
+make geometries
 ```

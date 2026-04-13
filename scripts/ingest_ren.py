@@ -201,6 +201,15 @@ def build_pv_collection():
             ),
         ),
     )
+    collection.add_asset(
+        "thumbnail",
+        pystac.Asset(
+            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/data/icons/pv_cf_d03_2030.gif",
+            media_type="image/gif",
+            roles=["thumbnail"],
+            title="PV capacity factor animated preview",
+        ),
+    )
     _build_ren_items(collection, "pv", PV_MODULE_PREFIXES)
     return collection
 
@@ -246,6 +255,15 @@ def build_wind_collection():
                     ]
                 ]
             ),
+        ),
+    )
+    collection.add_asset(
+        "thumbnail",
+        pystac.Asset(
+            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/data/icons/wind_cf_d03_2030.gif",
+            media_type="image/gif",
+            roles=["thumbnail"],
+            title="Wind capacity factor animated preview",
         ),
     )
     _build_ren_items(collection, "wind", WIND_MODULE_PREFIXES)
