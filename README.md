@@ -23,21 +23,20 @@ STAC API for Cal-Adapt climate datasets, built with [stac-fastapi](https://githu
 Client → API Gateway → Lambda (stac-fastapi) → RDS Postgres (pgSTAC)
 ```
 
-| Layer | What it does |
-|---|---|
-| **API Gateway** | Public HTTPS endpoint. Forwards requests to Lambda and returns responses. |
-| **Lambda** (`app/main.py`) | Runs stac-fastapi on demand. Handles STAC requests, queries the database, returns results. Wrapped for Lambda using [Mangum](https://mangum.fastapiexpert.com/). |
+**API Gateway** — Public HTTPS endpoint. Forwards requests to Lambda and returns responses.
+
+**Lambda** (`app/main.py`) — Runs stac-fastapi on demand. Handles STAC requests, queries the database, and returns results. Wrapped for Lambda using [Mangum](https://mangum.fastapiexpert.com/).
 
 ![Lambda functions](images/README/lambda_functions.png)
-> To find the Cal-Adapt Lambda functions in the AWS console, make sure you're in the **us-west-2** region. The STAC API function appears here.
+> To find the Cal-Adapt Lambda functions in the AWS console, make sure you're in the **us-west-2** region and then go to Lambda. The STAC API function appears here.
 
 ![main.py](images/README/code_source_main.png)
 > The Lambda function runs `app/main.py`, which sets up the stac-fastapi application. It configures extensions, connects to the database, and wraps the app with Mangum so it can run inside Lambda.
 
-| **RDS Postgres** | Cloud-hosted Postgres with the pgSTAC schema installed: tables, spatial indexes, and functions for storing and querying STAC collections and items. |
+**RDS Postgres** — Cloud-hosted Postgres with the pgSTAC schema installed: tables, spatial indexes, and functions for storing and querying STAC collections and items.
 
 ![RDS Database](images/README/rds_db.png)
-> The RDS database can be found in the AWS console under RDS → Databases (make sure you're in **us-west-2**). It runs on a `db.t3.micro` instance, which is the smallest available tier, which defines the CPU and memory allocated to the database. Costs ~$13/month.
+> The RDS database can be found in the AWS console under RDS → Databases (make sure you're in **us-west-2**). It runs on a `db.t3.micro` instance — the smallest available tier, which defines the CPU and memory allocated to the database. Costs ~$13/month.
 
 The live API is at `https://8dawjspn5g.execute-api.us-west-2.amazonaws.com`. This will eventually be updated to replace v1 of the STAC API, which currently has the url https://stac.cal-adapt.org.
 
@@ -208,9 +207,22 @@ make queryables
 curl -X DELETE https://8dawjspn5g.execute-api.us-west-2.amazonaws.com/collections/{collection-id}
 ```
 
+**Update collection icons:**
+
+Icons in `images/icons/` are used as `thumbnail` assets on STAC collections and displayed in STAC Browser. They're served directly from GitHub via raw URLs, so they must be committed and pushed to `main` to take effect. Re-run the relevant ingestion script after updating an icon to push the new URL to the database.
+
+| Icon | Collection |
+|---|---|
+| `wrf_t2_d03_2030.gif` | WRF UCLA, WRF UCSD, WRF CAE |
+| `tmy_icon.png` | Typical meteorological year |
+| `smy_icon.png` | Standard meteorological year |
+| `loca2_county_icon.png` | LOCA2 county |
+| `pv_cf_d03_2030.gif` | PV generation |
+| `wind_cf_d03_2030.gif` | Wind generation |
+
 **Regenerate item geometry GeoJSON files:**
 
-Some collections (county, station-based) can't embed full geometries in every STAC item because it would be too expensive to render them all in the browser at once. Instead, each collection has a single `item-geometries` asset — a GeoJSON file hosted on S3 — that the browser fetches once to draw all item footprints on the map.
+Some collections (county, station-based) attach a GeoJSON file as a collection-level `item-geometries` asset, hosted on S3. It contains the geometries (county boundaries or station coordinates) associated with the items in that collection.
 
 `make geometries` regenerates these files from source data (S3 parquet/CSVs) and writes them to `data/geometries/`. After running it, upload the files to `s3://cadcat/geometries/` so the live URLs stay current:
 
