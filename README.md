@@ -1,6 +1,7 @@
-# caladapt-stac
+CalAdapt-STAC
+=============
+CalAdapt-STAC is a SpatioTemporal Asset Catalog (STAC) compliant [web API](https://stac.cal-adapt.org/docs) built with [stac-fastapi](https://stac-utils.github.io/stac-fastapi/) to serve the latest catalog of gridded climate data for Cal-Adapt, namely LOCA2 and WRF-CMIP6.
 
-STAC API for Cal-Adapt climate datasets, built with [stac-fastapi](https://github.com/stac-utils/stac-fastapi) and [pgSTAC](https://github.com/stac-utils/pgstac).
 
 **README last updated:** April 2026
 
@@ -208,7 +209,7 @@ export PGDSN='postgresql://postgres@localhost:5432/postgis'
 
 Export this before running any ingestion commands.
 
-**1. Start the database**
+    make run
 
 ```bash
 docker run -p 5432:5432 \
@@ -228,7 +229,6 @@ uv run pypgstac migrate --dsn $PGDSN
 make run
 ```
 
-API will be available at `http://localhost:8000`.
 
 **4. Ingest data**
 
