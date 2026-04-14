@@ -37,22 +37,26 @@ jobs:
           checked = 0
 
           def check_url(url, label):
-              global checked
+              """Return None on success, or a failure message string."""
               try:
                   req = urllib.request.Request(url, headers={"User-Agent": "caladapt-link-checker/1.0"})
                   with urllib.request.urlopen(req, timeout=15) as r:
                       status = r.status
                   if status >= 400:
-                      failures.append(f"  {status} {url} ({label})")
-                  else:
-                      print(f"  ✓ {status} {url}")
-                  checked += 1
+                      return f"  {status} {url} ({label})"
+                  print(f"  ✓ {status} {url}")
+                  return None
               except urllib.error.HTTPError as e:
-                  failures.append(f"  {e.code} {url} ({label})")
-                  checked += 1
+                  return f"  {e.code} {url} ({label})"
               except Exception as e:
-                  failures.append(f"  ERROR {url} ({label}): {e}")
-                  checked += 1
+                  return f"  ERROR {url} ({label}): {e}"
+
+          def check_all(url, label):
+              nonlocal checked
+              failure = check_url(url, label)
+              if failure:
+                  failures.append(failure)
+              checked += 1
 
           for collection in collections:
               col_id = collection["id"]
@@ -60,16 +64,16 @@ jobs:
               # Check all links except internal API links
               for link in collection.get("links", []):
                   if link.get("rel") not in SKIP_RELS:
-                      check_url(link["href"], f"{col_id} link[rel={link.get('rel')}]")
+                      check_all(link["href"], f"{col_id} link[rel={link.get('rel')}]")
 
               # Check all asset hrefs
               for asset_key, asset in collection.get("assets", {}).items():
-                  check_url(asset["href"], f"{col_id} asset[{asset_key}]")
+                  check_all(asset["href"], f"{col_id} asset[{asset_key}]")
 
               # Check provider URLs
               for provider in collection.get("providers", []):
                   if url := provider.get("url"):
-                      check_url(url, f"{col_id} provider[{provider.get('name')}]")
+                      check_all(url, f"{col_id} provider[{provider.get('name')}]")
 
           if failures:
               print(f"\n❌ {len(failures)} broken link(s) found:")
