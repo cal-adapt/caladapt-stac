@@ -1,11 +1,12 @@
-check:
-	python -Wall -m unittest -v
+format:
+	uv run black .
 
 build:
-	sam build --cached --parallel
+	uv export --no-dev --no-hashes -o app/requirements.txt
+	sam build --use-container --cached --parallel
 
 deploy: build
-	sam deploy
+	sam deploy --profile era-de
 
 run:
 	uv run python -m uvicorn app.main:app --reload

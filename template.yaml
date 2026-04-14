@@ -1,17 +1,33 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: caladapt-stac-api
+Description: Cal-Adapt STAC API — Lambda + API Gateway
 
 Resources:
   Function:
     Type: AWS::Serverless::Function
     Properties:
-      MemorySize: 256
-      Timeout: 5
-      FunctionName: 'CalAdaptStacApi'
+      FunctionName: CalAdaptStacApiV2
       CodeUri: app
       Handler: main.handler
-      Runtime: python3.10
+      Runtime: python3.12
+      MemorySize: 256
+      Timeout: 30
+      Environment:
+        Variables:
+          PGHOST: caladapt-stac-v2.cpjq6uvykusl.us-west-2.rds.amazonaws.com
+          PGUSER: postgres
+          PGDATABASE: caladapt
+          PGPORT: 5432
+          PGPASSWORD: '{{resolve:ssm:/caladapt-stac/db-password}}'
+          ENABLE_TRANSACTIONS_EXTENSIONS: "TRUE"
+      VpcConfig:
+        SubnetIds:
+          - subnet-04b77f784ae4db899
+          - subnet-0f5e4ae83ff33b007
+          - subnet-076b001d266a516b3
+          - subnet-048326a07681ecfcd
+        SecurityGroupIds:
+          - sg-01ee5ade38ae56ac7
       Events:
         Api:
           Type: HttpApi
@@ -23,6 +39,6 @@ Resources:
 
 Outputs:
   ApiUrl:
-    Description: URL of your API
+    Description: URL of the STAC API
     Value:
       Fn::Sub: 'https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}/'
