@@ -41,6 +41,9 @@ Client → API Gateway → Lambda (stac-fastapi) → RDS Postgres (pgSTAC)
 ![RDS Database](images/README/rds_db.png)
 > The RDS database can be found in the AWS console under RDS → Databases (make sure you're in **us-west-2**). It runs on a `db.t3.micro` instance. This is the smallest available tier and defines the CPU and memory allocated to the database. Costs ~$13/month.
 
+![RDS Endpoint](images/README/endpoint.png)
+> The RDS endpoint can be found under the **Connectivity & security** tab → **Additional configurations** → **Endpoint & port**.
+
 The live API is at `https://8dawjspn5g.execute-api.us-west-2.amazonaws.com`. This will eventually be updated to replace v1 of the STAC API, which currently has the url https://stac.cal-adapt.org.
 
 ## Prerequisites
@@ -89,18 +92,24 @@ Ingestion scripts crawl S3, build pystac items, and load them directly into RDS 
 
 All ingestion scripts require a `PGDSN` environment variable pointing at the RDS instance.
 
-Retrieve the DB password from SSM:
+Retrieve the DB password and RDS endpoint from SSM:
 
 ```bash
 aws ssm get-parameter --name /caladapt-stac/db-password \
   --with-decryption --profile era-de \
   --query Parameter.Value --output text
+
+aws ssm get-parameter --name /caladapt-stac/db-host \
+  --profile era-de \
+  --query Parameter.Value --output text
 ```
 
-Export `PGDSN` for your session (replace `PASSWORD` with the value from above; the hostname is the RDS instance endpoint and is not sensitive):
+If you don't have SSM access, request the values from a project maintainer. The RDS endpoint can also be found in the AWS Console under **RDS → Databases** (make sure you're in **us-west-2**). See the [architecture diagram](#architecture) above for reference.
+
+Export `PGDSN` for your session (replace `PASSWORD` and `<RDS_ENDPOINT>` with the values from above):
 
 ```bash
-export PGDSN='postgresql://postgres:PASSWORD@caladapt-stac-v2.cpjq6uvykusl.us-west-2.rds.amazonaws.com:5432/caladapt?sslmode=require'
+export PGDSN='postgresql://postgres:PASSWORD@<RDS_ENDPOINT>:5432/caladapt?sslmode=require'
 ```
 
 Ingest all collections:
@@ -147,14 +156,7 @@ curl -X DELETE https://8dawjspn5g.execute-api.us-west-2.amazonaws.com/collection
 
 Icons in `images/icons/` are used as `thumbnail` assets on STAC collections and displayed in STAC Browser. They're served directly from GitHub via raw URLs, so they must be committed and pushed to `main` to take effect. Re-run the relevant ingestion script after updating an icon to push the new URL to the database.
 
-| Icon | Collection |
-|---|---|
-| `wrf_t2_d03_2030.gif` | WRF UCLA, WRF UCSD, WRF CAE |
-| `tmy_icon.png` | Typical meteorological year |
-| `smy_icon.png` | Standard meteorological year |
-| `loca2_county_icon.png` | LOCA2 county |
-| `pv_cf_d03_2030.gif` | PV generation |
-| `wind_cf_d03_2030.gif` | Wind generation |
+These icons were generated in the AE Jupyter Hub because the scripts rely on `climakitae`, which wasn't included as a dependency of this repository. 
 
 **Regenerate item geometry GeoJSON files:**
 
