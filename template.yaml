@@ -14,12 +14,11 @@ Resources:
       Timeout: 30
       Environment:
         Variables:
-          PGHOST: caladapt-stac-v2.cpjq6uvykusl.us-west-2.rds.amazonaws.com
+          PGHOST: '{{resolve:ssm:/caladapt-stac/db-host}}'
           PGUSER: postgres
           PGDATABASE: caladapt
           PGPORT: 5432
           PGPASSWORD: '{{resolve:ssm:/caladapt-stac/db-password}}'
-          ENABLE_TRANSACTIONS_EXTENSIONS: "TRUE"
       VpcConfig:
         SubnetIds:
           - subnet-04b77f784ae4db899
