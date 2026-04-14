@@ -4,11 +4,8 @@ Shared utilities for building and ingesting STAC items from S3.
 
 """
 
-import time
 import boto3
 import pystac
-import requests
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 s3 = boto3.client("s3")
@@ -25,36 +22,6 @@ def bbox_to_geometry(bbox):
             [[west, south], [east, south], [east, north], [west, north], [west, south]]
         ],
     }
-
-
-def post_or_put(url: str, data: dict, retries: int = 3):
-    """Post or put data to url, retrying on failure with exponential backoff."""
-    # pystac generates links with null hrefs when items are added to a collection;
-    # the API rejects these, so strip them before posting
-    if "links" in data:
-        data["links"] = [l for l in data["links"] if l.get("href") is not None]
-    for attempt in range(retries):
-        try:
-            res = requests.post(url, json=data, timeout=60)
-            if res.status_code == 409:
-                new_url = url + f"/{data['id']}"
-                res = requests.put(new_url, json=data, timeout=60)
-                if not res.status_code == 404:
-                    if not res.ok:
-                        raise Exception(
-                            f"PUT {new_url} failed {res.status_code}: {res.text}"
-                        )
-            elif not res.ok:
-                raise Exception(f"POST {url} failed {res.status_code}: {res.text}")
-            else:
-                res.raise_for_status()
-            return
-        except Exception as e:
-            if attempt == retries - 1:
-                raise
-            backoff = 2**attempt  # 1s, 2s, 4s...
-            print(f"  Retrying ({attempt + 1}/{retries}) in {backoff}s: {e}")
-            time.sleep(backoff)
 
 
 def list_zarr_stores(prefix, bucket, depth):
@@ -107,21 +74,6 @@ def list_keys(prefix, bucket):
     for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
         for obj in page.get("Contents", []):
             yield obj["Key"], obj["Size"]
-
-
-def post_items(collection, url, max_workers=2):
-    """POST all items in a collection to the STAC API in parallel, printing progress."""
-    items = list(collection.get_items())
-    total = len(items)
-    completed = 0
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
-        futures = {
-            executor.submit(post_or_put, url, item.to_dict()): item for item in items
-        }
-        for future in as_completed(futures):
-            future.result()  # raise any exceptions
-            completed += 1
-            print(f"  {completed}/{total}: {futures[future].id}")
 
 
 def load_direct(collection, dsn):
