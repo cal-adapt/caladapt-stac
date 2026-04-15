@@ -28,7 +28,7 @@ queryables:
 clim-prof:
 	uv run python -m scripts.ingest_climate_profiles
 	uv run python -m scripts.register_queryables --collection typical-met-year
-	uv run python -m scripts.register_queryables --collection standard-met-year
+	uv run python -m scripts.register_queryables --collection standard-year
 
 loca2-county:
 	uv run python -m scripts.ingest_loca2_county

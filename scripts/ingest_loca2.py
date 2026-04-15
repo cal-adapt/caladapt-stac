@@ -32,6 +32,7 @@ from scripts.constants import (
     CALADAPT_DATA_LICENSE,
     LOCA2_GRIDDED_BBOX,
     LOCA2_GRIDDED_PREFIX,
+    LOCA2_VARIABLE_LABELS,
     PGDSN,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
@@ -167,6 +168,7 @@ def build_loca2_gridded_collection():
             "cmip6:member_id": member_id,
             "cmip6:table_id": table_id,
             "variable_id": variable_id,
+            "variable_label": LOCA2_VARIABLE_LABELS.get(variable_id, variable_id),
             "grid_label": grid_label,
             "start_datetime": start_dt.isoformat(),
             "end_datetime": end_dt.isoformat(),

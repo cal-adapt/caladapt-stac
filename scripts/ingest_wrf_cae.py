@@ -31,6 +31,7 @@ from scripts.constants import (
     PGDSN,
     WRF_CAE_PREFIX,
     WRF_UCLA_GRID_BBOXES,
+    WRF_VARIABLE_LABELS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -165,6 +166,7 @@ def build_wrf_cae_collection():
             "experiment_id": experiment_id,
             "table_id": table_id,
             "variable_id": variable_id,
+            "variable_label": WRF_VARIABLE_LABELS.get(variable_id, variable_id),
             "grid_label": grid_label,
             "bias_adjusted": True,  # all CAE models are bias-adjusted (ensmean/mm4* are derived from BA models)
             "start_datetime": start_dt.isoformat(),

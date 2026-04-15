@@ -35,6 +35,7 @@ from scripts.constants import (
     PGDSN,
     SMY_PREFIX,
     TMY_PREFIX,
+    WRF_VARIABLE_LABELS,
 )
 from scripts.utils import build_item, list_keys, load_direct
 
@@ -198,8 +199,8 @@ def build_smy_collection():
         Collection containing one item per SMY CSV file in S3.
     """
     collection = pystac.Collection(
-        id="standard-met-year",
-        title="Standard meteorological year",
+        id="standard-year",
+        title="Standard year",
         extra_fields={"caladapt:spatial_type": "point"},
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
@@ -258,6 +259,7 @@ def build_smy_collection():
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
+        props["variable_label"] = WRF_VARIABLE_LABELS.get(props["variable"], props["variable"])
 
         lon, lat = station_coords[props["location"]]
         props["lat"] = lat

@@ -52,6 +52,12 @@ The live API is at `https://8dawjspn5g.execute-api.us-west-2.amazonaws.com`. Thi
 - [Docker](https://docs.docker.com/get-docker/): required for local development and SAM builds
 - [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html): required for deployment and ingestion
 - [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html): required for deployment
+- [libpq](https://formulae.brew.sh/formula/libpq) (`brew install libpq`): required for direct database access via `psql`
+
+  After installing, add it to your PATH:
+  ```bash
+  echo 'export PATH="/opt/homebrew/opt/libpq/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+  ```
 
 You'll also need an AWS profile named `era-de` configured in `~/.aws/credentials` with access to the ERA AWS account.
 
@@ -144,12 +150,14 @@ make queryables
 
 A GitHub Actions workflow (`.github/workflows/check-links.yml`) runs every Monday at 9am UTC and on every push to `main`. It fetches all collections from the live API and checks that every `related` link returns a valid response. Failed checks are reported in the Actions tab. You can also trigger it manually via `workflow_dispatch`.
 
-**Delete a collection** (no DB connection needed):
+**Delete a collection:**
 
 If you change the structure of a collection (item IDs, properties, or asset keys), delete it before re-ingesting. Ingestion uses upsert, so stale items with old IDs or fields will remain alongside new ones unless the collection is cleared first.
 
+Write endpoints are disabled on the public API, so deletion must be done directly via `psql` (requires `libpq` — see [Prerequisites](#prerequisites)):
+
 ```bash
-curl -X DELETE https://8dawjspn5g.execute-api.us-west-2.amazonaws.com/collections/{collection-id}
+psql $PGDSN -c "SELECT pgstac.delete_collection('{collection-id}');"
 ```
 
 **Update collection icons:**

@@ -32,6 +32,7 @@ from scripts.constants import (
     PGDSN,
     WRF_UCLA_GRID_BBOXES,
     WRF_UCLA_PREFIX,
+    WRF_VARIABLE_LABELS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -174,6 +175,7 @@ def build_wrf_ucla_collection():
             "experiment_id": experiment_id,
             "table_id": table_id,
             "variable_id": variable_id,
+            "variable_label": WRF_VARIABLE_LABELS.get(variable_id, variable_id),
             "grid_label": grid_label,
             "bias_adjusted": source_id not in UCLA_NON_BA_SOURCE_IDS,
             "start_datetime": start_dt.isoformat(),
