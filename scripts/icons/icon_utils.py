@@ -129,7 +129,8 @@ def make_icon_gif(
 
         if title:
             ax.text(
-                0.97, 0.95,
+                0.97,
+                0.95,
                 title.format(timestamp=timestamp),
                 transform=ax.transAxes,
                 **icon_constants.title_kwargs(scale=2),

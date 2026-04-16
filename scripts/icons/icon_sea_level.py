@@ -6,6 +6,7 @@ averaged over all ensemble members.
 
 import io
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import s3fs
@@ -64,8 +65,14 @@ def main():
     ax.set_ylabel("Sea level rise (m)", fontsize=fs, color="#333333")
     ax.set_title("Sea level rise — San Francisco", fontsize=fs, color="#333333", pad=10)
     ax.tick_params(axis="both", labelsize=fs * 0.85, colors="#555555")
-    ax.legend(fontsize=fs * 0.85, loc="upper left", framealpha=0.7, title="SLR scenario",
-              title_fontsize=fs * 0.85, edgecolor="#cccccc")
+    ax.legend(
+        fontsize=fs * 0.85,
+        loc="upper left",
+        framealpha=0.7,
+        title="SLR scenario",
+        title_fontsize=fs * 0.85,
+        edgecolor="#cccccc",
+    )
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_color("#cccccc")

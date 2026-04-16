@@ -5,12 +5,22 @@ colored by network.
 
 import io
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import geopandas as gpd
 from PIL import Image
 
-from icon_constants import WIDTH, HEIGHT, DPI, OCEAN_COLOR, LAND_COLOR, COUNTRY_EDGE_COLOR, STATE_EDGE_COLOR, title_kwargs
+from icon_constants import (
+    WIDTH,
+    HEIGHT,
+    DPI,
+    OCEAN_COLOR,
+    LAND_COLOR,
+    COUNTRY_EDGE_COLOR,
+    STATE_EDGE_COLOR,
+    title_kwargs,
+)
 
 OUT_PATH = "hdp_icon.png"
 WECC_BOUNDS = (-125.0, 25.0, -100.0, 52.0)
@@ -19,7 +29,9 @@ HDP_STATION_COORDS_URL = (
     "https://cadcat.s3.amazonaws.com/geometries/hdp-station-coords.geojson"
 )
 STATES_URL = "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_1_states_provinces.zip"
-COUNTRIES_URL = "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_0_countries.zip"
+COUNTRIES_URL = (
+    "https://naturalearth.s3.amazonaws.com/10m_cultural/ne_10m_admin_0_countries.zip"
+)
 
 
 def main():
@@ -28,16 +40,18 @@ def main():
 
     print("Loading boundaries...")
     states = gpd.read_file(STATES_URL)
-    states = states.cx[WECC_BOUNDS[0]:WECC_BOUNDS[2], WECC_BOUNDS[1]:WECC_BOUNDS[3]]
+    states = states.cx[WECC_BOUNDS[0] : WECC_BOUNDS[2], WECC_BOUNDS[1] : WECC_BOUNDS[3]]
     countries = gpd.read_file(COUNTRIES_URL)
-    countries = countries.cx[WECC_BOUNDS[0]:WECC_BOUNDS[2], WECC_BOUNDS[1]:WECC_BOUNDS[3]]
+    countries = countries.cx[
+        WECC_BOUNDS[0] : WECC_BOUNDS[2], WECC_BOUNDS[1] : WECC_BOUNDS[3]
+    ]
 
     # Assign a color to each network
     networks = sorted(stations["network"].unique())
     palette = (
-        list(plt.cm.tab20.colors) +
-        list(plt.cm.tab20b.colors) +
-        list(plt.cm.tab20c.colors)
+        list(plt.cm.tab20.colors)
+        + list(plt.cm.tab20b.colors)
+        + list(plt.cm.tab20c.colors)
     )
     network_color = {net: palette[i % len(palette)] for i, net in enumerate(networks)}
     colors = [network_color[n] for n in stations["network"]]
@@ -48,8 +62,12 @@ def main():
     fig.set_facecolor(OCEAN_COLOR)
     ax.set_facecolor(OCEAN_COLOR)
 
-    countries.plot(ax=ax, color=LAND_COLOR, edgecolor=COUNTRY_EDGE_COLOR, linewidth=1.2, zorder=1)
-    states.plot(ax=ax, color=LAND_COLOR, edgecolor=STATE_EDGE_COLOR, linewidth=0.6, zorder=2)
+    countries.plot(
+        ax=ax, color=LAND_COLOR, edgecolor=COUNTRY_EDGE_COLOR, linewidth=1.2, zorder=1
+    )
+    states.plot(
+        ax=ax, color=LAND_COLOR, edgecolor=STATE_EDGE_COLOR, linewidth=0.6, zorder=2
+    )
     ax.scatter(
         stations.geometry.x,
         stations.geometry.y,
@@ -63,7 +81,8 @@ def main():
     n_networks = len(networks)
     n_stations = len(stations)
     ax.text(
-        0.97, 0.95,
+        0.97,
+        0.95,
         f"{n_networks} networks · {n_stations:,} stations",
         transform=ax.transAxes,
         **title_kwargs(scale=2),

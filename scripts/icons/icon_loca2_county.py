@@ -50,7 +50,8 @@ def main():
 
     n_counties = len(gdf)
     ax.text(
-        0.97, 0.95,
+        0.97,
+        0.95,
         f"{n_counties} CA counties",
         transform=ax.transAxes,
         zorder=5,

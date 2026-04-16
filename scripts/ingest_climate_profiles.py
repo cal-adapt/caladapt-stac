@@ -262,7 +262,9 @@ def build_smy_collection():
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
-        props["variable_label"] = WRF_VARIABLE_LABELS.get(props["variable"], props["variable"])
+        props["variable_label"] = WRF_VARIABLE_LABELS.get(
+            props["variable"], props["variable"]
+        )
 
         lon, lat = station_coords[props["location"]]
         props["lat"] = lat
