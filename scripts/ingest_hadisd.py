@@ -30,6 +30,7 @@ from scripts.constants import (
     BUCKET_CADCAT,
     HADISD_PREFIX,
     HADISD_WECC_STATION_COORDS_URL,
+    ICON_BASE_URL,
     PGDSN,
 )
 from scripts.utils import load_direct
@@ -65,6 +66,7 @@ def build_hadisd_collection():
     collection = pystac.Collection(
         id="hadisd-station-zarrs",
         title="HadISD",
+        keywords=["weather station", "historical data", "cloud optimized"],
         extra_fields={"caladapt:spatial_type": "point"},
         description=("Met Office HadISD sub-daily station data for the WECC region."),
         license=HADISD_LICENSE,
@@ -112,6 +114,15 @@ def build_hadisd_collection():
             citation="Smith, A., et al. (2011): The Integrated Surface Database: Recent Developments and Partnerships. Bulletin of the American Meteorological Society, 92, 704-708.",
         ),
     ]
+    collection.add_asset(
+        "thumbnail",
+        pystac.Asset(
+            href=f"{ICON_BASE_URL}hadisd_icon.png",
+            media_type="image/png",
+            roles=["thumbnail"],
+            title="HadISD station locations",
+        ),
+    )
     collection.add_asset(
         "item-geometries",
         pystac.Asset(

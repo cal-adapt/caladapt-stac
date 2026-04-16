@@ -29,6 +29,7 @@ import pystac
 from scripts.constants import (
     BUCKET_CADCAT,
     CALADAPT_DATA_LICENSE,
+    ICON_BASE_URL,
     PGDSN,
     WRF_UCLA_GRID_BBOXES,
     WRF_UCLA_PREFIX,
@@ -99,11 +100,12 @@ def build_wrf_ucla_collection():
     -------
     pystac.Collection
     """
-    THUMBNAIL_URL = "https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/images/icons/wrf_t2_d03_2030.gif"
+    THUMBNAIL_URL = f"{ICON_BASE_URL}wrf_t2_d03_2030.gif"
 
     collection = pystac.Collection(
         id="wrf-ucla",
         title="WRF",
+        keywords=["climate model", "cloud optimized"],
         extra_fields={"caladapt:spatial_type": "grid"},
         description="Dynamically downscaled climate projections for California using the Weather Research & Forecasting Model (WRF).",
         license=CALADAPT_DATA_LICENSE,
@@ -171,9 +173,9 @@ def build_wrf_ucla_collection():
         props = {
             "activity_id": "WRF",
             "institution_id": "UCLA",
-            "source_id": source_id,
-            "experiment_id": experiment_id,
-            "table_id": table_id,
+            "cmip6:source_id": source_id,
+            "cmip6:experiment_id": experiment_id,
+            "cmip6:table_id": table_id,
             "variable_id": variable_id,
             "variable_label": WRF_VARIABLE_LABELS.get(variable_id, variable_id),
             "grid_label": grid_label,

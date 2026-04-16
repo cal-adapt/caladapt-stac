@@ -32,6 +32,7 @@ from scripts.constants import (
     CALADAPT_DATA_LICENSE,
     CLIM_PROF_GWL_PERIOD_DATES,
     HADISD_CA_STATION_COORDS_URL,
+    ICON_BASE_URL,
     PGDSN,
     SMY_PREFIX,
     TMY_PREFIX,
@@ -103,6 +104,7 @@ def build_tmy_collection():
     collection = pystac.Collection(
         id="typical-met-year",
         title="Typical meteorological year",
+        keywords=["climate profiles"],
         extra_fields={"caladapt:spatial_type": "point"},
         description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
@@ -140,7 +142,7 @@ def build_tmy_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/images/icons/tmy_icon.png",
+            href=f"{ICON_BASE_URL}tmy_icon.png",
             media_type="image/png",
             roles=["thumbnail"],
             title="TMY preview",
@@ -201,6 +203,7 @@ def build_smy_collection():
     collection = pystac.Collection(
         id="standard-year",
         title="Standard year",
+        keywords=["climate profiles"],
         extra_fields={"caladapt:spatial_type": "point"},
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
@@ -238,7 +241,7 @@ def build_smy_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/images/icons/smy_icon.png",
+            href=f"{ICON_BASE_URL}standard_year_icon.png",
             media_type="image/png",
             roles=["thumbnail"],
             title="SMY preview",

@@ -157,7 +157,7 @@ def generate_hdp_stations():
             {
                 "type": "Feature",
                 "geometry": {"type": "Point", "coordinates": [lon, lat]},
-                "properties": {"era_id": row["era-id"]},
+                "properties": {"era_id": row["era-id"], "network": row["network"]},
             }
         )
     return {"type": "FeatureCollection", "features": features}

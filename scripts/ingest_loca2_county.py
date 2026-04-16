@@ -29,6 +29,7 @@ from scripts.constants import (
     CA_COUNTY_FIPS,
     CA_COUNTIES_GEOMETRIES_URL,
     CALADAPT_DATA_LICENSE,
+    ICON_BASE_URL,
     LOCA2_COUNTY_NETCDF_PREFIX,
     LOCA2_VARIABLE_LABELS,
     PGDSN,
@@ -98,6 +99,7 @@ def build_loca2_county_collection():
     collection = pystac.Collection(
         id="loca2-county",
         title="LOCA2 county",
+        keywords=["climate model"],
         extra_fields={"caladapt:spatial_type": "county"},
         description="LOCA2 hybrid-statistically downscaled climate projections aggregated by California counties.",
         license=CALADAPT_DATA_LICENSE,
@@ -137,7 +139,7 @@ def build_loca2_county_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/images/icons/loca2_county_icon.png",
+            href=f"{ICON_BASE_URL}loca2_county_icon.png",
             media_type="image/png",
             roles=["thumbnail"],
             title="LOCA2 county preview",

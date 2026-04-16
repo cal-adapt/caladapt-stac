@@ -19,6 +19,9 @@ API_ENDPOINT = os.environ.get("STAC_API_ENDPOINT", "http://localhost:8082")
 # PostgreSQL DSN for direct DB access
 PGDSN = os.environ.get("PGDSN")
 
+# S3 HTTPS URL for collection thumbnail icons
+ICON_BASE_URL = "https://cadcat.s3.amazonaws.com/figures/icons/"
+
 # S3 HTTPS URLs for geometry GeoJSON files (upload manually after running generate_geometries.py)
 CA_COUNTIES_GEOMETRIES_URL = (
     "https://cadcat.s3.amazonaws.com/geometries/ca-counties-geometries.geojson"
@@ -150,6 +153,7 @@ WRF_UCSD_GRID_BBOXES = {
 WRF_UCLA_GRID_BBOXES = {
     "d01": [-154.6164, 9.4756, -87.2352, 64.4245],
     "d02": [-136.3039, 22.2671, -96.2959, 55.1834],
+    "d03": [-127.9559, 29.9789, -111.2325, 44.8999],
 }
 
 # Human-readable labels for WRF (Dynamical) variable IDs.

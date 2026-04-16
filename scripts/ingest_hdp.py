@@ -31,6 +31,7 @@ from scripts.constants import (
     CALADAPT_DATA_LICENSE,
     HDP_PREFIX,
     HDP_STATION_COORDS_URL,
+    ICON_BASE_URL,
     PGDSN,
     WECC_BBOX,
 )
@@ -56,10 +57,11 @@ def build_hdp_collection():
     collection = pystac.Collection(
         id="historical-data-platform",
         title="Historical data platform",
+        keywords=["weather station", "historical data", "cloud optimized"],
         extra_fields={"caladapt:spatial_type": "point"},
         description=(
             "Standardized and quality-controlled historical weather "
-            "station data from 27 stations within the WECC region"
+            "station data from 27 stations within the WECC region."
         ),
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[WECC_BBOX]),
@@ -85,6 +87,15 @@ def build_hdp_collection():
                 url="https://cal-adapt.org/",
             ),
         ],
+    )
+    collection.add_asset(
+        "thumbnail",
+        pystac.Asset(
+            href=f"{ICON_BASE_URL}hdp_icon.png",
+            media_type="image/png",
+            roles=["thumbnail"],
+            title="HDP station locations",
+        ),
     )
     collection.add_asset(
         "item-geometries",

@@ -30,6 +30,7 @@ import pystac
 from scripts.constants import (
     BUCKET_CADCAT,
     CALADAPT_DATA_LICENSE,
+    ICON_BASE_URL,
     LOCA2_GRIDDED_BBOX,
     LOCA2_GRIDDED_PREFIX,
     LOCA2_VARIABLE_LABELS,
@@ -104,6 +105,7 @@ def build_loca2_gridded_collection():
     collection = pystac.Collection(
         id="loca2-gridded",
         title="LOCA2",
+        keywords=["climate model", "cloud optimized"],
         extra_fields={"caladapt:spatial_type": "grid"},
         description="Hybrid-statistically downscaled climate projections for California produced by UCSD using the Localized Constructed Analogs version 2 (LOCA2) method.",
         license=CALADAPT_DATA_LICENSE,
@@ -132,6 +134,15 @@ def build_loca2_gridded_collection():
                     ]
                 ]
             ),
+        ),
+    )
+    collection.add_asset(
+        "thumbnail",
+        pystac.Asset(
+            href=f"{ICON_BASE_URL}loca2_tasmax_2030.gif",
+            media_type="image/gif",
+            roles=["thumbnail"],
+            title="LOCA2 tasmax animated preview",
         ),
     )
 

@@ -40,6 +40,7 @@ from scripts.constants import (
     BUCKET_CADCAT,
     CALADAPT_DATA_LICENSE,
     HMET_PREFIX,
+    ICON_BASE_URL,
     PGDSN,
     SEA_LEVEL_STATION_COORDS_URL,
 )
@@ -118,10 +119,11 @@ def build_sea_level_collection():
     collection = pystac.Collection(
         id="sea-level-projections",
         title="Sea level projections",
+        keywords=["climate model"],
         extra_fields={"caladapt:spatial_type": "point"},
         description=(
             "Hourly sea level projections for 13 NOAA tide stations along the California "
-            "coast and San Francisco Bay, 1950–2100, across low, intermediate, and high "
+            "coast and San Francisco Bay across low, intermediate, and high "
             "SLR scenarios and three SSP emission trajectories."
         ),
         license=CALADAPT_DATA_LICENSE,
@@ -171,6 +173,15 @@ def build_sea_level_collection():
         )
     )
 
+    collection.add_asset(
+        "thumbnail",
+        pystac.Asset(
+            href=f"{ICON_BASE_URL}sea_level_icon.png",
+            media_type="image/png",
+            roles=["thumbnail"],
+            title="Sea level projections preview",
+        ),
+    )
     collection.add_asset(
         "item-geometries",
         pystac.Asset(

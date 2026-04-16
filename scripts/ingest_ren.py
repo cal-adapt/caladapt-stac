@@ -31,6 +31,7 @@ import pystac
 from scripts.constants import (
     BUCKET_REN,
     CALADAPT_DATA_LICENSE,
+    ICON_BASE_URL,
     PGDSN,
     WRF_UCLA_GRID_BBOXES,
     WRF_UCSD_GRID_BBOXES,
@@ -174,6 +175,7 @@ def build_pv_collection():
     collection = pystac.Collection(
         id="pv-generation",
         title="Photovoltaic power generation profiles",
+        keywords=["renewable energy", "climate model", "cloud optimized"],
         extra_fields={"caladapt:spatial_type": "grid"},
         description="Photovoltaic power generation profiles (capacity factor and power output) for utility-scale and distributed solar PV, covering California (3 km) and WECC (9 km).",
         license=CALADAPT_DATA_LICENSE,
@@ -206,7 +208,7 @@ def build_pv_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/images/icons/pv_cf_d03_2030.gif",
+            href=f"{ICON_BASE_URL}pv_cf_d03_2030.gif",
             media_type="image/gif",
             roles=["thumbnail"],
             title="PV capacity factor animated preview",
@@ -230,6 +232,7 @@ def build_wind_collection():
     collection = pystac.Collection(
         id="wind-generation",
         title="Wind power generation profiles",
+        keywords=["renewable energy", "climate model", "cloud optimized"],
         extra_fields={"caladapt:spatial_type": "grid"},
         description="Wind power generation profiles (capacity factor and power output) for onshore and offshore wind, covering California (3 km) and WECC (9 km).",
         license=CALADAPT_DATA_LICENSE,
@@ -262,7 +265,7 @@ def build_wind_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href="https://raw.githubusercontent.com/cal-adapt/caladapt-stac/main/images/icons/wind_cf_d03_2030.gif",
+            href=f"{ICON_BASE_URL}wind_cf_d03_2030.gif",
             media_type="image/gif",
             roles=["thumbnail"],
             title="Wind capacity factor animated preview",
