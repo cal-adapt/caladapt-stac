@@ -51,29 +51,31 @@ jobs:
               except Exception as e:
                   return f"  ERROR {url} ({label}): {e}"
 
-          def check_all(url, label):
-              nonlocal checked
-              failure = check_url(url, label)
-              if failure:
-                  failures.append(failure)
-              checked += 1
-
           for collection in collections:
               col_id = collection["id"]
 
               # Check all links except internal API links
               for link in collection.get("links", []):
                   if link.get("rel") not in SKIP_RELS:
-                      check_all(link["href"], f"{col_id} link[rel={link.get('rel')}]")
+                      failure = check_url(link["href"], f"{col_id} link[rel={link.get('rel')}]")
+                      if failure:
+                          failures.append(failure)
+                      checked += 1
 
               # Check all asset hrefs
               for asset_key, asset in collection.get("assets", {}).items():
-                  check_all(asset["href"], f"{col_id} asset[{asset_key}]")
+                  failure = check_url(asset["href"], f"{col_id} asset[{asset_key}]")
+                  if failure:
+                      failures.append(failure)
+                  checked += 1
 
               # Check provider URLs
               for provider in collection.get("providers", []):
                   if url := provider.get("url"):
-                      check_all(url, f"{col_id} provider[{provider.get('name')}]")
+                      failure = check_url(url, f"{col_id} provider[{provider.get('name')}]")
+                      if failure:
+                          failures.append(failure)
+                      checked += 1
 
           if failures:
               print(f"\n❌ {len(failures)} broken link(s) found:")
