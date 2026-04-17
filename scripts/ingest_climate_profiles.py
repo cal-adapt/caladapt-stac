@@ -104,7 +104,7 @@ def build_tmy_collection():
     collection = pystac.Collection(
         id="typical-met-year",
         title="Typical meteorological year",
-        keywords=["climate profiles"],
+        keywords=["climate profiles", "global warming level", "climate models", "future projections", "CMIP6", "building standards", "energy efficiency"],
         extra_fields={"caladapt:spatial_type": "point"},
         description="Typical Meteorological Year climate profiles (8760) at weather station locations for p50 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,
@@ -203,7 +203,7 @@ def build_smy_collection():
     collection = pystac.Collection(
         id="standard-year",
         title="Standard year",
-        keywords=["climate profiles"],
+        keywords=["climate profiles", "global warming level", "climate models", "future projections", "CMIP6"],
         extra_fields={"caladapt:spatial_type": "point"},
         description="Standard Year climate profiles (8760) at weather station locations for p50, p5, p95 warming level planning horizons.",
         license=CALADAPT_DATA_LICENSE,

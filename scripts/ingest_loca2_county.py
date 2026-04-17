@@ -99,7 +99,7 @@ def build_loca2_county_collection():
     collection = pystac.Collection(
         id="loca2-county",
         title="LOCA2 county",
-        keywords=["climate model"],
+        keywords=["climate model", "California", "geospatial", "counties", "future projections", "statistical"],
         extra_fields={"caladapt:spatial_type": "county"},
         description="LOCA2 hybrid-statistically downscaled climate projections aggregated by California counties.",
         license=CALADAPT_DATA_LICENSE,

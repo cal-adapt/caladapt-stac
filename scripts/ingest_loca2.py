@@ -103,9 +103,9 @@ def build_loca2_gridded_collection():
     pystac.Collection
     """
     collection = pystac.Collection(
-        id="loca2-gridded",
+        id="loca2",
         title="LOCA2",
-        keywords=["climate model", "cloud optimized"],
+        keywords=["climate model", "cloud-optimized", "geospatial", "California", "future projections", "CMIP6", "statistical"],
         extra_fields={"caladapt:spatial_type": "grid"},
         description="Hybrid-statistically downscaled climate projections for California produced by UCSD using the Localized Constructed Analogs version 2 (LOCA2) method.",
         license=CALADAPT_DATA_LICENSE,

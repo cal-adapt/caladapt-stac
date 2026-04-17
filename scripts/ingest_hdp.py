@@ -57,7 +57,7 @@ def build_hdp_collection():
     collection = pystac.Collection(
         id="historical-data-platform",
         title="Historical data platform",
-        keywords=["weather station", "historical data", "cloud optimized"],
+        keywords=["cloud-optimized", "historical data", "weather station", "quality controlled", "western US"],
         extra_fields={"caladapt:spatial_type": "point"},
         description=(
             "Standardized and quality-controlled historical weather "

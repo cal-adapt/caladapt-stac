@@ -64,9 +64,9 @@ def build_hadisd_collection():
     bbox = [min(lons), min(lats), max(lons), max(lats)]
 
     collection = pystac.Collection(
-        id="hadisd-station-zarrs",
+        id="hadisd",
         title="HadISD",
-        keywords=["weather station", "historical data", "cloud optimized"],
+        keywords=["cloud-optimized", "historical data", "weather station", "air temperature"],
         extra_fields={"caladapt:spatial_type": "point"},
         description=("Met Office HadISD sub-daily station data for the WECC region."),
         license=HADISD_LICENSE,
