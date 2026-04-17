@@ -178,7 +178,7 @@ def build_wrf_ucla_collection():
             "cmip6:table_id": table_id,
             "variable_id": variable_id,
             "variable_label": WRF_VARIABLE_LABELS.get(variable_id, variable_id),
-            "grid_label": grid_label,
+            "cmip6:grid_label": grid_label,
             "bias_adjusted": source_id not in UCLA_NON_BA_SOURCE_IDS,
             "start_datetime": start_dt.isoformat(),
             "end_datetime": end_dt.isoformat(),

@@ -169,7 +169,7 @@ def build_wrf_cae_collection():
             "cmip6:table_id": table_id,
             "variable_id": variable_id,
             "variable_label": WRF_VARIABLE_LABELS.get(variable_id, variable_id),
-            "grid_label": grid_label,
+            "cmip6:grid_label": grid_label,
             "bias_adjusted": True,  # all CAE models are bias-adjusted (ensmean/mm4* are derived from BA models)
             "start_datetime": start_dt.isoformat(),
             "end_datetime": end_dt.isoformat(),

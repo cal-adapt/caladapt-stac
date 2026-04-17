@@ -35,7 +35,7 @@ from scripts.constants import (
 )
 from scripts.utils import load_direct
 
-HADISD_LICENSE = "Non-Commercial-Government-Licence-v2.0"
+HADISD_LICENSE = "proprietary"
 HADISD_LICENSE_URL = "https://www.nationalarchives.gov.uk/doc/non-commercial-government-licence/version/2/"
 
 # HadISD version and date range (v3.3.1.202312p covers 1931–2023)

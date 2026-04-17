@@ -180,7 +180,7 @@ def build_loca2_gridded_collection():
             "cmip6:table_id": table_id,
             "variable_id": variable_id,
             "variable_label": LOCA2_VARIABLE_LABELS.get(variable_id, variable_id),
-            "grid_label": grid_label,
+            "cmip6:grid_label": grid_label,
             "start_datetime": start_dt.isoformat(),
             "end_datetime": end_dt.isoformat(),
         }
