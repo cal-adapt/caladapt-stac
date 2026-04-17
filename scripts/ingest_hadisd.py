@@ -29,6 +29,7 @@ from pystac.extensions.scientific import ScientificExtension, Publication
 from scripts.constants import (
     BUCKET_CADCAT,
     HADISD_PREFIX,
+    HADISD_STATIONS_CSV_URL,
     HADISD_WECC_STATION_COORDS_URL,
     ICON_BASE_URL,
     PGDSN,
@@ -130,6 +131,15 @@ def build_hadisd_collection():
             media_type="application/geo+json",
             roles=["item-geometries"],
             title="Item geometries",
+        ),
+    )
+    collection.add_asset(
+        "stations",
+        pystac.Asset(
+            href=HADISD_STATIONS_CSV_URL,
+            media_type="text/csv",
+            roles=["metadata"],
+            title="Station metadata",
         ),
     )
 
