@@ -1,0 +1,14 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "caladapt-stac-v2"
+resolve_s3 = true
+s3_prefix = "caladapt-stac-v2"
+region = "us-west-2"
+profile = "era-de"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+
+[default.global.parameters]
+region = "us-west-2"

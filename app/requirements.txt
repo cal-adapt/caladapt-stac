@@ -1,8 +1,0 @@
-fastapi==0.105.0
-attrs==23.1.0
-stac-fastapi.api==2.4.9
-stac-fastapi.types==2.4.9
-stac-fastapi.extensions==2.4.9
-stac-fastapi.pgstac==2.4.10
-pypgstac[psycopg]==0.7.10
-mangum==0.17.0

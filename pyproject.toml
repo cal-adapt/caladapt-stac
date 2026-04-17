@@ -1,0 +1,24 @@
+[project]
+name = "caladapt-stac"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "mangum>=0.21.0",
+    "psycopg[binary]==3.2.6",
+    "stac-fastapi-pgstac>=6.2.2",
+]
+
+[dependency-groups]
+dev = [
+    "black>=26.3.1",
+]
+ingestion = [
+    "boto3>=1.26.0",
+    "geopandas>=1.1.3",
+    "pandas>=3.0.2",
+    "psycopg-pool>=3.3.0",
+    "pyarrow>=23.0.1",
+    "pypgstac==0.9.10",
+    "pystac>=1.14.3",
+    "requests>=2.33.1",
+]
