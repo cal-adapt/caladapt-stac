@@ -36,7 +36,7 @@ loca2-county:
 
 loca2:
 	uv run python -m scripts.ingest_loca2
-	uv run python -m scripts.register_queryables --collection loca2-gridded
+	uv run python -m scripts.register_queryables --collection loca2
 
 wrf-ucla:
 	uv run python -m scripts.ingest_wrf_ucla
@@ -48,7 +48,7 @@ wrf-cae:
 
 hadisd:
 	uv run python -m scripts.ingest_hadisd
-	uv run python -m scripts.register_queryables --collection hadisd-station-zarrs
+	uv run python -m scripts.register_queryables --collection hadisd
 
 hdp:
 	uv run python -m scripts.ingest_hdp
