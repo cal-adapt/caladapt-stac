@@ -34,6 +34,6 @@ make_icon_gif(
     vmax=1.0,
     width=WIDTH,
     height=HEIGHT,
-    duration_ms=200,
+    duration_ms=175,
     step=STEP,
 )

@@ -31,6 +31,6 @@ make_icon_gif(
     time_unit="h",
     width=WIDTH,
     height=HEIGHT,
-    duration_ms=100,
+    duration_ms=175,
     step=STEP,
 )

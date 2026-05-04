@@ -5,7 +5,7 @@ across California for a single month in 2030.
 
 from climakitae.new_core.user_interface import ClimateData
 
-from icon_constants import WIDTH, HEIGHT
+from icon_constants import WIDTH, HEIGHT, STEP
 from icon_utils import make_icon_gif
 
 print("Fetching LOCA2 tasmax EC-Earth3 daily data for 2030-06 …")
@@ -33,5 +33,6 @@ make_icon_gif(
     kelvin_to_celsius=True,
     width=WIDTH,
     height=HEIGHT,
-    duration_ms=150,
+    duration_ms=200,
+    step=STEP,
 )
