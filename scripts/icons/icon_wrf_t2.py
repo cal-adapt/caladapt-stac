@@ -5,7 +5,7 @@ resolution across California for a single day in 2030.
 
 from climakitae.new_core.user_interface import ClimateData
 
-from icon_constants import WIDTH, HEIGHT, DURATION_MS
+from icon_constants import WIDTH, HEIGHT, STEP
 from icon_utils import make_icon_gif
 
 print("Fetching WRF t2 hourly data for 2030-06-15 at d03 …")
@@ -26,12 +26,12 @@ print(f"Dataset retrieved: {data}")
 make_icon_gif(
     data,
     out_path="wrf_t2_d03_2030.gif",
-    title="WRF t2 – d03\n{timestamp}",
+    title="WRF t2 – d03",
     cmap="YlOrRd",
     time_unit="h",
     kelvin_to_celsius=True,
     width=WIDTH,
     height=HEIGHT,
-    duration_ms=DURATION_MS,
-    step=3,
+    duration_ms=175,
+    step=STEP,
 )
