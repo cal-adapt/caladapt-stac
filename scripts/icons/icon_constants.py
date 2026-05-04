@@ -15,8 +15,8 @@ HEIGHT = 500
 # Render DPI (all icons)
 DPI = 150
 
-# GIF frame duration
-DURATION_MS = 400
+# GIF frame stride (1 = every timestep)
+STEP = 1
 
 # Station map colors
 OCEAN_COLOR = "#a8c8e0"

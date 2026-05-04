@@ -5,7 +5,7 @@ resolution across California for a single day in 2030.
 
 from climakitae.new_core.user_interface import ClimateData
 
-from icon_constants import WIDTH, HEIGHT, DURATION_MS
+from icon_constants import WIDTH, HEIGHT, STEP
 from icon_utils import make_icon_gif
 
 print("Fetching WRF CAE ffwi hourly data for 2030-06-15 at d03 …")
@@ -31,6 +31,6 @@ make_icon_gif(
     time_unit="h",
     width=WIDTH,
     height=HEIGHT,
-    duration_ms=DURATION_MS,
-    step=3,
+    duration_ms=100,
+    step=STEP,
 )
