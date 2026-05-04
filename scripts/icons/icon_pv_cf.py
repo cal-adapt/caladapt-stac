@@ -5,7 +5,7 @@ across California for a single day in 2030.
 
 from climakitae.new_core.user_interface import ClimateData
 
-from icon_constants import WIDTH, HEIGHT, DURATION_MS
+from icon_constants import WIDTH, HEIGHT, STEP
 from icon_utils import make_icon_gif
 
 print("Fetching PV capacity factor hourly data for 2030-06-15 …")
@@ -27,13 +27,13 @@ print(f"Dataset retrieved: {data}")
 make_icon_gif(
     data,
     out_path="pv_cf_d03_2030.gif",
-    title="PV capacity factor\n{timestamp}",
+    title="PV capacity factor",
     cmap="Reds",
     time_unit="h",
     vmin=0.0,
     vmax=1.0,
     width=WIDTH,
     height=HEIGHT,
-    duration_ms=DURATION_MS,
-    step=3,
+    duration_ms=175,
+    step=STEP,
 )

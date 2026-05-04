@@ -32,6 +32,7 @@ HADISD_CA_STATION_COORDS_URL = (
 HADISD_WECC_STATION_COORDS_URL = (
     "https://cadcat.s3.amazonaws.com/geometries/hadisd-wecc-station-coords.geojson"
 )
+HADISD_STATIONS_CSV_URL = "https://cadcat.s3.amazonaws.com/hadisd/hadisd_stations.csv"
 HDP_STATION_COORDS_URL = (
     "https://cadcat.s3.amazonaws.com/geometries/hdp-station-coords.geojson"
 )
