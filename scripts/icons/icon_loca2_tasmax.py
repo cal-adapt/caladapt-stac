@@ -27,12 +27,12 @@ print(f"Dataset retrieved: {data}")
 make_icon_gif(
     data,
     out_path="loca2_tasmax_2030.gif",
-    title="LOCA2 tasmax\n{timestamp}",
+    title="LOCA2 tasmax",
     cmap="YlOrRd",
     time_unit="D",
     kelvin_to_celsius=True,
     width=WIDTH,
     height=HEIGHT,
-    duration_ms=200,
+    duration_ms=175,
     step=STEP,
 )

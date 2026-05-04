@@ -26,7 +26,7 @@ print(f"Dataset retrieved: {data}")
 make_icon_gif(
     data,
     out_path="wrf_cae_ffwi_d03_2030.gif",
-    title="WRF CAE ffwi – d03\n{timestamp}",
+    title="WRF CAE ffwi – d03",
     cmap="inferno",
     time_unit="h",
     width=WIDTH,

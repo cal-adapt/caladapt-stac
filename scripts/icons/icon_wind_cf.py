@@ -27,7 +27,7 @@ print(f"Dataset retrieved: {data}")
 make_icon_gif(
     data,
     out_path="wind_cf_d03_2030.gif",
-    title="Wind capacity factor\n{timestamp}",
+    title="Wind capacity factor",
     cmap="Blues",
     time_unit="h",
     vmin=0.0,

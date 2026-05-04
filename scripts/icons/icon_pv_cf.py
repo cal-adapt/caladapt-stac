@@ -27,7 +27,7 @@ print(f"Dataset retrieved: {data}")
 make_icon_gif(
     data,
     out_path="pv_cf_d03_2030.gif",
-    title="PV capacity factor\n{timestamp}",
+    title="PV capacity factor",
     cmap="Reds",
     time_unit="h",
     vmin=0.0,
