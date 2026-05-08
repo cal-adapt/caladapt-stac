@@ -90,7 +90,17 @@ def build_wrf_cae_collection():
     collection = pystac.Collection(
         id="wrf-cae",
         title="WRF-derived climate metrics",
-        keywords=["climate model", "cloud-optimized", "western US", "geospatial", "CMIP6", "dynamical", "extreme heat", "wildfire", "extreme precipitation"],
+        keywords=[
+            "climate model",
+            "cloud-optimized",
+            "western US",
+            "geospatial",
+            "CMIP6",
+            "dynamical",
+            "extreme heat",
+            "wildfire",
+            "extreme precipitation",
+        ],
         extra_fields={"caladapt:spatial_type": "grid"},
         description=(
             "Extreme heat, precipitation, and fire weather metrics derived from "
@@ -162,8 +172,8 @@ def build_wrf_cae_collection():
 
         bbox = WRF_UCLA_GRID_BBOXES.get(grid_label, WRF_UCLA_GRID_BBOXES["d02"])
         props = {
-            "activity_id": "WRF",
-            "institution_id": "CAE",
+            "cmip6:activity_id": "WRF",
+            "cmip6:institution_id": "CAE",
             "cmip6:source_id": source_id,
             "cmip6:experiment_id": experiment_id,
             "cmip6:table_id": table_id,

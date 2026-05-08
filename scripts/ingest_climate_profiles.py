@@ -104,7 +104,15 @@ def build_tmy_collection():
     collection = pystac.Collection(
         id="typical-met-year",
         title="Typical meteorological year",
-        keywords=["climate profiles", "global warming level", "climate models", "future projections", "CMIP6", "building standards", "energy efficiency"],
+        keywords=[
+            "climate profiles",
+            "global warming level",
+            "climate models",
+            "future projections",
+            "CMIP6",
+            "building standards",
+            "energy efficiency",
+        ],
         extra_fields={"caladapt:spatial_type": "point"},
         description="Typical Meteorological Year climate profiles (8760) generated with dynamically-downscaled (WRF) global climate models at weather station locations for 50th percentile (p50) and 4 warming level planning horizons. A climate profile represents every hour of a 1-year period (e.g., 8760 hours). TMY profiles are in the time zone of the selected station.",
         license=CALADAPT_DATA_LICENSE,
@@ -203,7 +211,13 @@ def build_smy_collection():
     collection = pystac.Collection(
         id="standard-year",
         title="Standard year",
-        keywords=["climate profiles", "global warming level", "climate models", "future projections", "CMIP6"],
+        keywords=[
+            "climate profiles",
+            "global warming level",
+            "climate models",
+            "future projections",
+            "CMIP6",
+        ],
         extra_fields={"caladapt:spatial_type": "point"},
         description="Standard Year climate profiles (8760) generated with dynamically downscaled (WRF) global climate models at weather station locations for 50th, 5th, and 95th percentiles and 4 warming level planning horizons. A climate profile represents every hour of a 1-year period (e.g., 8760 hours). Standard Year profiles are in the time zone of the selected station.",
         license=CALADAPT_DATA_LICENSE,

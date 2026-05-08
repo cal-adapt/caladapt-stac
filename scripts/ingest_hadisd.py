@@ -67,7 +67,12 @@ def build_hadisd_collection():
     collection = pystac.Collection(
         id="hadisd",
         title="HadISD",
-        keywords=["cloud-optimized", "historical data", "weather station", "air temperature"],
+        keywords=[
+            "cloud-optimized",
+            "historical data",
+            "weather station",
+            "air temperature",
+        ],
         extra_fields={"caladapt:spatial_type": "point"},
         description=("Met Office HadISD sub-daily station data for the WECC region."),
         license=HADISD_LICENSE,
