@@ -119,7 +119,14 @@ def build_sea_level_collection():
     collection = pystac.Collection(
         id="sea-level-projections",
         title="Sea level projections",
-        keywords=["climate model", "tide stations", "California", "sea level rise", "future projections", "CMIP6"],
+        keywords=[
+            "climate model",
+            "tide stations",
+            "California",
+            "sea level rise",
+            "future projections",
+            "CMIP6",
+        ],
         extra_fields={"caladapt:spatial_type": "point"},
         description=(
             "Hourly sea level projections for 13 NOAA tide stations along the California "

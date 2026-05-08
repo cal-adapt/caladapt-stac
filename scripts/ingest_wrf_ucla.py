@@ -105,7 +105,14 @@ def build_wrf_ucla_collection():
     collection = pystac.Collection(
         id="wrf-ucla",
         title="WRF",
-        keywords=["climate model", "cloud-optimized", "western US", "geospatial", "CMIP6", "dynamical"],
+        keywords=[
+            "climate model",
+            "cloud-optimized",
+            "western US",
+            "geospatial",
+            "CMIP6",
+            "dynamical",
+        ],
         extra_fields={"caladapt:spatial_type": "grid"},
         description="Dynamically downscaled climate projections for California using the Weather Research & Forecasting Model (WRF).",
         license=CALADAPT_DATA_LICENSE,
@@ -171,8 +178,8 @@ def build_wrf_ucla_collection():
 
         bbox = WRF_UCLA_GRID_BBOXES.get(grid_label, WRF_UCLA_GRID_BBOXES["d02"])
         props = {
-            "activity_id": "WRF",
-            "institution_id": "UCLA",
+            "cmip6:activity_id": "WRF",
+            "cmip6:institution_id": "UCLA",
             "cmip6:source_id": source_id,
             "cmip6:experiment_id": experiment_id,
             "cmip6:table_id": table_id,

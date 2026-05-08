@@ -27,7 +27,9 @@ class TestBboxToGeometry:
 
 class TestParseTmyKey:
     def test_valid_epw(self):
-        key = "climate-profiles/typical-met-year/sacramento/taiesm1/mid-century/file.epw"
+        key = (
+            "climate-profiles/typical-met-year/sacramento/taiesm1/mid-century/file.epw"
+        )
         assert parse_tmy_key(key) == {
             "location": "sacramento",
             "model": "taiesm1",
@@ -42,12 +44,17 @@ class TestParseTmyKey:
         assert result["time_period"] == "near-future"
 
     def test_invalid_extension(self):
-        assert parse_tmy_key("climate-profiles/typical-met-year/loc/model/period/file.nc") is None
+        assert (
+            parse_tmy_key("climate-profiles/typical-met-year/loc/model/period/file.nc")
+            is None
+        )
 
 
 class TestParseSmyKey:
     def test_valid_csv(self):
-        key = "climate-profiles/standard-met-year/sacramento/dbt/p50/mid-century/file.csv"
+        key = (
+            "climate-profiles/standard-met-year/sacramento/dbt/p50/mid-century/file.csv"
+        )
         assert parse_smy_key(key) == {
             "location": "sacramento",
             "variable": "dbt",
@@ -56,7 +63,9 @@ class TestParseSmyKey:
         }
 
     def test_epw_returns_none(self):
-        key = "climate-profiles/standard-met-year/sacramento/dbt/p50/mid-century/file.epw"
+        key = (
+            "climate-profiles/standard-met-year/sacramento/dbt/p50/mid-century/file.epw"
+        )
         assert parse_smy_key(key) is None
 
 
@@ -79,7 +88,10 @@ class TestParseLoca2CountyKey:
         assert parse_loca2_county_key("loca2/ucb/netcdf/county/day/file.zarr") is None
 
     def test_too_few_filename_parts(self):
-        assert parse_loca2_county_key("loca2/ucb/netcdf/county/day/06115_pr_day.nc") is None
+        assert (
+            parse_loca2_county_key("loca2/ucb/netcdf/county/day/06115_pr_day.nc")
+            is None
+        )
 
 
 class TestParseLoca2GriddedStore:
@@ -95,7 +107,10 @@ class TestParseLoca2GriddedStore:
         assert r["grid_label"] == "d03"
 
     def test_path_includes_bucket(self):
-        assert parse_loca2_gridded_store(self.PREFIX)["path"] == f"s3://cadcat/{self.PREFIX}"
+        assert (
+            parse_loca2_gridded_store(self.PREFIX)["path"]
+            == f"s3://cadcat/{self.PREFIX}"
+        )
 
 
 class TestParseRenStore:
@@ -111,10 +126,27 @@ class TestParseRenStore:
         assert r["grid_label"] == "d03"
 
     def test_path_includes_ren_bucket(self):
-        assert parse_ren_store(self.PREFIX, self.BASE)["path"] == f"s3://wfclimres/{self.PREFIX}"
+        assert (
+            parse_ren_store(self.PREFIX, self.BASE)["path"]
+            == f"s3://wfclimres/{self.PREFIX}"
+        )
 
 
-VALID_STATIONS = {"sf", "lj", "la", "sb", "sl", "my", "pa", "hb", "cc", "pc", "al", "rc", "ri"}
+VALID_STATIONS = {
+    "sf",
+    "lj",
+    "la",
+    "sb",
+    "sl",
+    "my",
+    "pa",
+    "hb",
+    "cc",
+    "pc",
+    "al",
+    "rc",
+    "ri",
+}
 
 
 class TestParseHmetKey:
@@ -127,16 +159,30 @@ class TestParseHmetKey:
         }
 
     def test_wrong_extension(self):
-        assert parse_hmet_key("hmet/watlev.sf.low.50pctile.ssp245.wv2.csv", VALID_STATIONS) is None
+        assert (
+            parse_hmet_key("hmet/watlev.sf.low.50pctile.ssp245.wv2.csv", VALID_STATIONS)
+            is None
+        )
 
     def test_wrong_prefix_word(self):
-        assert parse_hmet_key("hmet/other.sf.low.50pctile.ssp245.wv2.nc", VALID_STATIONS) is None
+        assert (
+            parse_hmet_key("hmet/other.sf.low.50pctile.ssp245.wv2.nc", VALID_STATIONS)
+            is None
+        )
 
     def test_unknown_station(self):
-        assert parse_hmet_key("hmet/watlev.zz.low.50pctile.ssp245.wv2.nc", VALID_STATIONS) is None
+        assert (
+            parse_hmet_key("hmet/watlev.zz.low.50pctile.ssp245.wv2.nc", VALID_STATIONS)
+            is None
+        )
 
     def test_unknown_slr_scenario(self):
-        assert parse_hmet_key("hmet/watlev.sf.medium.50pctile.ssp245.wv2.nc", VALID_STATIONS) is None
+        assert (
+            parse_hmet_key(
+                "hmet/watlev.sf.medium.50pctile.ssp245.wv2.nc", VALID_STATIONS
+            )
+            is None
+        )
 
     def test_all_slr_scenarios_recognized(self):
         for abbrev in SLR_SCENARIO_LABELS:

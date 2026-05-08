@@ -47,11 +47,15 @@ def s3_client():
 @pytest.mark.parametrize("prefix", CADCAT_PREFIXES, ids=CADCAT_PREFIXES)
 def test_cadcat_prefix_non_empty(s3_client, prefix):
     response = s3_client.list_objects_v2(Bucket=BUCKET_CADCAT, Prefix=prefix, MaxKeys=1)
-    assert response.get("KeyCount", 0) > 0, f"No objects under s3://{BUCKET_CADCAT}/{prefix}"
+    assert (
+        response.get("KeyCount", 0) > 0
+    ), f"No objects under s3://{BUCKET_CADCAT}/{prefix}"
 
 
 @pytest.mark.integration
 @pytest.mark.parametrize("prefix", REN_PREFIXES, ids=REN_PREFIXES)
 def test_ren_prefix_non_empty(s3_client, prefix):
     response = s3_client.list_objects_v2(Bucket=BUCKET_REN, Prefix=prefix, MaxKeys=1)
-    assert response.get("KeyCount", 0) > 0, f"No objects under s3://{BUCKET_REN}/{prefix}"
+    assert (
+        response.get("KeyCount", 0) > 0
+    ), f"No objects under s3://{BUCKET_REN}/{prefix}"

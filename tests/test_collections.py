@@ -18,7 +18,6 @@ from scripts.ingest_wrf_cae import build_wrf_cae_collection
 from scripts.ingest_wrf_ucla import build_wrf_ucla_collection
 from scripts.ingest_ren import build_pv_collection, build_wind_collection
 
-
 MOCK_ONE_FEATURE = {
     "type": "FeatureCollection",
     "features": [
