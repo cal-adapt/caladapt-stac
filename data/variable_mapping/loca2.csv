@@ -1,0 +1,11 @@
+variable_id,variable_label
+hursmax,Maximum relative humidity
+hursmin,Minimum relative humidity
+huss,Specific humidity at 2m
+pr,Precipitation (total)
+rsds,Shortwave flux at the surface
+tasmax,Maximum air temperature at 2m
+tasmin,Minimum air temperature at 2m
+uas,West-East component of wind at 10m
+vas,North-South component of wind at 10m
+wspeed,Wind speed at 10m

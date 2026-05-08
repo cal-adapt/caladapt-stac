@@ -35,7 +35,7 @@ from scripts.constants import (
     PGDSN,
     WRF_UCLA_GRID_BBOXES,
     WRF_UCSD_GRID_BBOXES,
-    WRF_VARIABLE_LABELS,
+    RENEWABLES_VARIABLE_LABELS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -144,7 +144,7 @@ def _build_ren_items(collection, resource, module_prefixes):
                     "cmip6:experiment_id": experiment_id,
                     "cmip6:table_id": table_id,
                     "variable_id": variable_id,
-                    "variable_label": WRF_VARIABLE_LABELS.get(variable_id, variable_id),
+                    "variable_label": RENEWABLES_VARIABLE_LABELS.get(variable_id, variable_id),
                     "cmip6:grid_label": grid_label,
                     "start_datetime": start_dt.isoformat(),
                     "end_datetime": end_dt.isoformat(),

@@ -1,0 +1,86 @@
+variable_id,variable_label
+cape,Convective available potential energy
+cin,Convective inhibition
+dew_point,Dew point temperature
+dew_point_derived,Dew point temperature
+dew_point_derived_hrly,Dew point temperature
+effective_temp_index,Effective temperature index
+effective_temp_index_derived,Effective temperature
+etrans_sfc,Evapotranspiration
+evap_sfc,Evaporation
+ffwi,Fosberg fire weather index
+ffwige50,Days with FFWI ≥ 50
+ffwige50d,Change in days with FFWI ≥ 50
+gh_sfc,Ground heat flux
+hurs,Relative humidity
+ivt,Integrated vapor transport
+iwp,Ice water path
+lcl,Lifting condensation level
+lfc,Level of free convection
+lh_sfc,Latent heat flux at the surface
+lw_dwn,Instantaneous downwelling longwave flux at bottom
+lw_sfc,Longwave flux at the surface
+lwdnb,Instantaneous downwelling longwave flux at bottom
+lwdnbc,Instantaneous downwelling clear sky longwave flux at bottom
+lwp,Liquid water path
+lwupb,Instantaneous upwelling longwave flux at bottom
+lwupbc,Instantaneous upwelling clear sky longwave flux at bottom
+noaa_heat_index_derived,NOAA heat index
+p,Air pressure
+pblh,Planetary boundary layer height
+ph,Geopotential height perturbation
+prec,Precipitation (total)
+prec_c,Precipitation (convective only)
+prec_max,Maximum precipitation
+prec_snow,Snowfall
+psfc,Surface pressure
+q2,Water vapor mixing ratio at 2m
+q2_derived,Specific humidity at 2m
+R99p,Change in 99th percentile precipitation (excl. snowfall)
+R99pd,Change in 99th percentile precipitation from historical (excl. snowfall)
+rainc,Precipitation (cumulus portion only)
+rainnc,Precipitation (grid-scale portion only)
+rh,Relative humidity
+rh_derived,Relative humidity
+rh_max,Maximum relative humidity
+rh_min,Minimum relative humidity
+runsb,Subsurface runoff
+runsf,Surface runoff
+sfc_runoff,Surface runoff
+sh_sfc,Sensible heat flux at the surface
+snow,Snow water equivalent
+snownc,Snowfall (snow and ice)
+soil_m,Soil moisture
+soil_t,Soil temperature
+subsfc_runoff,Subsurface runoff
+sw_dwn,Instantaneous downwelling shortwave flux at bottom
+sw_sfc,Shortwave flux at the surface
+swddif,Shortwave surface downward diffuse irradiance
+swddir,Shortwave surface downward direct irradiance
+swddni,Shortwave surface downward direct normal irradiance
+swdnb,Instantaneous downwelling shortwave flux at bottom
+swdnbc,Instantaneous downwelling clear sky shortwave flux at bottom
+swupb,Instantaneous upwelling shortwave flux at bottom
+swupbc,Instantaneous upwelling clear sky shortwave flux at bottom
+t,Air temperature
+t2,Air temperature at 2m
+t2max,Maximum air temperature at 2m
+t2max_99pctl,99th percentile of daily maximum temperature at 2m
+t2max_ge100F,Days with maximum temperature ≥ 100°F
+t2max_ge105F,Days with maximum temperature ≥ 105°F
+t2min,Minimum air temperature at 2m
+tsk,Surface skin temperature
+tskin,Surface skin temperature
+TX99p,Days with max temperature > 99th percentile
+TX99pd,Change in days with max temperature > 99th percentile
+u,Zonal wind component at 10m
+u10,West-East component of wind at 10m
+uv10,U and V wind components at 10m
+v,Meridional wind component at 10m
+v10,North-South component of wind at 10m
+wind_direction_derived,Wind direction at 10m
+wind_speed_derived,Wind speed at 10m
+wspd10max,Maximum wind speed at 10m
+wspd10mean,Mean wind speed at 10m
+wspeed,Wind speed at 10m
+znt,Surface roughness length

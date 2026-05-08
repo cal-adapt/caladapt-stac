@@ -4,8 +4,10 @@ Shared constants for building and ingesting STAC items.
 
 """
 
+import csv
 import os
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pystac
 
@@ -157,92 +159,20 @@ WRF_UCLA_GRID_BBOXES = {
     "d03": [-127.9559, 29.9789, -111.2325, 44.8999],
 }
 
-# Human-readable labels for WRF (Dynamical) variable IDs.
-# Sourced from climakitae/data/variable_descriptions.csv (display_name column).
-WRF_VARIABLE_LABELS: dict[str, str] = {
-    "t2": "Air Temperature at 2m",
-    "t2max": "Maximum air temperature at 2m",
-    "t2min": "Minimum air temperature at 2m",
-    "t": "Air Temperature",
-    "tsk": "Surface skin temperature",
-    "tskin": "Surface skin temperature",
-    "prec": "Precipitation (total)",
-    "prec_snow": "Snowfall",
-    "prec_c": "Precipitation (convective only)",
-    "prec_max": "Maximum precipitation",
-    "rainc": "Precipitation (cumulus portion only)",
-    "rainnc": "Precipitation (grid-scale portion only)",
-    "snownc": "Snowfall (snow and ice)",
-    "snow": "Snow water equivalent",
-    "rh": "Relative humidity",
-    "rh_derived": "Relative humidity",
-    "rh_max": "Maximum relative humidity",
-    "rh_min": "Minimum relative humidity",
-    "q2": "Water Vapor Mixing Ratio at 2m",
-    "q2_derived": "Specific humidity at 2m",
-    "psfc": "Surface Pressure",
-    "p": "Air pressure",
-    "ph": "Geopotential height perturbation",
-    "u10": "West-East component of Wind at 10m",
-    "v10": "North-South component of Wind at 10m",
-    "u": "Zonal Wind Component at 10m",
-    "v": "Meridional Wind Component at 10m",
-    "wind_speed_derived": "Wind speed at 10m",
-    "wind_direction_derived": "Wind direction at 10m",
-    "wspd10mean": "Mean wind speed at 10m",
-    "wspd10max": "Maximum wind speed at 10m",
-    "lwdnb": "Instantaneous downwelling longwave flux at bottom",
-    "lwdnbc": "Instantaneous downwelling clear sky longwave flux at bottom",
-    "lwupb": "Instantaneous upwelling longwave flux at bottom",
-    "lwupbc": "Instantaneous upwelling clear sky longwave flux at bottom",
-    "lw_dwn": "Instantaneous downwelling longwave flux at bottom",
-    "lw_sfc": "Longwave flux at the surface",
-    "swdnb": "Instantaneous downwelling shortwave flux at bottom",
-    "swdnbc": "Instantaneous downwelling clear sky shortwave flux at bottom",
-    "swupb": "Instantaneous upwelling shortwave flux at bottom",
-    "swupbc": "Instantaneous upwelling clear sky shortwave flux at bottom",
-    "swddni": "Shortwave surface downward direct normal irradiance",
-    "swddir": "Shortwave surface downward direct irradiance",
-    "swddif": "Shortwave surface downward diffuse irradiance",
-    "sw_dwn": "Instantaneous downwelling shortwave flux at bottom",
-    "sw_sfc": "Shortwave flux at the surface",
-    "sh_sfc": "Sensible heat flux at the surface",
-    "lh_sfc": "Latent heat flux at the surface",
-    "gh_sfc": "Ground heat flux",
-    "dew_point_derived_hrly": "Dew point temperature",
-    "dew_point_derived": "Dew point temperature",
-    "noaa_heat_index_derived": "NOAA Heat Index",
-    "effective_temp_index_derived": "Effective Temperature",
-    "ffwi": "Fosberg fire weather index",
-    "lwp": "Liquid water path",
-    "iwp": "Ice water path",
-    "pblh": "Planetary boundary layer height",
-    "cape": "Convective Available Potential Energy",
-    "cin": "Convective Inhibition",
-    "lcl": "Lifting Condensation Level",
-    "lfc": "Level of Free Convection",
-    "znt": "Surface roughness length",
-    "runsf": "Surface runoff",
-    "runsb": "Subsurface runoff",
-    "sfc_runoff": "Surface runoff",
-    "subsfc_runoff": "Subsurface runoff",
-    "evap_sfc": "Evaporation",
-    "etrans_sfc": "Evapotranspiration",
-    "cf": "Capacity factor",
-    "gen": "Power generation",
-}
+_VAR_MAPPING_DIR = Path(__file__).parent.parent / "data" / "variable_mapping"
 
-# Human-readable labels for LOCA2 (Statistical) variable IDs.
-# Sourced from climakitae/data/variable_descriptions.csv (display_name column).
-LOCA2_VARIABLE_LABELS: dict[str, str] = {
-    "pr": "Precipitation (total)",
-    "tasmax": "Maximum air temperature at 2m",
-    "tasmin": "Minimum air temperature at 2m",
-    "uas": "West-East component of Wind at 10m",
-    "vas": "North-South component of Wind at 10m",
-    "huss": "Specific humidity at 2m",
-    "hursmin": "Minimum relative humidity",
-    "hursmax": "Maximum relative humidity",
-    "wspeed": "Wind speed at 10m",
-    "rsds": "Shortwave flux at the surface",
-}
+
+def _load_variable_labels(path: Path) -> dict[str, str]:
+    with path.open(encoding="utf-8") as f:
+        return {row["variable_id"]: row["variable_label"] for row in csv.DictReader(f)}
+
+
+WRF_VARIABLE_LABELS: dict[str, str] = _load_variable_labels(
+    _VAR_MAPPING_DIR / "wrf.csv"
+)
+LOCA2_VARIABLE_LABELS: dict[str, str] = _load_variable_labels(
+    _VAR_MAPPING_DIR / "loca2.csv"
+)
+RENEWABLES_VARIABLE_LABELS: dict[str, str] = _load_variable_labels(
+    _VAR_MAPPING_DIR / "renewables.csv"
+)
