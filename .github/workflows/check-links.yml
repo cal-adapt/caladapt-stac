@@ -16,7 +16,7 @@ jobs:
 
       - name: Check collection related links
         env:
-          STAC_API_URL: https://8dawjspn5g.execute-api.us-west-2.amazonaws.com
+          STAC_API_URL: https://stac.cal-adapt.org
         run: |
           python3 - <<'EOF'
           import sys

@@ -44,7 +44,7 @@ Client → API Gateway → Lambda (stac-fastapi) → RDS Postgres (pgSTAC)
 ![RDS Endpoint](images/README/endpoint.png)
 > The RDS endpoint can be found under the **Connectivity & security** tab → **Additional configurations** → **Endpoint & port**.
 
-The live API is at `https://8dawjspn5g.execute-api.us-west-2.amazonaws.com`. This will eventually be updated to replace v1 of the STAC API, which currently has the url https://stac.cal-adapt.org.
+The live API is at `https://stac.cal-adapt.org`. The raw API Gateway URL `https://8dawjspn5g.execute-api.us-west-2.amazonaws.com` redirects to `https://stac.cal-adapt.org`.
 
 ## Prerequisites
 
