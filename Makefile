@@ -16,7 +16,10 @@ ingest-all:
 	$(MAKE) loca2-county
 	$(MAKE) loca2
 	$(MAKE) wrf-ucla
-	$(MAKE) wrf-cae
+	$(MAKE) wrf-extreme-heat-tool-county
+	$(MAKE) wrf-extreme-heat-tool-county-csv
+	$(MAKE) wrf-derived-vars
+	$(MAKE) wrf-climate-metrics-map
 	$(MAKE) hadisd
 	$(MAKE) hdp
 	$(MAKE) ren
@@ -42,9 +45,21 @@ wrf-ucla:
 	uv run python -m scripts.ingest_wrf_ucla
 	uv run python -m scripts.register_queryables --collection wrf-ucla
 
-wrf-cae:
-	uv run python -m scripts.ingest_wrf_cae
-	uv run python -m scripts.register_queryables --collection wrf-cae
+wrf-extreme-heat-tool-county:
+	uv run python -m scripts.ingest_wrf_extreme_heat_tool
+	uv run python -m scripts.register_queryables --collection wrf-extreme-heat-tool-county
+
+wrf-extreme-heat-tool-county-csv:
+	uv run python -m scripts.ingest_wrf_extreme_heat_tool_county_csv
+	uv run python -m scripts.register_queryables --collection wrf-extreme-heat-tool-county-csv
+
+wrf-derived-vars:
+	uv run python -m scripts.ingest_wrf_derived_vars
+	uv run python -m scripts.register_queryables --collection wrf-derived-vars
+
+wrf-climate-metrics-map:
+	uv run python -m scripts.ingest_wrf_climate_metrics_map
+	uv run python -m scripts.register_queryables --collection wrf-climate-metrics-map
 
 hadisd:
 	uv run python -m scripts.ingest_hadisd
