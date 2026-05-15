@@ -131,6 +131,8 @@ make clim-prof       # typical-met-year, standard-met-year
 make loca2-county    # LOCA2 county NetCDF
 make loca2           # LOCA2 gridded Zarr
 make wrf-ucla        # WRF UCLA
+make wrf-extreme-heat-tool-county      # WRF extreme heat tool county Zarr
+make wrf-extreme-heat-tool-county-csv  # WRF extreme heat tool county CSV
 make wrf-cae         # WRF-derived climate metrics
 make hadisd          # HadISD station Zarrs
 make hdp             # Historical Data Platform

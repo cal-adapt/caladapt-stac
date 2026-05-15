@@ -1,6 +1,6 @@
 """ingest_wrf_extreme_heat_tool.py
 
-Ingest WRF extreme heat tool data into pgSTAC.
+Ingest WRF extreme heat tool county-aggregated Zarr data into pgSTAC.
 
 Bias-corrected WRF dynamically downscaled extreme heat projections for
 California at global warming levels (0.8°C–3.0°C), supporting the Cal-Adapt
@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 import pystac
 
 from scripts.constants import (
+    API_ENDPOINT,
     BUCKET_CADCAT,
     CA_BBOX,
     CALADAPT_DATA_LICENSE,
@@ -70,15 +71,15 @@ def parse_county_store(store_prefix):
 
 def build_wrf_extreme_heat_tool_collection():
     """
-    Build a pystac Collection for WRF extreme heat tool data.
+    Build a pystac Collection for WRF extreme heat tool county-aggregated Zarr data.
 
     Returns
     -------
     pystac.Collection
     """
     collection = pystac.Collection(
-        id="wrf-extreme-heat-tool",
-        title="Cal Adapt extreme heat metrics tool",
+        id="wrf-extreme-heat-tool-county",
+        title="Cal Adapt extreme heat metrics tool (county Zarr)",
         keywords=[
             "climate model",
             "cloud-optimized",
@@ -130,7 +131,14 @@ def build_wrf_extreme_heat_tool_collection():
             title="WRF extreme heat tool preview",
         ),
     )
-
+    collection.add_link(
+        pystac.Link(
+            rel="related",
+            target=f"{API_ENDPOINT}/collections/wrf-extreme-heat-tool-county-csv",
+            media_type="application/json",
+            title="WRF extreme heat tool county CSV",
+        )
+    )
 
     print("  Listing county zarr stores...")
     for store_prefix in list_zarr_stores(COUNTY_PREFIX, BUCKET_CADCAT, depth=4):
@@ -172,7 +180,7 @@ def build_wrf_extreme_heat_tool_collection():
 
 
 def main():
-    print("  Building WRF extreme heat tool collection...")
+    print("  Building WRF extreme heat tool county collection...")
     collection = build_wrf_extreme_heat_tool_collection()
     print("  Loading directly into pgSTAC...")
     load_direct(collection, PGDSN)
