@@ -156,6 +156,7 @@ def build_loca2_gridded_collection():
 
     # depth=6: source_id/experiment_id/member_id/table_id/variable_id/grid_label
     print("  Listing zarr stores...")
+    seen_variables: set[str] = set()
     for i, store_prefix in enumerate(
         list_zarr_stores(LOCA2_GRIDDED_PREFIX, BUCKET_CADCAT, depth=6)
     ):
@@ -170,6 +171,7 @@ def build_loca2_gridded_collection():
         variable_id = parsed["variable_id"]
         grid_label = parsed["grid_label"]
 
+        seen_variables.add(variable_id)
         item_id = f"loca2-gridded-{source_id}-{experiment_id}-{member_id}-{table_id}-{variable_id}-{grid_label}"
 
         start_dt, end_dt = EXPERIMENT_DATE_RANGES.get(
@@ -187,7 +189,6 @@ def build_loca2_gridded_collection():
             "cmip6:member_id": member_id,
             "cmip6:table_id": table_id,
             "variable_id": variable_id,
-            "variable_label": LOCA2_VARIABLE_LABELS.get(variable_id, variable_id),
             "cmip6:grid_label": grid_label,
             "start_datetime": start_dt.isoformat(),
             "end_datetime": end_dt.isoformat(),
@@ -205,6 +206,9 @@ def build_loca2_gridded_collection():
         )
         collection.add_item(item)
 
+    collection.extra_fields["caladapt:variable_labels"] = {
+        var: LOCA2_VARIABLE_LABELS.get(var, var) for var in seen_variables
+    }
     return collection
 
 

@@ -134,6 +134,7 @@ def build_wrf_climate_metrics_map_collection():
     )
 
     print("  Listing zarr stores...")
+    seen_variables: set[str] = set()
     for store_prefix in list_zarr_stores(
         WRF_CLIMATE_METRICS_MAP_PREFIX, BUCKET_CADCAT, depth=5
     ):
@@ -143,6 +144,7 @@ def build_wrf_climate_metrics_map_collection():
         metric = parsed["metric"]
         grid_label = parsed["grid_label"]
 
+        seen_variables.add(metric)
         start_dt, end_dt = EXPERIMENT_DATE_RANGES[scenario]
         item_id = f"wrf-climate-metrics-map-{statistic}-{scenario}-gwl-{metric}-{grid_label}"
 
@@ -154,7 +156,6 @@ def build_wrf_climate_metrics_map_collection():
             "cmip6:grid_label": grid_label,
             "statistic": statistic,
             "variable_id": metric,
-            "variable_label": WRF_VARIABLE_LABELS.get(metric, metric),
             "caladapt:spatial_type": "grid",
             "start_datetime": start_dt.isoformat(),
             "end_datetime": end_dt.isoformat(),
@@ -172,6 +173,9 @@ def build_wrf_climate_metrics_map_collection():
         )
         collection.add_item(item)
 
+    collection.extra_fields["caladapt:variable_labels"] = {
+        var: WRF_VARIABLE_LABELS.get(var, var) for var in seen_variables
+    }
     return collection
 
 

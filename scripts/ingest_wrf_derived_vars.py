@@ -135,6 +135,7 @@ def build_wrf_derived_vars_collection():
     )
 
     print("  Listing zarr stores...")
+    seen_variables: set[str] = set()
     for store_prefix in list_zarr_stores(WRF_DERIVED_VARS_PREFIX, BUCKET_CADCAT, depth=5):
         parsed = parse_derived_vars_store(store_prefix)
         model = parsed["model"]
@@ -142,6 +143,7 @@ def build_wrf_derived_vars_collection():
         variable_id = parsed["variable_id"]
         grid_label = parsed["grid_label"]
 
+        seen_variables.add(variable_id)
         start_dt, end_dt = EXPERIMENT_DATE_RANGES[scenario]
         item_id = f"wrf-derived-vars-{model}-{scenario}-1hr-{variable_id}-{grid_label}"
 
@@ -153,7 +155,6 @@ def build_wrf_derived_vars_collection():
             "cmip6:table_id": "1hr",
             "cmip6:grid_label": grid_label,
             "variable_id": variable_id,
-            "variable_label": WRF_VARIABLE_LABELS.get(variable_id, variable_id),
             "caladapt:spatial_type": "grid",
             "start_datetime": start_dt.isoformat(),
             "end_datetime": end_dt.isoformat(),
@@ -171,6 +172,9 @@ def build_wrf_derived_vars_collection():
         )
         collection.add_item(item)
 
+    collection.extra_fields["caladapt:variable_labels"] = {
+        var: WRF_VARIABLE_LABELS.get(var, var) for var in seen_variables
+    }
     return collection
 
 

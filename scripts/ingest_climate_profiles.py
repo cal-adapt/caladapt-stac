@@ -266,6 +266,7 @@ def build_smy_collection():
     )
 
     station_coords = get_station_coords()
+    variable_labels = {}
     for key, size in list_keys(SMY_PREFIX, BUCKET_CADCAT):
         props = parse_smy_key(key)
         if props is None:
@@ -276,7 +277,8 @@ def build_smy_collection():
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
-        props["variable_label"] = WRF_VARIABLE_LABELS.get(
+
+        variable_labels[props["variable"]] = WRF_VARIABLE_LABELS.get(
             props["variable"], props["variable"]
         )
 
@@ -298,6 +300,8 @@ def build_smy_collection():
             file_size=size,
         )
         collection.add_item(item)
+
+    collection.extra_fields["caladapt:variable_labels"] = variable_labels
     return collection
 
 

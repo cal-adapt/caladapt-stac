@@ -153,6 +153,7 @@ def build_wrf_ucla_collection():
 
     # depth=5: source_id/experiment_id/table_id/variable_id/grid_label
     print("  Listing zarr stores...")
+    seen_variables: set[str] = set()
     for i, store_prefix in enumerate(
         list_zarr_stores(WRF_UCLA_PREFIX, BUCKET_CADCAT, depth=5)
     ):
@@ -166,6 +167,7 @@ def build_wrf_ucla_collection():
         variable_id = parsed["variable_id"]
         grid_label = parsed["grid_label"]
 
+        seen_variables.add(variable_id)
         item_id = f"wrf-ucla-{source_id}-{experiment_id}-{table_id}-{variable_id}-{grid_label}"
 
         start_dt, end_dt = EXPERIMENT_DATE_RANGES.get(
@@ -184,7 +186,6 @@ def build_wrf_ucla_collection():
             "cmip6:experiment_id": experiment_id,
             "cmip6:table_id": table_id,
             "variable_id": variable_id,
-            "variable_label": WRF_VARIABLE_LABELS.get(variable_id, variable_id),
             "cmip6:grid_label": grid_label,
             "bias_adjusted": source_id not in UCLA_NON_BA_SOURCE_IDS,
             "start_datetime": start_dt.isoformat(),
@@ -203,6 +204,9 @@ def build_wrf_ucla_collection():
         )
         collection.add_item(item)
 
+    collection.extra_fields["caladapt:variable_labels"] = {
+        var: WRF_VARIABLE_LABELS.get(var, var) for var in seen_variables
+    }
     return collection
 
 

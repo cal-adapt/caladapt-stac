@@ -171,6 +171,13 @@ def build_loca2_county_collection():
         )
         groups[group_key][parsed["variable"]] = (key, size)
 
+    all_variables: set[str] = set()
+    for variables in groups.values():
+        all_variables.update(variables.keys())
+    collection.extra_fields["caladapt:variable_labels"] = {
+        var: LOCA2_VARIABLE_LABELS.get(var, var) for var in all_variables
+    }
+
     print(f"  Building {len(groups)} items...")
     for group_key, variables in groups.items():
         county_code, model, scenario, member_id, frequency = group_key
@@ -204,10 +211,7 @@ def build_loca2_county_collection():
                     href=f"s3://{BUCKET_CADCAT}/{key}",
                     media_type="application/netcdf",
                     title=LOCA2_VARIABLE_LABELS.get(variable, variable),
-                    extra_fields={
-                        "file:size": size,
-                        "variable_label": LOCA2_VARIABLE_LABELS.get(variable, variable),
-                    },
+                    extra_fields={"file:size": size},
                 ),
             )
         collection.add_item(item)
