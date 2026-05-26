@@ -34,6 +34,7 @@ DATA_DIR = Path(__file__).parent.parent / "data" / "geometries"
 
 CA_COUNTIES_URL = "s3://cadcat/parquet/ca_counties.parquet"
 HADISD_STATIONS_URL = "https://cadcat.s3.amazonaws.com/hadisd/hadisd_stations.csv"
+HADISD_STATION_INFO_PATH = DATA_DIR.parent / "hadisd_station_info_v343_2025f.txt"
 HDP_STATIONS_CSV_URL = (
     "https://cadcat.s3.amazonaws.com/histwxstns/historical_wx_stations.csv"
 )
@@ -97,6 +98,25 @@ def generate_hadisd_ca_stations():
     return {"type": "FeatureCollection", "features": features}
 
 
+def _load_hadisd_station_names():
+    """Parse hadisd_station_info_v343_2025f.txt into a station_id → name dict.
+
+    File format is fixed-width: USAF-WBAN  NAME  LAT  LON  ELEV  START  END.
+    Station IDs use USAF-WBAN with hyphen (e.g. 723840-23155); we strip the
+    hyphen to match zarr filenames (e.g. 72384023155).
+    """
+    names = {}
+    for line in HADISD_STATION_INFO_PATH.read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        station_id = line[:12].replace("-", "")
+        tokens = line[13:].split()
+        if len(tokens) >= 5:
+            names[station_id] = " ".join(tokens[:-5]).strip().title()
+    return names
+
+
 def generate_hadisd_wecc_stations():
     """
     Load WECC-wide HadISD station coordinates from zarr stores in S3 and return as a GeoJSON FeatureCollection.
@@ -104,6 +124,9 @@ def generate_hadisd_wecc_stations():
     Lists all HadISD_*.zarr stores, reads lat/lon scalar variables from each,
     and returns one Point feature per station with a station_id property.
     """
+    print("  Loading HadISD station names...")
+    station_names = _load_hadisd_station_names()
+
     print("  Listing HadISD zarr stores in S3...")
     paginator = s3.get_paginator("list_objects_v2")
     features = []
@@ -136,7 +159,11 @@ def generate_hadisd_wecc_stations():
                 {
                     "type": "Feature",
                     "geometry": {"type": "Point", "coordinates": [lon, lat]},
-                    "properties": {"station_id": station_id, "elevation": elev},
+                    "properties": {
+                        "station_id": station_id,
+                        "station_name": station_names.get(station_id),
+                        "elevation": elev,
+                    },
                 }
             )
     return {"type": "FeatureCollection", "features": features}
