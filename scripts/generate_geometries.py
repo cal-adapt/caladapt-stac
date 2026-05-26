@@ -91,7 +91,7 @@ def generate_hadisd_ca_stations():
             {
                 "type": "Feature",
                 "geometry": {"type": "Point", "coordinates": [lon, lat]},
-                "properties": {"location": location},
+                "properties": {"location": location, "station_name": row["station"]},
             }
         )
     return {"type": "FeatureCollection", "features": features}

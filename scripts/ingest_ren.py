@@ -112,6 +112,7 @@ def _build_ren_items(collection, resource, module_prefixes):
         Mapping of module name to S3 prefix.
     """
     count = 0
+    seen_variables: set[str] = set()
     for installation, prefix in module_prefixes.items():
         print(f"  Listing {resource}/{installation} zarr stores...")
         for store_prefix in list_zarr_stores(prefix, BUCKET_REN, depth=5):
@@ -122,6 +123,7 @@ def _build_ren_items(collection, resource, module_prefixes):
             variable_id = parsed["variable_id"]
             grid_label = parsed["grid_label"]
 
+            seen_variables.add(variable_id)
             item_id = f"{resource}-{installation}-{source_id}-{experiment_id}-{table_id}-{variable_id}-{grid_label}"
 
             start_dt, end_dt = SCENARIO_DATE_RANGES.get(
@@ -144,7 +146,6 @@ def _build_ren_items(collection, resource, module_prefixes):
                     "cmip6:experiment_id": experiment_id,
                     "cmip6:table_id": table_id,
                     "variable_id": variable_id,
-                    "variable_label": RENEWABLES_VARIABLE_LABELS.get(variable_id, variable_id),
                     "cmip6:grid_label": grid_label,
                     "start_datetime": start_dt.isoformat(),
                     "end_datetime": end_dt.isoformat(),
@@ -158,6 +159,9 @@ def _build_ren_items(collection, resource, module_prefixes):
             count += 1
             if count % 50 == 0:
                 print(f"  {count} stores found...")
+    collection.extra_fields["caladapt:variable_labels"] = {
+        var: RENEWABLES_VARIABLE_LABELS.get(var, var) for var in seen_variables
+    }
     return count
 
 
