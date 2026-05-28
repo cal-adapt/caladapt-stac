@@ -160,7 +160,8 @@ def build_tmy_collection():
         "10.5281/zenodo.18135273"
     )
 
-    station_coords = get_station_coords()
+    station_coords, station_names = get_station_data()
+    station_labels = {}
     for key, size in list_keys(TMY_PREFIX, BUCKET_CADCAT):
         props = parse_tmy_key(key)
         if props is None:
@@ -170,6 +171,8 @@ def build_tmy_collection():
         item_id = (
             f"tmy-{props['location']}-{props['model']}-{props['time_period']}-{ext}"
         )
+
+        station_labels[props["location"]] = station_names.get(props["location"], props["location"])
 
         # Get the time period from the profiles lookup table
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
@@ -196,6 +199,7 @@ def build_tmy_collection():
         )
         collection.add_item(item)
 
+    collection.extra_fields["caladapt:station_labels"] = station_labels
     return collection
 
 
@@ -265,7 +269,9 @@ def build_smy_collection():
         "10.5281/zenodo.18135273"
     )
 
-    station_coords = get_station_coords()
+    station_coords, station_names = get_station_data()
+    station_labels = {}
+    variable_labels = {}
     for key, size in list_keys(SMY_PREFIX, BUCKET_CADCAT):
         props = parse_smy_key(key)
         if props is None:
@@ -276,7 +282,9 @@ def build_smy_collection():
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
-        props["variable_label"] = WRF_VARIABLE_LABELS.get(
+
+        station_labels[props["location"]] = station_names.get(props["location"], props["location"])
+        variable_labels[props["variable"]] = WRF_VARIABLE_LABELS.get(
             props["variable"], props["variable"]
         )
 
@@ -298,23 +306,30 @@ def build_smy_collection():
             file_size=size,
         )
         collection.add_item(item)
+
+    collection.extra_fields["caladapt:variable_labels"] = variable_labels
+    collection.extra_fields["caladapt:station_labels"] = station_labels
     return collection
 
 
-def get_station_coords():
+def get_station_data():
     """
-    Load HadISD station coordinates from S3.
+    Load HadISD station coordinates and names from S3.
 
     Returns
     -------
-    dict
-        Mapping of location name (e.g. "sacramento") to [lon, lat].
+    tuple[dict, dict]
+        coords: location -> [lon, lat]
+        names: location -> readable station name
     """
     fc = requests.get(HADISD_CA_STATION_COORDS_URL).json()
-    return {
-        feature["properties"]["location"]: feature["geometry"]["coordinates"]
-        for feature in fc["features"]
-    }
+    coords = {}
+    names = {}
+    for feature in fc["features"]:
+        loc = feature["properties"]["location"]
+        coords[loc] = feature["geometry"]["coordinates"]
+        names[loc] = feature["properties"].get("station_name", loc)
+    return coords, names
 
 
 def main():
