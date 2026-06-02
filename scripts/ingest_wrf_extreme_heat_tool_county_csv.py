@@ -32,6 +32,7 @@ from scripts.constants import (
     ICON_BASE_URL,
     PGDSN,
     WRF_EXTREME_HEAT_TOOL_PREFIX,
+    WRF_VARIABLE_LABELS,
 )
 from scripts.utils import list_keys, load_direct
 
@@ -140,6 +141,10 @@ def build_wrf_extreme_heat_tool_county_csv_collection():
             ),
         ),
     )
+    collection.extra_fields["caladapt:variable_labels"] = {
+        var: WRF_VARIABLE_LABELS.get(var, var)
+        for var in ("t2max_99pctl", "t2max_ge100F", "t2max_ge105F")
+    }
     collection.add_asset(
         "thumbnail",
         pystac.Asset(

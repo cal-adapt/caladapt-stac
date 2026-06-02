@@ -29,7 +29,6 @@ from pystac.extensions.scientific import ScientificExtension, Publication
 from scripts.constants import (
     BUCKET_CADCAT,
     HADISD_PREFIX,
-    HADISD_STATIONS_CSV_URL,
     HADISD_WECC_STATION_COORDS_URL,
     ICON_BASE_URL,
     PGDSN,
@@ -138,20 +137,16 @@ def build_hadisd_collection():
             title="Item geometries",
         ),
     )
-    collection.add_asset(
-        "stations",
-        pystac.Asset(
-            href=HADISD_STATIONS_CSV_URL,
-            media_type="text/csv",
-            roles=["metadata"],
-            title="Station metadata",
-        ),
-    )
 
+    station_labels = {}
     for feature in features:
         props_in = feature["properties"]
         station_id = props_in["station_id"]
+        station_name = props_in.get("station_name")
         lon, lat = feature["geometry"]["coordinates"]
+
+        if station_name:
+            station_labels[station_id] = station_name
 
         item = pystac.Item(
             id=f"hadisd-{station_id}",
@@ -175,6 +170,7 @@ def build_hadisd_collection():
         )
         collection.add_item(item)
 
+    collection.extra_fields["caladapt:station_labels"] = station_labels
     return collection
 
 

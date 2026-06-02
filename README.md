@@ -162,6 +162,16 @@ Write endpoints are disabled on the public API, so deletion must be done directl
 psql $PGDSN -c "SELECT pgstac.delete_collection('{collection-id}');"
 ```
 
+**Enable item count in search responses:**
+
+pgSTAC's context setting controls whether the API returns `numberMatched` (total items matching a query) in search responses. This is a database-level setting and must be configured directly via `psql`:
+
+```bash
+psql $PGDSN -c "INSERT INTO pgstac.pgstac_settings (name, value) VALUES ('context', 'auto') ON CONFLICT (name) DO UPDATE SET value = 'auto';"
+```
+
+`'auto'` uses estimated counts (fast). This only needs to be run once after the database is created.
+
 **Update collection icons:**
 
 Icons in `images/icons/` are used as `thumbnail` assets on STAC collections and displayed in STAC Browser. They're served directly from GitHub via raw URLs, so they must be committed and pushed to `main` to take effect. Re-run the relevant ingestion script after updating an icon to push the new URL to the database.

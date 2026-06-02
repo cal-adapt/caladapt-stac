@@ -2,7 +2,7 @@ format:
 	uv run black .
 
 build:
-	uv export --no-dev --no-hashes -o app/requirements.txt
+	uv export --no-group dev --no-group ingestion --no-hashes -o app/requirements.txt
 	sam build --use-container --cached --parallel
 
 deploy: build

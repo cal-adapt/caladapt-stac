@@ -140,12 +140,14 @@ def build_wrf_extreme_heat_tool_collection():
     )
 
     print("  Listing county zarr stores...")
+    seen_variables: set[str] = set()
     for store_prefix in list_zarr_stores(COUNTY_PREFIX, BUCKET_CADCAT, depth=4):
         parsed = parse_county_store(store_prefix)
         scenario = parsed["scenario"]
         metric = parsed["metric"]
         grid_label = parsed["grid_label"]
 
+        seen_variables.add(metric)
         start_dt, end_dt = EXPERIMENT_DATE_RANGES[scenario]
         item_id = f"wrf-extreme-heat-tool-county-{scenario}-gwl-{metric}-{grid_label}"
 
@@ -156,7 +158,6 @@ def build_wrf_extreme_heat_tool_collection():
             "cmip6:table_id": "gwl",
             "cmip6:grid_label": grid_label,
             "variable_id": metric,
-            "variable_label": WRF_VARIABLE_LABELS.get(metric, metric),
             "caladapt:spatial_type": "county",
             "bias_adjusted": True,
             "start_datetime": start_dt.isoformat(),
@@ -175,6 +176,9 @@ def build_wrf_extreme_heat_tool_collection():
         )
         collection.add_item(item)
 
+    collection.extra_fields["caladapt:variable_labels"] = {
+        var: WRF_VARIABLE_LABELS.get(var, var) for var in seen_variables
+    }
     return collection
 
 
