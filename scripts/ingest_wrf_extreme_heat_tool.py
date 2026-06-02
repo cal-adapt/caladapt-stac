@@ -93,8 +93,7 @@ def build_wrf_extreme_heat_tool_collection():
         ],
         extra_fields={"caladapt:spatial_type": "county"},
         description=(
-            "County-aggregated WRF extreme heat projections for California at global warming levels (0.8°C–3.0°C), "
-            "supporting the Cal-Adapt Extreme Heat Tool."
+            "County-indexed WRF extreme heat projections for California across global warming levels (0.8°C–3.0°C). Zarr store with county as an explicit dimension, containing exceedance counts for the Cal-Adapt Extreme Heat Tool."
         ),
         license=CALADAPT_DATA_LICENSE,
         providers=[
