@@ -106,7 +106,7 @@ def build_tmy_collection():
         title="Typical meteorological year",
         keywords=[
             "climate profiles",
-            "global warming level",
+            "global warming levels",
             "climate models",
             "future projections",
             "CMIP6",
@@ -217,7 +217,7 @@ def build_smy_collection():
         title="Standard year",
         keywords=[
             "climate profiles",
-            "global warming level",
+            "global warming levels",
             "climate models",
             "future projections",
             "CMIP6",

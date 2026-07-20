@@ -1,4 +1,6 @@
 variable_id,variable_label
+eh_days,Extreme heat days
+warm_nights,Warm nights
 cape,Convective available potential energy
 cin,Convective inhibition
 dew_point,Dew point temperature
