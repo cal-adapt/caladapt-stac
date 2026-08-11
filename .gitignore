@@ -165,3 +165,6 @@ app/requirements.txt
 # SAM build artifacts and local config
 .aws-sam/
 samconfig.toml
+
+# Local output of scripts/generate_geometries.py, manually uploaded to S3
+data/geometries/
