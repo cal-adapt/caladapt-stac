@@ -8,13 +8,17 @@ import pandas as pd
 import pystac
 from unittest.mock import patch, MagicMock
 
-from scripts.ingest_climate_profiles import build_tmy_collection, build_smy_collection
+from scripts.ingest_climate_profiles import (
+    build_tmy_collection,
+    build_smy_collection,
+    build_xmy_persist_collection,
+    build_xmy_shock_collection,
+)
 from scripts.ingest_hadisd import build_hadisd_collection
 from scripts.ingest_hdp import build_hdp_collection
 from scripts.ingest_loca2_county import build_loca2_county_collection
 from scripts.ingest_loca2 import build_loca2_gridded_collection
 from scripts.ingest_sea_level import build_sea_level_collection
-from scripts.ingest_wrf_cae import build_wrf_cae_collection
 from scripts.ingest_wrf_ucla import build_wrf_ucla_collection
 from scripts.ingest_ren import build_pv_collection, build_wind_collection
 
@@ -73,6 +77,34 @@ class TestBuildSmyCollection:
     def test_metadata(self, mock_get, _):
         mock_get.return_value = _mock_response(MOCK_EMPTY_FC)
         _check_metadata(build_smy_collection(), "standard-year")
+
+
+class TestBuildXmyPersistCollection:
+    @patch("scripts.ingest_climate_profiles.list_keys", return_value=[])
+    @patch("scripts.ingest_climate_profiles.requests.get")
+    def test_metadata(self, mock_get, _):
+        mock_get.return_value = _mock_response(MOCK_EMPTY_FC)
+        _check_metadata(build_xmy_persist_collection(), "xmy-persist")
+
+    @patch("scripts.ingest_climate_profiles.list_keys", return_value=[])
+    @patch("scripts.ingest_climate_profiles.requests.get")
+    def test_item_geometries_asset(self, mock_get, _):
+        mock_get.return_value = _mock_response(MOCK_EMPTY_FC)
+        assert "item-geometries" in build_xmy_persist_collection().assets
+
+
+class TestBuildXmyShockCollection:
+    @patch("scripts.ingest_climate_profiles.list_keys", return_value=[])
+    @patch("scripts.ingest_climate_profiles.requests.get")
+    def test_metadata(self, mock_get, _):
+        mock_get.return_value = _mock_response(MOCK_EMPTY_FC)
+        _check_metadata(build_xmy_shock_collection(), "xmy-shock")
+
+    @patch("scripts.ingest_climate_profiles.list_keys", return_value=[])
+    @patch("scripts.ingest_climate_profiles.requests.get")
+    def test_item_geometries_asset(self, mock_get, _):
+        mock_get.return_value = _mock_response(MOCK_EMPTY_FC)
+        assert "item-geometries" in build_xmy_shock_collection().assets
 
 
 class TestBuildHadisdCollection:
@@ -136,12 +168,6 @@ class TestBuildSeaLevelCollection:
     def test_item_geometries_asset(self, mock_get, _):
         mock_get.return_value = _mock_response(MOCK_EMPTY_FC)
         assert "item-geometries" in build_sea_level_collection().assets
-
-
-class TestBuildWrfCaeCollection:
-    @patch("scripts.ingest_wrf_cae.list_zarr_stores", return_value=[])
-    def test_metadata(self, _):
-        _check_metadata(build_wrf_cae_collection(), "wrf-cae")
 
 
 class TestBuildWrfUclaCollection:

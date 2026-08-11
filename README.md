@@ -127,17 +127,17 @@ make ingest-all
 Or ingest a single collection (also registers queryables):
 
 ```bash
-make clim-prof       # typical-met-year, standard-met-year
-make loca2-county    # LOCA2 county NetCDF
-make loca2           # LOCA2 gridded Zarr
-make wrf-ucla        # WRF UCLA
-make wrf-extreme-heat-tool-county      # WRF extreme heat tool county Zarr
-make wrf-extreme-heat-tool-county-csv  # WRF extreme heat tool county CSV
-make wrf-cae         # WRF-derived climate metrics
-make hadisd          # HadISD station Zarrs
-make hdp             # Historical Data Platform
-make ren             # PV + wind generation
-make slr             # Sea level projections
+make clim-prof                  # typical-met-year, standard-year, xmy-persist, xmy-shock
+make loca2-county               # LOCA2 county NetCDF
+make loca2                      # LOCA2 gridded Zarr
+make wrf-ucla                   # WRF UCLA
+make eh-metrics-mm-boundary-csv # WRF extreme heat tool boundary CSV
+make wrf-derived-vars           # WRF-derived climate metrics
+make wrf-climate-metrics-map    # WRF climate metrics map
+make hadisd                     # HadISD station Zarrs
+make hdp                        # Historical Data Platform
+make ren                        # PV + wind generation
+make slr                        # Sea level projections
 ```
 
 Queryables are item properties registered in pgSTAC as filterable fields. They tell the STAC API (and STAC Browser) which properties can be used in search queries (e.g. `countyname=Sacramento` or `cmip6:source_id=CESM2`). Each `make` target above registers queryables automatically after ingestion. To re-register without re-ingesting:
