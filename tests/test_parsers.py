@@ -1,12 +1,16 @@
 """Unit tests for parse functions and bbox_to_geometry. No external calls needed."""
 
 from scripts.utils import bbox_to_geometry
-from scripts.ingest_climate_profiles import parse_tmy_key, parse_smy_key
+from scripts.ingest_climate_profiles import (
+    parse_tmy_key,
+    parse_smy_key,
+    parse_xmy_persist_key,
+    parse_xmy_shock_key,
+)
 from scripts.ingest_loca2_county import parse_loca2_county_key
 from scripts.ingest_loca2 import parse_loca2_gridded_store
 from scripts.ingest_ren import parse_ren_store
 from scripts.ingest_sea_level import parse_hmet_key, SLR_SCENARIO_LABELS
-from scripts.ingest_wrf_cae import parse_wrf_cae_store
 from scripts.ingest_wrf_ucla import parse_wrf_ucla_store
 
 
@@ -49,6 +53,14 @@ class TestParseTmyKey:
             is None
         )
 
+    def test_era5_no_time_period(self):
+        key = "climate-profiles/typical-met-year/sacramento/era5/file.csv"
+        assert parse_tmy_key(key) == {
+            "location": "sacramento",
+            "model": "era5",
+            "time_period": "historical",
+        }
+
 
 class TestParseSmyKey:
     def test_valid_csv(self):
@@ -67,6 +79,91 @@ class TestParseSmyKey:
             "climate-profiles/standard-met-year/sacramento/dbt/p50/mid-century/file.epw"
         )
         assert parse_smy_key(key) is None
+
+    def test_time_based_centered_year(self):
+        key = (
+            "climate-profiles/standard-met-year/sacramento/t2/50ptile/time-based/"
+            "stdyr_t2_50ptile_sacramento_30yr_window_time_2015_ssp370.csv"
+        )
+        assert parse_smy_key(key) == {
+            "location": "sacramento",
+            "variable": "t2",
+            "percentile": "50ptile",
+            "time_period": "time-based",
+            "centered_year": 2015,
+        }
+
+    def test_time_based_no_year_returns_none(self):
+        key = (
+            "climate-profiles/standard-met-year/sacramento/t2/50ptile/time-based/"
+            "stdyr_t2_50ptile_sacramento_30yr_window_ssp370.csv"
+        )
+        assert parse_smy_key(key) is None
+
+    def test_zero_padded_percentile_strips_leading_zero(self):
+        key = "climate-profiles/standard-met-year/sacramento/t2/05ptile/mid-century/file.csv"
+        result = parse_smy_key(key)
+        assert result["percentile"] == "5ptile"
+
+
+class TestParseXmyPersistKey:
+    def test_valid_csv(self):
+        key = "climate-profiles/extreme-met-year-persist/sacramento/taiesm1/mid-century/95ptile/file.csv"
+        assert parse_xmy_persist_key(key) == {
+            "location": "sacramento",
+            "model": "taiesm1",
+            "time_period": "mid-century",
+            "percentile": "95ptile",
+        }
+
+    def test_valid_epw(self):
+        key = "climate-profiles/extreme-met-year-persist/sacramento/taiesm1/mid-century/5ptile/file.epw"
+        result = parse_xmy_persist_key(key)
+        assert result["percentile"] == "5ptile"
+
+    def test_invalid_extension(self):
+        assert (
+            parse_xmy_persist_key(
+                "climate-profiles/extreme-met-year-persist/loc/model/period/95ptile/file.nc"
+            )
+            is None
+        )
+
+
+class TestParseXmyShockKey:
+    def test_hot_shock(self):
+        key = (
+            "climate-profiles/extreme-met-year-shock/sacramento/taiesm1/mid-century/"
+            "hot_shock_xmy_sacramento_wrf_taiesm1_r1i1p1f1_mid-century.csv"
+        )
+        assert parse_xmy_shock_key(key) == {
+            "location": "sacramento",
+            "model": "taiesm1",
+            "time_period": "mid-century",
+            "shock_type": "hot",
+        }
+
+    def test_cold_shock(self):
+        key = (
+            "climate-profiles/extreme-met-year-shock/sacramento/taiesm1/mid-century/"
+            "cold_shock_xmy_sacramento_wrf_taiesm1_r1i1p1f1_mid-century.epw"
+        )
+        result = parse_xmy_shock_key(key)
+        assert result["shock_type"] == "cold"
+
+    def test_unrecognized_filename_returns_none(self):
+        key = (
+            "climate-profiles/extreme-met-year-shock/sacramento/taiesm1/mid-century/"
+            "sacramento_wrf_taiesm1_r1i1p1f1_mid-century.csv"
+        )
+        assert parse_xmy_shock_key(key) is None
+
+    def test_invalid_extension(self):
+        key = (
+            "climate-profiles/extreme-met-year-shock/sacramento/taiesm1/mid-century/"
+            "hot_shock_xmy_sacramento_wrf_taiesm1_r1i1p1f1_mid-century.nc"
+        )
+        assert parse_xmy_shock_key(key) is None
 
 
 class TestParseLoca2CountyKey:
@@ -188,21 +285,6 @@ class TestParseHmetKey:
         for abbrev in SLR_SCENARIO_LABELS:
             key = f"hmet/watlev.sf.{abbrev}.50pctile.ssp245.wv2.nc"
             assert parse_hmet_key(key, VALID_STATIONS) is not None
-
-
-class TestParseWrfCaeStore:
-    PREFIX = "wrf/cae/ec-earth3/historical/1hr/ffwi/d03/"
-
-    def test_fields(self):
-        r = parse_wrf_cae_store(self.PREFIX)
-        assert r["source_id"] == "ec-earth3"
-        assert r["experiment_id"] == "historical"
-        assert r["table_id"] == "1hr"
-        assert r["variable_id"] == "ffwi"
-        assert r["grid_label"] == "d03"
-
-    def test_path(self):
-        assert parse_wrf_cae_store(self.PREFIX)["path"] == f"s3://cadcat/{self.PREFIX}"
 
 
 class TestParseWrfUclaStore:
