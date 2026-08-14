@@ -46,6 +46,8 @@ SEA_LEVEL_STATION_COORDS_URL = (
 # S3 prefixes for collections
 TMY_PREFIX = "climate-profiles/typical-met-year/"
 SMY_PREFIX = "climate-profiles/standard-met-year/"
+XMY_PERSIST_PREFIX = "climate-profiles/extreme-met-year-persist/"
+XMY_SHOCK_PREFIX = "climate-profiles/extreme-met-year-shock/"
 LOCA2_COUNTY_NETCDF_PREFIX = "loca2/ucb/netcdf/county/"
 LOCA2_GRIDDED_PREFIX = "loca2/ucsd/"
 WRF_UCLA_PREFIX = "wrf/ucla/"
@@ -61,6 +63,9 @@ HMET_PREFIX = "hmet/"
 # License for all Cal-Adapt data (CMIP6-derived products)
 CALADAPT_DATA_LICENSE = "CC-BY-4.0"
 CALADAPT_DATA_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
+
+# DOI for climate profile collections (TMY, SMY, XMY persist/shock)
+CLIM_PROF_DOI = "10.5281/zenodo.18135273"
 
 # Mapping of California county FIPS codes to county names (without "County" suffix)
 # Matches the countyname property used in STAC items and the cal-adapt-de-website data download tool
@@ -144,6 +149,10 @@ CLIM_PROF_GWL_PERIOD_DATES = {
         datetime(2054, 1, 1, tzinfo=timezone.utc),
         datetime(2084, 12, 31, tzinfo=timezone.utc),
     ),  # centered_year=2069
+    "historical": (
+        datetime(1981, 1, 1, tzinfo=timezone.utc),
+        datetime(2019, 12, 31, tzinfo=timezone.utc),
+    ),  # ERA5 reanalysis baseline period
 }
 
 # Spatial extents

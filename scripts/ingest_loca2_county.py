@@ -98,7 +98,7 @@ def build_loca2_county_collection():
     """
     collection = pystac.Collection(
         id="loca2-county",
-        title="LOCA2 county",
+        title="Aggregated LOCA2 county data",
         keywords=[
             "climate model",
             "California",
