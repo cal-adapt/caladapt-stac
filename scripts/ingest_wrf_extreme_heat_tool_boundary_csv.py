@@ -14,11 +14,6 @@ S3 path structure:
 One STAC item per (metric × boundary × threshold) combination.
 Each item has one asset pointing to the S3 prefix directory.
 
-Each item also carries `data_min`/`data_max` properties: the min/max across
-every region's multimodel_median/p10/p90 values at every global warming level
-(the frontend uses these to size its chart's y-axis).
-
-
 Usage:
     uv run python -m scripts.ingest_wrf_extreme_heat_tool_boundary_csv
 
@@ -27,10 +22,8 @@ Requires:
     - PGDSN environment variable with a valid PostgreSQL DSN
 """
 
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
-import pandas as pd
 import pystac
 
 from scripts.constants import (
@@ -42,7 +35,7 @@ from scripts.constants import (
     WRF_EXTREME_HEAT_TOOL_PREFIX,
     WRF_VARIABLE_LABELS,
 )
-from scripts.utils import bbox_to_geometry, list_keys, list_zarr_stores, load_direct
+from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
 MULTIMODEL_CSV_PREFIX = WRF_EXTREME_HEAT_TOOL_PREFIX + "multimodel_per_boundary/"
 
@@ -59,16 +52,6 @@ EXPERIMENT_DATE_RANGE = (
     datetime(2015, 1, 1, tzinfo=timezone.utc),
     datetime(2100, 12, 31, tzinfo=timezone.utc),
 )
-
-# Columns whose combined min/max define each item's data_min/data_max: the
-# plotted median plus the p10/p90 uncertainty bounds, so a downstream axis
-# never clips a future uncertainty band even though only the median is
-# plotted today.
-VALUE_COLUMNS = ["multimodel_median", "multimodel_p10", "multimodel_p90"]
-
-# Each item's prefix can hold anywhere from ~8 to ~140 small (~450 B) region
-# CSVs, so fetching them is network-latency bound rather than CPU bound.
-CSV_FETCH_WORKERS = 16
 
 
 def parse_csv_prefix(prefix):
@@ -99,67 +82,6 @@ def parse_csv_prefix(prefix):
         "thresh": thresh,
         "path": f"s3://{BUCKET_CADCAT}/{prefix}",
     }
-
-
-def load_region_dataframes(prefix):
-    """
-    Read every region CSV under an item's S3 prefix into a DataFrame.
-
-    Fetches concurrently since each file is tiny and latency-bound. Skips (with
-    a warning) any file that fails to fetch or parse rather than aborting the
-    whole ingest run.
-
-    Parameters
-    ----------
-    prefix : str
-        S3 prefix for one (metric x boundary x threshold) item, e.g.
-        wrf/extreme-heat-tool/multimodel_per_boundary/eh_days/ca_counties/ssp370/t2max_ge95F/
-
-    Returns
-    -------
-    list[pd.DataFrame]
-    """
-    keys = [
-        key for key, _size in list_keys(prefix, BUCKET_CADCAT) if key.endswith(".csv")
-    ]
-
-    def _read(key):
-        url = f"https://{BUCKET_CADCAT}.s3.amazonaws.com/{key}"
-        try:
-            return pd.read_csv(url)
-        except Exception as exc:
-            print(f"    Skipping {key}: {exc}")
-            return None
-
-    with ThreadPoolExecutor(max_workers=CSV_FETCH_WORKERS) as pool:
-        results = pool.map(_read, keys)
-    return [df for df in results if df is not None]
-
-
-def compute_data_range(dfs):
-    """
-    Compute the (min, max) across `VALUE_COLUMNS` in a list of region
-    DataFrames -- the full data-driven range for one (metric x boundary x
-    threshold) item, across every region and global warming level.
-
-    Parameters
-    ----------
-    dfs : list[pd.DataFrame]
-
-    Returns
-    -------
-    tuple[float, float] or tuple[None, None]
-        (min, max), or (None, None) when there is no finite data to derive a
-        range from.
-    """
-    columns = [df[col] for df in dfs for col in VALUE_COLUMNS if col in df.columns]
-    if not columns:
-        return None, None
-    values = pd.concat(columns, ignore_index=True)
-    values = values[values.notna()]
-    if values.empty:
-        return None, None
-    return float(values.min()), float(values.max())
 
 
 def build_collection():
@@ -239,9 +161,6 @@ def build_collection():
         start_dt, end_dt = EXPERIMENT_DATE_RANGE
         item_id = f"eh-metrics-mm-boundary-csv-{metric}-{boundary}-{thresh}"
 
-        print(f"    Computing data range for {item_id}...")
-        data_min, data_max = compute_data_range(load_region_dataframes(prefix))
-
         item = pystac.Item(
             id=item_id,
             geometry=bbox_to_geometry(CA_BBOX),
@@ -259,11 +178,6 @@ def build_collection():
                 "boundary_label": BOUNDARY_LABELS.get(boundary, boundary),
                 "caladapt:spatial_type": "boundary",
                 "bias_adjusted": True,
-                # Data-driven min/max for this (metric x boundary x threshold)
-                # combination: across every region's median and p10/p90
-                # values at every global warming level.
-                "data_min": data_min,
-                "data_max": data_max,
             },
         )
         item.add_asset(
