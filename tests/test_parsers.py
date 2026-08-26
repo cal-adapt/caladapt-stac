@@ -1,6 +1,7 @@
 """Unit tests for parse functions and bbox_to_geometry. No external calls needed."""
 
 import pandas as pd
+import pytest
 
 from scripts.utils import bbox_to_geometry
 from scripts.ingest_climate_profiles import (
@@ -14,8 +15,11 @@ from scripts.ingest_loca2 import parse_loca2_gridded_store
 from scripts.ingest_ren import parse_ren_store
 from scripts.ingest_sea_level import parse_hmet_key, SLR_SCENARIO_LABELS
 from scripts.ingest_wrf_ucla import parse_wrf_ucla_store
+import scripts.ingest_wrf_extreme_heat_tool_boundary_csv as eh_boundary_csv
 from scripts.ingest_wrf_extreme_heat_tool_boundary_csv import (
+    DATA_RANGE_BOUNDARIES,
     compute_data_range,
+    fetch_csv_with_retries,
     parse_csv_prefix,
 )
 
@@ -376,3 +380,48 @@ class TestComputeDataRange:
     def test_all_nan_returns_none(self):
         dfs = [pd.DataFrame({"multimodel_median": [float("nan")]})]
         assert compute_data_range(dfs) == (None, None)
+
+
+class TestDataRangeBoundaries:
+    def test_matches_frontend_selectable_boundaries(self):
+        # Must match SPATIAL_AGGREGATIONS in the website's options.ts. Census
+        # tracts and IOU/POUs are deliberately excluded: not yet
+        # user-selectable, and too high a file count (2,338 regions/threshold
+        # for census tracts) to fetch reliably.
+        assert DATA_RANGE_BOUNDARIES == {
+            "ca_counties",
+            "ca_watersheds",
+            "forecast_zones",
+            "electric_balancing_areas",
+        }
+
+
+class TestFetchCsvWithRetries:
+    def test_succeeds_after_transient_failures(self, monkeypatch):
+        monkeypatch.setattr(eh_boundary_csv.time, "sleep", lambda _seconds: None)
+        attempts = {"count": 0}
+        expected = pd.DataFrame({"multimodel_median": [1.0]})
+
+        def flaky_read_csv(url):
+            attempts["count"] += 1
+            if attempts["count"] < 2:
+                raise ConnectionError("connection reset by peer")
+            return expected
+
+        monkeypatch.setattr(eh_boundary_csv.pd, "read_csv", flaky_read_csv)
+
+        result = fetch_csv_with_retries("https://example.com/region.csv")
+
+        pd.testing.assert_frame_equal(result, expected)
+        assert attempts["count"] == 2
+
+    def test_raises_after_exhausting_retries(self, monkeypatch):
+        monkeypatch.setattr(eh_boundary_csv.time, "sleep", lambda _seconds: None)
+
+        def always_fails(url):
+            raise ConnectionError("connection reset by peer")
+
+        monkeypatch.setattr(eh_boundary_csv.pd, "read_csv", always_fails)
+
+        with pytest.raises(RuntimeError, match="Failed to fetch"):
+            fetch_csv_with_retries("https://example.com/region.csv")

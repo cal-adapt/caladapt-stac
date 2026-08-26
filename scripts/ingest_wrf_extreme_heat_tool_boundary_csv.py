@@ -14,9 +14,12 @@ S3 path structure:
 One STAC item per (metric × boundary × threshold) combination.
 Each item has one asset pointing to the S3 prefix directory.
 
-Each item also carries `data_min`/`data_max` properties: the min/max across
-every region's multimodel_median/p10/p90 values at every global warming level
-(the frontend uses these to size its chart's y-axis).
+Items in `DATA_RANGE_BOUNDARIES` also carry `data_min`/`data_max` properties:
+the min/max across every region's multimodel_median/p10/p90 values at every
+global warming level (the frontend uses these to size its chart's y-axis).
+Other boundaries (e.g. ca_census_tracts, at 2,338 regions/threshold) are
+excluded -- not yet user-selectable in the frontend, and too high a file
+count to fetch reliably.
 
 
 Usage:
@@ -27,6 +30,7 @@ Requires:
     - PGDSN environment variable with a valid PostgreSQL DSN
 """
 
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
@@ -66,9 +70,30 @@ EXPERIMENT_DATE_RANGE = (
 # plotted today.
 VALUE_COLUMNS = ["multimodel_median", "multimodel_p10", "multimodel_p90"]
 
-# Each item's prefix can hold anywhere from ~8 to ~140 small (~450 B) region
-# CSVs, so fetching them is network-latency bound rather than CPU bound.
-CSV_FETCH_WORKERS = 16
+# Boundary types to compute data_min/data_max for -- the ones the frontend
+# currently exposes as spatial-aggregation options (SPATIAL_AGGREGATIONS in
+# the website's options.ts). Excludes ca_census_tracts (2,338 regions per
+# threshold) and ious_pous, which aren't user-selectable yet and are too
+# high a file count to fetch reliably at this concurrency.
+DATA_RANGE_BOUNDARIES = frozenset(
+    {
+        "ca_counties",
+        "ca_watersheds",
+        "forecast_zones",
+        "electric_balancing_areas",
+    }
+)
+
+# Each in-scope item's prefix can hold up to ~140 small (~450 B) region CSVs,
+# so fetching them is network-latency bound rather than CPU bound.
+CSV_FETCH_WORKERS = 8
+
+# Retries for a single CSV fetch before giving up on it. A file that still
+# fails after retries raises rather than being skipped -- silently dropping a
+# region would understate the computed data_min/data_max without anyone
+# noticing.
+CSV_FETCH_RETRIES = 3
+CSV_FETCH_RETRY_DELAY_SECONDS = 1
 
 
 def parse_csv_prefix(prefix):
@@ -101,13 +126,44 @@ def parse_csv_prefix(prefix):
     }
 
 
+def fetch_csv_with_retries(url):
+    """
+    Fetch and parse one CSV, retrying transient failures (e.g. connection
+    resets) up to `CSV_FETCH_RETRIES` times.
+
+    Raises if every attempt fails. Callers must not silently drop a region --
+    doing so would understate the item's computed data_min/data_max without
+    anyone noticing.
+
+    Parameters
+    ----------
+    url : str
+
+    Returns
+    -------
+    pd.DataFrame
+    """
+    last_exc = None
+    for attempt in range(1, CSV_FETCH_RETRIES + 1):
+        try:
+            return pd.read_csv(url)
+        except Exception as exc:
+            last_exc = exc
+            if attempt < CSV_FETCH_RETRIES:
+                print(f"    Retry {attempt}/{CSV_FETCH_RETRIES - 1} for {url}: {exc}")
+                time.sleep(CSV_FETCH_RETRY_DELAY_SECONDS)
+    raise RuntimeError(
+        f"Failed to fetch {url} after {CSV_FETCH_RETRIES} attempts"
+    ) from last_exc
+
+
 def load_region_dataframes(prefix):
     """
     Read every region CSV under an item's S3 prefix into a DataFrame.
 
-    Fetches concurrently since each file is tiny and latency-bound. Skips (with
-    a warning) any file that fails to fetch or parse rather than aborting the
-    whole ingest run.
+    Fetches concurrently since each file is tiny and latency-bound. Raises if
+    any file still fails after retries, so the ingest run fails loudly rather
+    than silently understating data_min/data_max for the item.
 
     Parameters
     ----------
@@ -125,15 +181,10 @@ def load_region_dataframes(prefix):
 
     def _read(key):
         url = f"https://{BUCKET_CADCAT}.s3.amazonaws.com/{key}"
-        try:
-            return pd.read_csv(url)
-        except Exception as exc:
-            print(f"    Skipping {key}: {exc}")
-            return None
+        return fetch_csv_with_retries(url)
 
     with ThreadPoolExecutor(max_workers=CSV_FETCH_WORKERS) as pool:
-        results = pool.map(_read, keys)
-    return [df for df in results if df is not None]
+        return list(pool.map(_read, keys))
 
 
 def compute_data_range(dfs):
@@ -239,32 +290,34 @@ def build_collection():
         start_dt, end_dt = EXPERIMENT_DATE_RANGE
         item_id = f"eh-metrics-mm-boundary-csv-{metric}-{boundary}-{thresh}"
 
-        print(f"    Computing data range for {item_id}...")
-        data_min, data_max = compute_data_range(load_region_dataframes(prefix))
+        properties = {
+            "start_datetime": start_dt.isoformat(),
+            "end_datetime": end_dt.isoformat(),
+            "cmip6:activity_id": "WRF",
+            "cmip6:institution_id": "CAE",
+            "cmip6:experiment_id": scenario,
+            "variable_id": metric,
+            "threshold_name": thresh,
+            "boundary": boundary,
+            "boundary_label": BOUNDARY_LABELS.get(boundary, boundary),
+            "caladapt:spatial_type": "boundary",
+            "bias_adjusted": True,
+        }
+        if boundary in DATA_RANGE_BOUNDARIES:
+            print(f"    Computing data range for {item_id}...")
+            # Data-driven min/max for this (metric x boundary x threshold)
+            # combination: across every region's median and p10/p90 values
+            # at every global warming level.
+            properties["data_min"], properties["data_max"] = compute_data_range(
+                load_region_dataframes(prefix)
+            )
 
         item = pystac.Item(
             id=item_id,
             geometry=bbox_to_geometry(CA_BBOX),
             bbox=CA_BBOX,
             datetime=None,
-            properties={
-                "start_datetime": start_dt.isoformat(),
-                "end_datetime": end_dt.isoformat(),
-                "cmip6:activity_id": "WRF",
-                "cmip6:institution_id": "CAE",
-                "cmip6:experiment_id": scenario,
-                "variable_id": metric,
-                "threshold_name": thresh,
-                "boundary": boundary,
-                "boundary_label": BOUNDARY_LABELS.get(boundary, boundary),
-                "caladapt:spatial_type": "boundary",
-                "bias_adjusted": True,
-                # Data-driven min/max for this (metric x boundary x threshold)
-                # combination: across every region's median and p10/p90
-                # values at every global warming level.
-                "data_min": data_min,
-                "data_max": data_max,
-            },
+            properties=properties,
         )
         item.add_asset(
             "data",
