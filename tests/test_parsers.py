@@ -1,5 +1,7 @@
 """Unit tests for parse functions and bbox_to_geometry. No external calls needed."""
 
+import pandas as pd
+
 from scripts.utils import bbox_to_geometry
 from scripts.ingest_climate_profiles import (
     parse_tmy_key,
@@ -12,6 +14,10 @@ from scripts.ingest_loca2 import parse_loca2_gridded_store
 from scripts.ingest_ren import parse_ren_store
 from scripts.ingest_sea_level import parse_hmet_key, SLR_SCENARIO_LABELS
 from scripts.ingest_wrf_ucla import parse_wrf_ucla_store
+from scripts.ingest_wrf_extreme_heat_tool_boundary_csv import (
+    compute_data_range,
+    parse_csv_prefix,
+)
 
 
 class TestBboxToGeometry:
@@ -300,3 +306,73 @@ class TestParseWrfUclaStore:
 
     def test_path(self):
         assert parse_wrf_ucla_store(self.PREFIX)["path"] == f"s3://cadcat/{self.PREFIX}"
+
+
+class TestParseCsvPrefix:
+    def test_valid_prefix(self):
+        prefix = (
+            "wrf/extreme-heat-tool/multimodel_per_boundary/"
+            "eh_days/ca_counties/ssp370/t2max_ge100F/"
+        )
+        assert parse_csv_prefix(prefix) == {
+            "metric": "eh_days",
+            "boundary": "ca_counties",
+            "scenario": "ssp370",
+            "thresh": "t2max_ge100F",
+            "path": f"s3://cadcat/{prefix}",
+        }
+
+    def test_wrong_scenario_returns_none(self):
+        prefix = (
+            "wrf/extreme-heat-tool/multimodel_per_boundary/"
+            "eh_days/ca_counties/ssp245/t2max_ge100F/"
+        )
+        assert parse_csv_prefix(prefix) is None
+
+    def test_wrong_depth_returns_none(self):
+        prefix = "wrf/extreme-heat-tool/multimodel_per_boundary/eh_days/ca_counties/"
+        assert parse_csv_prefix(prefix) is None
+
+
+class TestComputeDataRange:
+    def test_min_max_across_median_and_uncertainty_bounds(self):
+        dfs = [
+            pd.DataFrame(
+                {
+                    "multimodel_median": [10.0, 20.0],
+                    "multimodel_p10": [5.0, 15.0],
+                    "multimodel_p90": [12.0, 30.0],
+                }
+            ),
+            pd.DataFrame(
+                {
+                    "multimodel_median": [1.0],
+                    "multimodel_p10": [0.5],
+                    "multimodel_p90": [3.0],
+                }
+            ),
+        ]
+        assert compute_data_range(dfs) == (0.5, 30.0)
+
+    def test_ignores_nan_values(self):
+        dfs = [
+            pd.DataFrame(
+                {
+                    "multimodel_median": [10.0, float("nan")],
+                    "multimodel_p10": [float("nan"), float("nan")],
+                    "multimodel_p90": [12.0, float("nan")],
+                }
+            )
+        ]
+        assert compute_data_range(dfs) == (10.0, 12.0)
+
+    def test_empty_dataframe_list_returns_none(self):
+        assert compute_data_range([]) == (None, None)
+
+    def test_missing_columns_returns_none(self):
+        dfs = [pd.DataFrame({"warming_level": [0.8, 1.5]})]
+        assert compute_data_range(dfs) == (None, None)
+
+    def test_all_nan_returns_none(self):
+        dfs = [pd.DataFrame({"multimodel_median": [float("nan")]})]
+        assert compute_data_range(dfs) == (None, None)
