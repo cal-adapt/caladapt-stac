@@ -21,6 +21,10 @@ from scripts.ingest_loca2 import build_loca2_gridded_collection
 from scripts.ingest_sea_level import build_sea_level_collection
 from scripts.ingest_wrf_ucla import build_wrf_ucla_collection
 from scripts.ingest_ren import build_pv_collection, build_wind_collection
+from scripts.ingest_wrf_hdd_cdd_tool_boundary_csv import (
+    VALID_BOUNDARIES as HDD_CDD_VALID_BOUNDARIES,
+    build_collection as build_hdd_cdd_boundary_collection,
+)
 
 MOCK_ONE_FEATURE = {
     "type": "FeatureCollection",
@@ -186,3 +190,28 @@ class TestBuildWindCollection:
     @patch("scripts.ingest_ren.list_zarr_stores", return_value=[])
     def test_metadata(self, _):
         _check_metadata(build_wind_collection(), "wind-generation")
+
+
+class TestBuildHddCddBoundaryCollection:
+    def test_metadata(self):
+        _check_metadata(
+            build_hdd_cdd_boundary_collection(), "hdd-cdd-metrics-mm-boundary-csv"
+        )
+
+    def test_one_item_per_boundary(self):
+        collection = build_hdd_cdd_boundary_collection()
+        items = list(collection.get_items())
+        assert len(items) == len(HDD_CDD_VALID_BOUNDARIES)
+        assert {item.properties["boundary"] for item in items} == set(
+            HDD_CDD_VALID_BOUNDARIES
+        )
+
+    def test_census_tracts_and_ious_pous_excluded(self):
+        assert "ca_census_tracts" not in HDD_CDD_VALID_BOUNDARIES
+        assert "ious_pous" not in HDD_CDD_VALID_BOUNDARIES
+
+    def test_items_have_data_asset(self):
+        collection = build_hdd_cdd_boundary_collection()
+        for item in collection.get_items():
+            assert "data" in item.assets
+            assert item.assets["data"].href.startswith("s3://")
