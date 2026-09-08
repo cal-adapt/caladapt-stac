@@ -17,6 +17,7 @@ ingest-all:
 	$(MAKE) loca2
 	$(MAKE) wrf-ucla
 	$(MAKE) eh-metrics-mm-boundary-csv
+	$(MAKE) hdd-cdd-metrics-mm-boundary-csv
 	$(MAKE) wrf-derived-vars
 	$(MAKE) wrf-climate-metrics-map
 	$(MAKE) hadisd
@@ -49,6 +50,10 @@ wrf-ucla:
 eh-metrics-mm-boundary-csv:
 	uv run python -m scripts.ingest_wrf_extreme_heat_tool_boundary_csv
 	uv run python -m scripts.register_queryables --collection eh-metrics-mm-boundary-csv
+
+hdd-cdd-metrics-mm-boundary-csv:
+	uv run python -m scripts.ingest_wrf_hdd_cdd_tool_boundary_csv
+	uv run python -m scripts.register_queryables --collection hdd-cdd-metrics-mm-boundary-csv
 
 wrf-derived-vars:
 	uv run python -m scripts.ingest_wrf_derived_vars
