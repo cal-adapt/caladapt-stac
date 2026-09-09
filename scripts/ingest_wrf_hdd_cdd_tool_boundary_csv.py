@@ -37,27 +37,25 @@ from scripts.constants import (
     CALADAPT_DATA_LICENSE,
     ICON_BASE_URL,
     PGDSN,
+    WRF_HDD_CDD_TOOL_PREFIX,
 )
 from scripts.utils import bbox_to_geometry, load_direct
 
-MULTIMODEL_CSV_PREFIX = "wrf/hdd-cdd-tool/multimodel_per_boundary/"
+MULTIMODEL_CSV_PREFIX = WRF_HDD_CDD_TOOL_PREFIX + "multimodel_per_boundary/"
 
 SCENARIO = "ssp370"
 THRESHOLD_NAME = "65F"
 
-VALID_BOUNDARIES = [
-    "ca_counties",
-    "ca_watersheds",
-    "forecast_zones",
-    "electric_balancing_areas",
-]
-
+# Launch scope: 4 of the 6 boundary types the pipeline produces. Census
+# tracts and IOU/POUs are intentionally excluded (see module docstring), so
+# this is a deliberate allowlist rather than something to discover from S3.
 BOUNDARY_LABELS = {
     "ca_counties": "California counties",
     "ca_watersheds": "California watersheds (HUC8)",
     "forecast_zones": "California forecast zones",
     "electric_balancing_areas": "California electric balancing areas",
 }
+VALID_BOUNDARIES = list(BOUNDARY_LABELS)
 
 # Historical (1981) through the end of the ssp370 projection (2099), matching
 # the continuous per-region timeseries CSVs.
@@ -128,15 +126,18 @@ def build_collection():
         ),
     )
 
+    geometry = bbox_to_geometry(CA_BBOX)
+    start_dt, end_dt = TIMESERIES_DATE_RANGE
+
     items_built = 0
     for boundary in VALID_BOUNDARIES:
         path = f"{MULTIMODEL_CSV_PREFIX}{boundary}/{SCENARIO}/timeseries/csv/"
-        start_dt, end_dt = TIMESERIES_DATE_RANGE
+        boundary_label = BOUNDARY_LABELS[boundary]
         item_id = f"hdd-cdd-metrics-mm-boundary-csv-{boundary}"
 
         item = pystac.Item(
             id=item_id,
-            geometry=bbox_to_geometry(CA_BBOX),
+            geometry=geometry,
             bbox=CA_BBOX,
             datetime=None,
             properties={
@@ -147,7 +148,7 @@ def build_collection():
                 "cmip6:experiment_id": SCENARIO,
                 "threshold_name": THRESHOLD_NAME,
                 "boundary": boundary,
-                "boundary_label": BOUNDARY_LABELS.get(boundary, boundary),
+                "boundary_label": boundary_label,
                 "caladapt:spatial_type": "boundary",
                 "bias_adjusted": True,
             },
@@ -157,7 +158,7 @@ def build_collection():
             pystac.Asset(
                 href=f"s3://{BUCKET_CADCAT}/{path}",
                 media_type="text/csv",
-                title=f"{BOUNDARY_LABELS.get(boundary, boundary)} — annual HDD65/CDD65 timeseries",
+                title=f"{boundary_label} — annual HDD65/CDD65 timeseries",
                 roles=["data"],
             ),
         )

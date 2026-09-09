@@ -1,19 +1,3 @@
-# CloudFront distribution fronting stac.cal-adapt.org. Its cache policy
-# (CachingOptimizedQueryParams) caches /search responses for up to 7 days
-# keyed on the full query string, including ones with 0 results. Ingesting
-# a brand-new collection after a client has already searched for it (and
-# gotten cached as empty) leaves that exact query stuck returning nothing
-# until this is invalidated. Only wired into the ingest targets that back a
-# live web tool doing on-demand STAC searches (extreme heat, hdd/cdd) --
-# not the other collections, which aren't queried this way.
-STAC_CLOUDFRONT_DISTRIBUTION_ID := E2ON6INEGWTHQ1
-
-invalidate-search-cache:
-	aws cloudfront create-invalidation \
-		--distribution-id $(STAC_CLOUDFRONT_DISTRIBUTION_ID) \
-		--paths "/search*" \
-		--profile era-de
-
 format:
 	uv run black .
 
@@ -62,6 +46,22 @@ loca2:
 wrf-ucla:
 	uv run python -m scripts.ingest_wrf_ucla
 	uv run python -m scripts.register_queryables --collection wrf-ucla
+
+# CloudFront distribution fronting stac.cal-adapt.org. Its cache policy
+# (CachingOptimizedQueryParams) caches /search responses for up to 7 days
+# keyed on the full query string, including ones with 0 results. Ingesting
+# a brand-new collection after a client has already searched for it (and
+# gotten cached as empty) leaves that exact query stuck returning nothing
+# until this is invalidated. Only wired into the ingest targets that back a
+# live web tool doing on-demand STAC searches (extreme heat, hdd/cdd) --
+# not the other collections, which aren't queried this way.
+STAC_CLOUDFRONT_DISTRIBUTION_ID := E2ON6INEGWTHQ1
+
+invalidate-search-cache:
+	aws cloudfront create-invalidation \
+		--distribution-id $(STAC_CLOUDFRONT_DISTRIBUTION_ID) \
+		--paths "/search*" \
+		--profile era-de
 
 eh-metrics-mm-boundary-csv:
 	uv run python -m scripts.ingest_wrf_extreme_heat_tool_boundary_csv

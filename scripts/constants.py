@@ -53,6 +53,7 @@ LOCA2_GRIDDED_PREFIX = "loca2/ucsd/"
 WRF_UCLA_PREFIX = "wrf/ucla/"
 WRF_UCSD_PREFIX = "wrf/ucsd/"
 WRF_EXTREME_HEAT_TOOL_PREFIX = "wrf/extreme-heat-tool/"
+WRF_HDD_CDD_TOOL_PREFIX = "wrf/hdd-cdd-tool/"
 WRF_DERIVED_VARS_PREFIX = "wrf/derived-vars/"
 WRF_CLIMATE_METRICS_MAP_PREFIX = "wrf/climate-metrics-map/"
 
