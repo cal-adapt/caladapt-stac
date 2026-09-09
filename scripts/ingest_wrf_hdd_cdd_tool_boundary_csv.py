@@ -12,13 +12,6 @@ boundary raster mask only assigns 42 of 52 utility geometries (see
 HDD/CDD MVP Requirements doc, "Outstanding Questions"), the same known issue
 that scopes the extreme heat tool's boundary options.
 
-NOTE: the source data currently has a known bug -- see cal-adapt-data-gen PR
-"fix: multimodel mean/min/max only reflected one model (hdd_cdd, extreme_heat)".
-The `hdd_mean`/`hdd_min`/`hdd_max`/`cdd_mean`/`cdd_min`/`cdd_max` columns do
-not yet reflect a true multi-model aggregate. Ingesting anyway so STAC/frontend
-work can proceed in parallel; the underlying CSVs will be regenerated in place
-(same S3 paths) once the pipeline fix is rerun, with no changes needed here.
-
 S3 path structure:
     wrf/hdd-cdd-tool/multimodel_per_boundary/{boundary}/ssp370/timeseries/csv/
     Files within: {Region_Name}.csv
