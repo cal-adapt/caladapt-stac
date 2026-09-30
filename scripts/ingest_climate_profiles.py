@@ -409,7 +409,7 @@ def build_xmy_persist_collection():
     """
     collection = pystac.Collection(
         id="xmy-persist",
-        title="Extreme Year (Persistence)",
+        title="Extreme year (persistence)",
         keywords=[
             "climate profiles",
             "global warming levels",
@@ -515,7 +515,7 @@ def build_xmy_shock_collection():
     """
     collection = pystac.Collection(
         id="xmy-shock",
-        title="Extreme Year (Shock)",
+        title="Extreme year (shock)",
         keywords=[
             "climate profiles",
             "global warming levels",
