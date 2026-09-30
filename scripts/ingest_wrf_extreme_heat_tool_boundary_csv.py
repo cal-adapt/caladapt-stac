@@ -94,7 +94,7 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="eh-metrics-mm-boundary-csv",
-        title="Cal Adapt extreme heat tool (boundary CSV)",
+        title="Cal-Adapt extreme heat tool (boundary CSV)",
         keywords=[
             "climate model",
             "California",

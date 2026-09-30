@@ -100,7 +100,7 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="hwl-metrics-mm-boundary-csv",
-        title="Cal Adapt heat-wave length tool (boundary CSV)",
+        title="Cal-Adapt heat-wave length tool (boundary CSV)",
         keywords=[
             "climate model",
             "California",

@@ -79,7 +79,7 @@ def build_wrf_climate_metrics_map_collection():
 
     collection = pystac.Collection(
         id="wrf-climate-metrics-map",
-        title="Cal Adapt climate metrics map data",
+        title="Cal-Adapt climate metrics map data",
         keywords=[
             "climate model",
             "cloud-optimized",

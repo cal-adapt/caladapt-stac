@@ -75,7 +75,7 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="hdd-cdd-metrics-mm-boundary-csv",
-        title="Cal Adapt HDD/CDD tool (boundary CSV)",
+        title="Cal-Adapt HDD/CDD tool (boundary CSV)",
         keywords=[
             "climate model",
             "California",
