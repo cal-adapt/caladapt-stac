@@ -115,14 +115,11 @@ def build_collection():
             "CSV",
         ],
         description=(
-            "Multi-model mean CSVs of WRF extreme heat season projections for "
+            "Multi-model mean CSVs of WRF day-of-year threshold exceedance frequency for "
             "California at global warming levels (0.8°C–3.0°C), aggregated by boundary "
-            "region. For each day of the year (1–365, no-leap calendar), the value is "
-            "the percent of years in the 30-year GWL window when daily maximum "
-            "temperature exceeded a threshold (65°F–135°F, or the 90th–99th "
-            "percentile). Covers 4 boundary types: counties, watersheds, forecast "
-            "zones, and electric balancing areas. Each CSV contains frequency_percent "
-            "for every warming level and day of year (1,825 rows) for one region."
+            "region, for each threshold. Covers 4 boundary types: counties, watersheds, "
+            "forecast zones, and electric balancing areas. Each CSV contains one value "
+            "per warming level and day of year for one region."
         ),
         license=CALADAPT_DATA_LICENSE,
         providers=[

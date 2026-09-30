@@ -114,16 +114,11 @@ def build_collection():
             "CSV",
         ],
         description=(
-            "Multi-model mean CSVs of WRF heat-wave length projections for "
-            "California at global warming levels (0.8°C–3.0°C), aggregated by boundary "
-            "region. A heat wave is a run of at least three consecutive days with daily "
-            "maximum temperature above a threshold (85°F–115°F, or the 95th/99th "
-            "percentile); each year's value is the mean length in days of its "
-            "qualifying runs. Covers 4 boundary types: counties, watersheds, forecast "
-            "zones, and electric balancing areas. Each CSV contains annual mean "
-            "heat-wave length (median, p10, p90 over each 30-year window) and change "
-            "signals relative to the 0.8°C reference for one region across all "
-            "warming levels."
+            "Multi-model mean CSVs of WRF annual mean heat-wave length for California "
+            "at global warming levels (0.8°C–3.0°C), aggregated by boundary region, for "
+            "each threshold. Covers 4 boundary types: counties, watersheds, forecast "
+            "zones, and electric balancing areas. Each CSV contains median/p10/p90 "
+            "values for one region."
         ),
         license=CALADAPT_DATA_LICENSE,
         providers=[
