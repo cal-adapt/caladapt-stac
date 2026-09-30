@@ -12,6 +12,15 @@ from scripts.ingest_loca2 import parse_loca2_gridded_store
 from scripts.ingest_ren import parse_ren_store
 from scripts.ingest_sea_level import parse_hmet_key, SLR_SCENARIO_LABELS
 from scripts.ingest_wrf_ucla import parse_wrf_ucla_store
+from scripts.ingest_wrf_heat_wave_frequency_boundary_csv import (
+    parse_csv_prefix as parse_hwf_csv_prefix,
+)
+from scripts.ingest_wrf_heat_wave_length_boundary_csv import (
+    parse_csv_prefix as parse_hwl_csv_prefix,
+)
+from scripts.ingest_wrf_extreme_heat_season_boundary_csv import (
+    parse_csv_prefix as parse_ehs_csv_prefix,
+)
 
 
 class TestBboxToGeometry:
@@ -300,3 +309,68 @@ class TestParseWrfUclaStore:
 
     def test_path(self):
         assert parse_wrf_ucla_store(self.PREFIX)["path"] == f"s3://cadcat/{self.PREFIX}"
+
+
+class TestParseHwfCsvPrefix:
+    PREFIX = "wrf/heat-wave-frequency/multimodel_per_boundary/"
+
+    def test_valid(self):
+        prefix = f"{self.PREFIX}ca_counties/gwl/csv/t2max_ge95pctl/duration_14d/"
+        assert parse_hwf_csv_prefix(prefix) == {
+            "boundary": "ca_counties",
+            "thresh": "t2max_ge95pctl",
+            "duration": "duration_14d",
+            "path": f"s3://cadcat/{prefix}",
+        }
+
+    def test_wrong_depth(self):
+        assert (
+            parse_hwf_csv_prefix(f"{self.PREFIX}ca_counties/gwl/csv/t2max_ge95F/")
+            is None
+        )
+
+    def test_zarr_not_csv(self):
+        prefix = f"{self.PREFIX}ca_counties/gwl/zarr/t2max_ge95F/duration_3d/"
+        assert parse_hwf_csv_prefix(prefix) is None
+
+    def test_bad_duration(self):
+        prefix = f"{self.PREFIX}ca_counties/gwl/csv/t2max_ge95F/duration_xd/"
+        assert parse_hwf_csv_prefix(prefix) is None
+
+
+class TestParseHwlCsvPrefix:
+    PREFIX = "wrf/heat-wave-length/multimodel_per_boundary/"
+
+    def test_valid(self):
+        prefix = f"{self.PREFIX}ca_counties/gwl/csv/t2max_ge99pctl/"
+        assert parse_hwl_csv_prefix(prefix) == {
+            "boundary": "ca_counties",
+            "thresh": "t2max_ge99pctl",
+            "path": f"s3://cadcat/{prefix}",
+        }
+
+    def test_wrong_depth(self):
+        assert parse_hwl_csv_prefix(f"{self.PREFIX}ca_counties/gwl/csv/") is None
+
+    def test_zarr_not_csv(self):
+        prefix = f"{self.PREFIX}ca_counties/gwl/zarr/t2max_ge99pctl/"
+        assert parse_hwl_csv_prefix(prefix) is None
+
+
+class TestParseEhsCsvPrefix:
+    PREFIX = "wrf/extreme-heat-season/multimodel_per_boundary/"
+
+    def test_valid(self):
+        prefix = f"{self.PREFIX}ca_counties/gwl/csv/t2max_ge90pctl/"
+        assert parse_ehs_csv_prefix(prefix) == {
+            "boundary": "ca_counties",
+            "thresh": "t2max_ge90pctl",
+            "path": f"s3://cadcat/{prefix}",
+        }
+
+    def test_wrong_depth(self):
+        assert parse_ehs_csv_prefix(f"{self.PREFIX}ca_counties/gwl/csv/") is None
+
+    def test_zarr_not_csv(self):
+        prefix = f"{self.PREFIX}ca_counties/gwl/zarr/t2max_ge90pctl/"
+        assert parse_ehs_csv_prefix(prefix) is None

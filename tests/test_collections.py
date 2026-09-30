@@ -25,6 +25,18 @@ from scripts.ingest_wrf_hdd_cdd_tool_boundary_csv import (
     VALID_BOUNDARIES as HDD_CDD_VALID_BOUNDARIES,
     build_collection as build_hdd_cdd_boundary_collection,
 )
+from scripts.ingest_wrf_heat_wave_frequency_boundary_csv import (
+    VALID_BOUNDARIES as HWF_VALID_BOUNDARIES,
+    build_collection as build_hwf_boundary_collection,
+)
+from scripts.ingest_wrf_heat_wave_length_boundary_csv import (
+    VALID_BOUNDARIES as HWL_VALID_BOUNDARIES,
+    build_collection as build_hwl_boundary_collection,
+)
+from scripts.ingest_wrf_extreme_heat_season_boundary_csv import (
+    VALID_BOUNDARIES as EHS_VALID_BOUNDARIES,
+    build_collection as build_ehs_boundary_collection,
+)
 
 MOCK_ONE_FEATURE = {
     "type": "FeatureCollection",
@@ -214,3 +226,74 @@ class TestBuildHddCddBoundaryCollection:
         for item in collection.get_items():
             assert "data" in item.assets
             assert item.assets["data"].href.startswith("s3://")
+
+
+class TestBuildHwfBoundaryCollection:
+    @patch(
+        "scripts.ingest_wrf_heat_wave_frequency_boundary_csv.list_zarr_stores",
+        return_value=[],
+    )
+    def test_metadata(self, _):
+        _check_metadata(build_hwf_boundary_collection(), "hwf-metrics-mm-boundary-csv")
+
+    @patch("scripts.ingest_wrf_heat_wave_frequency_boundary_csv.list_zarr_stores")
+    def test_only_lists_valid_boundaries(self, mock_list):
+        # Census tracts and IOU/POUs are excluded to match the HDD/CDD tool.
+        mock_list.side_effect = lambda prefix, bucket, depth: [
+            f"{prefix}t2max_ge95F/duration_3d/"
+        ]
+        items = list(build_hwf_boundary_collection().get_items())
+        boundaries = {item.properties["boundary"] for item in items}
+        assert boundaries == set(HWF_VALID_BOUNDARIES)
+        assert "ca_census_tracts" not in boundaries
+        assert "ious_pous" not in boundaries
+        for item in items:
+            assert "data" in item.assets
+            assert item.assets["data"].href.startswith("s3://")
+            assert item.properties["duration_name"] == "duration_3d"
+
+
+class TestBuildHwlBoundaryCollection:
+    @patch(
+        "scripts.ingest_wrf_heat_wave_length_boundary_csv.list_zarr_stores",
+        return_value=[],
+    )
+    def test_metadata(self, _):
+        _check_metadata(build_hwl_boundary_collection(), "hwl-metrics-mm-boundary-csv")
+
+    @patch("scripts.ingest_wrf_heat_wave_length_boundary_csv.list_zarr_stores")
+    def test_only_lists_valid_boundaries(self, mock_list):
+        # Census tracts and IOU/POUs are excluded to match the HDD/CDD tool.
+        mock_list.side_effect = lambda prefix, bucket, depth: [f"{prefix}t2max_ge100F/"]
+        items = list(build_hwl_boundary_collection().get_items())
+        boundaries = {item.properties["boundary"] for item in items}
+        assert boundaries == set(HWL_VALID_BOUNDARIES)
+        assert "ca_census_tracts" not in boundaries
+        assert "ious_pous" not in boundaries
+        for item in items:
+            assert "data" in item.assets
+            assert item.assets["data"].href.startswith("s3://")
+            assert item.properties["threshold_name"] == "t2max_ge100F"
+
+
+class TestBuildEhsBoundaryCollection:
+    @patch(
+        "scripts.ingest_wrf_extreme_heat_season_boundary_csv.list_zarr_stores",
+        return_value=[],
+    )
+    def test_metadata(self, _):
+        _check_metadata(build_ehs_boundary_collection(), "ehs-metrics-mm-boundary-csv")
+
+    @patch("scripts.ingest_wrf_extreme_heat_season_boundary_csv.list_zarr_stores")
+    def test_only_lists_valid_boundaries(self, mock_list):
+        # Census tracts and IOU/POUs are excluded to match the HDD/CDD tool.
+        mock_list.side_effect = lambda prefix, bucket, depth: [f"{prefix}t2max_ge90F/"]
+        items = list(build_ehs_boundary_collection().get_items())
+        boundaries = {item.properties["boundary"] for item in items}
+        assert boundaries == set(EHS_VALID_BOUNDARIES)
+        assert "ca_census_tracts" not in boundaries
+        assert "ious_pous" not in boundaries
+        for item in items:
+            assert "data" in item.assets
+            assert item.assets["data"].href.startswith("s3://")
+            assert item.properties["threshold_name"] == "t2max_ge90F"
