@@ -7,11 +7,11 @@ exceedance frequency at each global warming level, organized by boundary ×
 threshold. For each calendar day, frequency_percent is the share of years in
 the 30-year GWL window whose daily maximum temperature (t2max) exceeded the
 threshold. Days run 1-365 on a no-leap calendar (February 29 removed). This
-is not a heat-wave event metric: consecutive days are not considered. Covers
+is not a heat wave event metric: consecutive days are not considered. Covers
 4 of the 6 California boundary types produced by the pipeline: counties,
 watersheds, forecast zones, and electric balancing areas.
 
-Census tracts and IOU/POUs are excluded to match the HDD/CDD and heat-wave
+Census tracts and IOU/POUs are excluded to match the HDD/CDD and heat wave
 tools' launch scope (see ingest_wrf_hdd_cdd_tool_boundary_csv.py).
 
 S3 path structure:

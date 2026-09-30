@@ -1,8 +1,8 @@
 """ingest_wrf_heat_wave_frequency_boundary_csv.py
 
-Ingest WRF heat-wave frequency tool multi-model boundary CSV data into pgSTAC.
+Ingest WRF heat wave frequency tool multi-model boundary CSV data into pgSTAC.
 
-Multi-model mean CSVs (across 4 WRF models) of annual heat-wave counts at each
+Multi-model mean CSVs (across 4 WRF models) of annual heat wave counts at each
 global warming level, organized by boundary × threshold × duration. A heat wave
 is a contiguous run of days with t2max above the threshold; each run
 contributes floor(run_length / duration) non-overlapping heat waves. Median,
@@ -14,7 +14,7 @@ Census tracts and IOU/POUs are excluded to match the HDD/CDD tool's launch
 scope (see ingest_wrf_hdd_cdd_tool_boundary_csv.py).
 
 S3 path structure:
-    wrf/heat-wave-frequency/multimodel_per_boundary/{boundary}/gwl/csv/{thresh}/duration_{n}d/
+    wrf/heat wave-frequency/multimodel_per_boundary/{boundary}/gwl/csv/{thresh}/duration_{n}d/
     Files within: {Region_Name}_{thresh}_{n}d.csv
 
 Duration is stored as its S3 storage name (e.g. "duration_3d") in
@@ -74,7 +74,7 @@ def parse_csv_prefix(prefix):
     ----------
     prefix : str
         S3 prefix, e.g.
-        wrf/heat-wave-frequency/multimodel_per_boundary/ca_counties/gwl/csv/t2max_ge95F/duration_3d/
+        wrf/heat wave-frequency/multimodel_per_boundary/ca_counties/gwl/csv/t2max_ge95F/duration_3d/
 
     Returns
     -------
@@ -101,7 +101,7 @@ def parse_csv_prefix(prefix):
 
 def build_collection():
     """
-    Build a pystac Collection for WRF heat-wave frequency multi-model boundary CSVs.
+    Build a pystac Collection for WRF heat wave frequency multi-model boundary CSVs.
 
     Returns
     -------
@@ -109,18 +109,18 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="hwf-metrics-mm-boundary-csv",
-        title="Cal-Adapt heat-wave frequency tool (boundary CSV)",
+        title="Cal-Adapt heat wave frequency tool (boundary CSV)",
         keywords=[
             "climate model",
             "California",
             "extreme heat",
             "heat waves",
-            "heat-wave frequency",
+            "heat wave frequency",
             "global warming levels",
             "CSV",
         ],
         description=(
-            "Multi-model mean CSVs of WRF annual heat-wave counts for California at "
+            "Multi-model mean CSVs of WRF annual heat wave counts for California at "
             "global warming levels (0.8°C–3.0°C), aggregated by boundary region, for "
             "each threshold and minimum duration. Covers 4 boundary types: counties, "
             "watersheds, forecast zones, and electric balancing areas. Each CSV "
@@ -146,14 +146,14 @@ def build_collection():
             ),
         ),
     )
-    # TODO: swap in a dedicated heat-wave frequency thumbnail once one exists.
+    # TODO: swap in a dedicated heat wave frequency thumbnail once one exists.
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
             href=f"{ICON_BASE_URL}wrf_extreme_heat_ridgeplot.png",
             media_type="image/png",
             roles=["thumbnail"],
-            title="WRF heat-wave frequency tool preview",
+            title="WRF heat wave frequency tool preview",
         ),
     )
 
@@ -220,7 +220,7 @@ def build_collection():
 
 
 def main():
-    print("  Building WRF heat-wave frequency tool boundary CSV collection...")
+    print("  Building WRF heat wave frequency tool boundary CSV collection...")
     collection = build_collection()
     print("  Loading directly into pgSTAC...")
     load_direct(collection, PGDSN)

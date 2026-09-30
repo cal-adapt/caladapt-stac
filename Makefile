@@ -57,7 +57,7 @@ wrf-ucla:
 # gotten cached as empty) leaves that exact query stuck returning nothing
 # until this is invalidated. Only wired into the ingest targets that back a
 # live web tool doing on-demand STAC searches (extreme heat, hdd/cdd,
-# heat-wave frequency/length, extreme heat season) -- not the other
+# heat wave frequency/length, extreme heat season) -- not the other
 # collections, which aren't queried this way.
 STAC_CLOUDFRONT_DISTRIBUTION_ID := E2ON6INEGWTHQ1
 

@@ -1,8 +1,8 @@
 """ingest_wrf_heat_wave_length_boundary_csv.py
 
-Ingest WRF heat-wave length tool multi-model boundary CSV data into pgSTAC.
+Ingest WRF heat wave length tool multi-model boundary CSV data into pgSTAC.
 
-Multi-model mean CSVs (across 4 WRF models) of annual mean heat-wave length at
+Multi-model mean CSVs (across 4 WRF models) of annual mean heat wave length at
 each global warming level, organized by boundary × threshold. A heat wave is a
 contiguous run of at least three days with t2max above the threshold; the
 annual value is the mean length in days of all qualifying runs. Median, p10,
@@ -10,11 +10,11 @@ and p90 capture year-to-year variability over each 30-year GWL window. Covers
 4 of the 6 California boundary types produced by the pipeline: counties,
 watersheds, forecast zones, and electric balancing areas.
 
-Census tracts and IOU/POUs are excluded to match the HDD/CDD and heat-wave
+Census tracts and IOU/POUs are excluded to match the HDD/CDD and heat wave
 frequency tools' launch scope (see ingest_wrf_hdd_cdd_tool_boundary_csv.py).
 
 S3 path structure:
-    wrf/heat-wave-length/multimodel_per_boundary/{boundary}/gwl/csv/{thresh}/
+    wrf/heat wave-length/multimodel_per_boundary/{boundary}/gwl/csv/{thresh}/
     Files within: {Region_Name}_{thresh}.csv
 
 One STAC item per (boundary × threshold) combination.
@@ -70,7 +70,7 @@ def parse_csv_prefix(prefix):
     ----------
     prefix : str
         S3 prefix, e.g.
-        wrf/heat-wave-length/multimodel_per_boundary/ca_counties/gwl/csv/t2max_ge100F/
+        wrf/heat wave-length/multimodel_per_boundary/ca_counties/gwl/csv/t2max_ge100F/
 
     Returns
     -------
@@ -92,7 +92,7 @@ def parse_csv_prefix(prefix):
 
 def build_collection():
     """
-    Build a pystac Collection for WRF heat-wave length multi-model boundary CSVs.
+    Build a pystac Collection for WRF heat wave length multi-model boundary CSVs.
 
     Returns
     -------
@@ -100,18 +100,18 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="hwl-metrics-mm-boundary-csv",
-        title="Cal-Adapt heat-wave length tool (boundary CSV)",
+        title="Cal-Adapt heat wave length tool (boundary CSV)",
         keywords=[
             "climate model",
             "California",
             "extreme heat",
             "heat waves",
-            "heat-wave length",
+            "heat wave length",
             "global warming levels",
             "CSV",
         ],
         description=(
-            "Multi-model mean CSVs of WRF annual mean heat-wave length for California "
+            "Multi-model mean CSVs of WRF annual mean heat wave length for California "
             "at global warming levels (0.8°C–3.0°C), aggregated by boundary region, for "
             "each threshold. Covers 4 boundary types: counties, watersheds, forecast "
             "zones, and electric balancing areas. Each CSV contains median/p10/p90 "
@@ -137,14 +137,14 @@ def build_collection():
             ),
         ),
     )
-    # TODO: swap in a dedicated heat-wave length thumbnail once one exists.
+    # TODO: swap in a dedicated heat wave length thumbnail once one exists.
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
             href=f"{ICON_BASE_URL}wrf_extreme_heat_ridgeplot.png",
             media_type="image/png",
             roles=["thumbnail"],
-            title="WRF heat-wave length tool preview",
+            title="WRF heat wave length tool preview",
         ),
     )
 
@@ -195,7 +195,7 @@ def build_collection():
             pystac.Asset(
                 href=parsed["path"],
                 media_type="text/csv",
-                title=f"{boundary_label} — heat-wave length | {thresh}",
+                title=f"{boundary_label} — heat wave length | {thresh}",
                 roles=["data"],
             ),
         )
@@ -209,7 +209,7 @@ def build_collection():
 
 
 def main():
-    print("  Building WRF heat-wave length tool boundary CSV collection...")
+    print("  Building WRF heat wave length tool boundary CSV collection...")
     collection = build_collection()
     print("  Loading directly into pgSTAC...")
     load_direct(collection, PGDSN)
