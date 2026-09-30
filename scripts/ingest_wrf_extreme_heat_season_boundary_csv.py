@@ -105,13 +105,10 @@ def build_collection():
         keywords=[
             "climate model",
             "California",
-            "CMIP6",
-            "dynamical",
             "extreme heat",
             "extreme heat season",
             "seasonality",
             "global warming levels",
-            "boundaries",
             "CSV",
         ],
         description=(
