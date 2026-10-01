@@ -133,6 +133,9 @@ make loca2                      # LOCA2 gridded Zarr
 make wrf-ucla                   # WRF UCLA
 make eh-metrics-mm-boundary-csv # WRF extreme heat tool boundary CSV
 make hdd-cdd-metrics-mm-boundary-csv # WRF HDD/CDD tool boundary CSV
+make hwf-metrics-mm-boundary-csv # WRF heat wave frequency tool boundary CSV
+make hwl-metrics-mm-boundary-csv # WRF heat wave length tool boundary CSV
+make ehs-metrics-mm-boundary-csv # WRF extreme heat season tool boundary CSV
 make wrf-derived-vars           # WRF-derived climate metrics
 make wrf-climate-metrics-map    # WRF climate metrics map
 make hadisd                     # HadISD station Zarrs

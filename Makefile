@@ -18,6 +18,9 @@ ingest-all:
 	$(MAKE) wrf-ucla
 	$(MAKE) eh-metrics-mm-boundary-csv
 	$(MAKE) hdd-cdd-metrics-mm-boundary-csv
+	$(MAKE) hwf-metrics-mm-boundary-csv
+	$(MAKE) hwl-metrics-mm-boundary-csv
+	$(MAKE) ehs-metrics-mm-boundary-csv
 	$(MAKE) wrf-derived-vars
 	$(MAKE) wrf-climate-metrics-map
 	$(MAKE) hadisd
@@ -52,15 +55,18 @@ wrf-ucla:
 # keyed on the full query string, including ones with 0 results. Ingesting
 # a brand-new collection after a client has already searched for it (and
 # gotten cached as empty) leaves that exact query stuck returning nothing
-# until this is invalidated. Only wired into the ingest targets that back a
-# live web tool doing on-demand STAC searches (extreme heat, hdd/cdd) --
-# not the other collections, which aren't queried this way.
+# until this is invalidated. /collections responses are cached the same way,
+# so re-ingested collection metadata (titles, keywords) stays stale without
+# invalidating them too. Only wired into the ingest targets that back a
+# live web tool doing on-demand STAC searches (extreme heat, hdd/cdd,
+# heat wave frequency/length, extreme heat season) -- not the other
+# collections, which aren't queried this way.
 STAC_CLOUDFRONT_DISTRIBUTION_ID := E2ON6INEGWTHQ1
 
 invalidate-search-cache:
 	aws cloudfront create-invalidation \
 		--distribution-id $(STAC_CLOUDFRONT_DISTRIBUTION_ID) \
-		--paths "/search*" \
+		--paths "/search*" "/collections*" \
 		--profile era-de
 
 eh-metrics-mm-boundary-csv:
@@ -71,6 +77,21 @@ eh-metrics-mm-boundary-csv:
 hdd-cdd-metrics-mm-boundary-csv:
 	uv run python -m scripts.ingest_wrf_hdd_cdd_tool_boundary_csv
 	uv run python -m scripts.register_queryables --collection hdd-cdd-metrics-mm-boundary-csv
+	$(MAKE) invalidate-search-cache
+
+hwf-metrics-mm-boundary-csv:
+	uv run python -m scripts.ingest_wrf_heat_wave_frequency_boundary_csv
+	uv run python -m scripts.register_queryables --collection hwf-metrics-mm-boundary-csv
+	$(MAKE) invalidate-search-cache
+
+hwl-metrics-mm-boundary-csv:
+	uv run python -m scripts.ingest_wrf_heat_wave_length_boundary_csv
+	uv run python -m scripts.register_queryables --collection hwl-metrics-mm-boundary-csv
+	$(MAKE) invalidate-search-cache
+
+ehs-metrics-mm-boundary-csv:
+	uv run python -m scripts.ingest_wrf_extreme_heat_season_boundary_csv
+	uv run python -m scripts.register_queryables --collection ehs-metrics-mm-boundary-csv
 	$(MAKE) invalidate-search-cache
 
 wrf-derived-vars:

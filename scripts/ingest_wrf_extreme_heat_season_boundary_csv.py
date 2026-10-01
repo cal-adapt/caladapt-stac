@@ -1,21 +1,28 @@
-"""ingest_wrf_extreme_heat_tool_boundary_csv.py
+"""ingest_wrf_extreme_heat_season_boundary_csv.py
 
-Ingest WRF extreme heat tool multi-model boundary CSV data into pgSTAC.
+Ingest WRF extreme heat season tool multi-model boundary CSV data into pgSTAC.
 
-Multi-model ensemble summary CSVs (median/p10/p90 across 4 WRF models) at each
-global warming level, organized by metric × boundary × threshold. Covers 6
-California boundary types: counties, watersheds, census tracts, IOU/POUs,
-forecast zones, and electric balancing areas.
+Multi-model mean CSVs (across 4 WRF models) of day-of-year threshold
+exceedance frequency at each global warming level, organized by boundary ×
+threshold. For each calendar day, frequency_percent is the share of years in
+the 30-year GWL window whose daily maximum temperature (t2max) exceeded the
+threshold. Days run 1-365 on a no-leap calendar (February 29 removed). This
+is not a heat wave event metric: consecutive days are not considered. Covers
+4 of the 6 California boundary types produced by the pipeline: counties,
+watersheds, forecast zones, and electric balancing areas.
+
+Census tracts and IOU/POUs are excluded to match the HDD/CDD and heat wave
+tools' launch scope (see ingest_wrf_hdd_cdd_tool_boundary_csv.py).
 
 S3 path structure:
-    wrf/extreme-heat-tool/multimodel_per_boundary/{metric}/{boundary}/ssp370/csv/{thresh}/
-    Files within: {Region_Name}_{thresh}.csv
+    wrf/extreme-heat-season/multimodel_per_boundary/{boundary}/gwl/csv/{thresh}/
+    Files within: {Region_Name}_{thresh}.csv (1,825 rows: 5 GWLs × 365 days)
 
-One STAC item per (metric × boundary × threshold) combination.
+One STAC item per (boundary × threshold) combination.
 Each item has one asset pointing to the S3 prefix directory.
 
 Usage:
-    uv run python -m scripts.ingest_wrf_extreme_heat_tool_boundary_csv
+    uv run python -m scripts.ingest_wrf_extreme_heat_season_boundary_csv
 
 Requires:
     - AWS credentials with read access to the cadcat S3 bucket
@@ -32,21 +39,23 @@ from scripts.constants import (
     CALADAPT_DATA_LICENSE,
     ICON_BASE_URL,
     PGDSN,
-    WRF_EXTREME_HEAT_TOOL_PREFIX,
-    WRF_VARIABLE_LABELS,
+    WRF_EXTREME_HEAT_SEASON_PREFIX,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
-MULTIMODEL_CSV_PREFIX = WRF_EXTREME_HEAT_TOOL_PREFIX + "multimodel_per_boundary/"
+MULTIMODEL_CSV_PREFIX = WRF_EXTREME_HEAT_SEASON_PREFIX + "multimodel_per_boundary/"
 
+# Launch scope: 4 of the 6 boundary types the pipeline produces, matching the
+# HDD/CDD tool. Census tracts and IOU/POUs are intentionally excluded (see
+# module docstring), so this is a deliberate allowlist rather than something
+# to discover from S3.
 BOUNDARY_LABELS = {
     "ca_counties": "California counties",
     "ca_watersheds": "California watersheds (HUC8)",
-    "ca_census_tracts": "California census tracts",
-    "ious_pous": "California IOUs and POUs",
     "forecast_zones": "California forecast zones",
     "electric_balancing_areas": "California electric balancing areas",
 }
+VALID_BOUNDARIES = list(BOUNDARY_LABELS)
 
 EXPERIMENT_DATE_RANGE = (
     datetime(2015, 1, 1, tzinfo=timezone.utc),
@@ -62,7 +71,7 @@ def parse_csv_prefix(prefix):
     ----------
     prefix : str
         S3 prefix, e.g.
-        wrf/extreme-heat-tool/multimodel_per_boundary/eh_days/ca_counties/ssp370/t2max_ge95F/
+        wrf/extreme-heat-season/multimodel_per_boundary/ca_counties/gwl/csv/t2max_ge90F/
 
     Returns
     -------
@@ -71,14 +80,12 @@ def parse_csv_prefix(prefix):
     """
     inner = prefix.removeprefix(MULTIMODEL_CSV_PREFIX).rstrip("/")
     parts = inner.split("/")
-    # expected: [metric, boundary, ssp370, thresh]
-    if len(parts) != 4 or parts[2] != "ssp370":
+    # expected: [boundary, gwl, csv, thresh]
+    if len(parts) != 4 or parts[1:3] != ["gwl", "csv"]:
         return None
-    metric, boundary, scenario, thresh = parts
+    boundary, _, _, thresh = parts
     return {
-        "metric": metric,
         "boundary": boundary,
-        "scenario": scenario,
         "thresh": thresh,
         "path": f"s3://{BUCKET_CADCAT}/{prefix}",
     }
@@ -86,28 +93,30 @@ def parse_csv_prefix(prefix):
 
 def build_collection():
     """
-    Build a pystac Collection for WRF extreme heat tool multi-model boundary CSVs.
+    Build a pystac Collection for WRF extreme heat season multi-model boundary CSVs.
 
     Returns
     -------
     pystac.Collection
     """
     collection = pystac.Collection(
-        id="eh-metrics-mm-boundary-csv",
-        title="Cal-Adapt extreme heat tool (boundary CSV)",
+        id="ehs-metrics-mm-boundary-csv",
+        title="Cal-Adapt extreme heat season tool (boundary CSV)",
         keywords=[
             "climate model",
             "California",
             "extreme heat",
+            "extreme heat season",
+            "seasonality",
             "global warming levels",
             "CSV",
         ],
         description=(
-            "Multi-model ensemble summary CSVs of WRF extreme heat projections for California "
-            "at global warming levels (0.8°C–3.0°C), aggregated by boundary region. "
-            "Covers 6 boundary types: counties, watersheds, census tracts, IOU/POUs, "
-            "forecast zones, and electric balancing areas. Each CSV contains multi-model "
-            "median/p10/p90 exceedance counts across all warming levels for one region."
+            "Multi-model mean CSVs of WRF day-of-year threshold exceedance frequency for "
+            "California at global warming levels (0.8°C–3.0°C), aggregated by boundary "
+            "region, for each threshold. Covers 4 boundary types: counties, watersheds, "
+            "forecast zones, and electric balancing areas. Each CSV contains one value "
+            "per warming level and day of year for one region."
         ),
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -129,50 +138,55 @@ def build_collection():
             ),
         ),
     )
+    # TODO: swap in a dedicated extreme heat season thumbnail once one exists.
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
             href=f"{ICON_BASE_URL}wrf_extreme_heat_ridgeplot.png",
             media_type="image/png",
             roles=["thumbnail"],
-            title="WRF extreme heat tool preview",
+            title="WRF extreme heat season tool preview",
         ),
     )
 
     print("  Discovering boundary CSV prefixes from S3...")
-    seen_metrics: set[str] = set()
+    geometry = bbox_to_geometry(CA_BBOX)
+    start_dt, end_dt = EXPERIMENT_DATE_RANGE
     items_built = 0
 
-    # depth=4: metric / boundary / ssp370 / thresh
-    for prefix in list_zarr_stores(MULTIMODEL_CSV_PREFIX, BUCKET_CADCAT, depth=4):
+    prefixes = (
+        prefix
+        for boundary in VALID_BOUNDARIES
+        # depth=1: thresh
+        for prefix in list_zarr_stores(
+            f"{MULTIMODEL_CSV_PREFIX}{boundary}/gwl/csv/", BUCKET_CADCAT, depth=1
+        )
+    )
+    for prefix in prefixes:
         parsed = parse_csv_prefix(prefix)
         if parsed is None:
             continue
 
-        metric = parsed["metric"]
         boundary = parsed["boundary"]
-        scenario = parsed["scenario"]
         thresh = parsed["thresh"]
-        seen_metrics.add(metric)
-
-        start_dt, end_dt = EXPERIMENT_DATE_RANGE
-        item_id = f"eh-metrics-mm-boundary-csv-{metric}-{boundary}-{thresh}"
+        boundary_label = BOUNDARY_LABELS[boundary]
+        item_id = f"ehs-metrics-mm-boundary-csv-{boundary}-{thresh}"
 
         item = pystac.Item(
             id=item_id,
-            geometry=bbox_to_geometry(CA_BBOX),
+            geometry=geometry,
             bbox=CA_BBOX,
             datetime=None,
             properties={
                 "start_datetime": start_dt.isoformat(),
                 "end_datetime": end_dt.isoformat(),
                 "cmip6:activity_id": "WRF",
-                "cmip6:institution_id": "CAE",
-                "cmip6:experiment_id": scenario,
-                "variable_id": metric,
+                "cmip6:institution_id": "UCLA",
+                "cmip6:experiment_id": "ssp370",
+                "variable_id": "frequency_percent",
                 "threshold_name": thresh,
                 "boundary": boundary,
-                "boundary_label": BOUNDARY_LABELS.get(boundary, boundary),
+                "boundary_label": boundary_label,
                 "caladapt:spatial_type": "boundary",
                 "bias_adjusted": True,
             },
@@ -182,16 +196,13 @@ def build_collection():
             pystac.Asset(
                 href=parsed["path"],
                 media_type="text/csv",
-                title=f"{BOUNDARY_LABELS.get(boundary, boundary)} — {metric} | {thresh}",
+                title=f"{boundary_label} — extreme heat season | {thresh}",
                 roles=["data"],
             ),
         )
         collection.add_item(item)
         items_built += 1
 
-    collection.extra_fields["caladapt:variable_labels"] = {
-        var: WRF_VARIABLE_LABELS.get(var, var) for var in seen_metrics
-    }
     collection.extra_fields["caladapt:boundary_labels"] = BOUNDARY_LABELS
 
     print(f"  Built {items_built} items.")
@@ -199,7 +210,7 @@ def build_collection():
 
 
 def main():
-    print("  Building WRF extreme heat tool boundary CSV collection...")
+    print("  Building WRF extreme heat season tool boundary CSV collection...")
     collection = build_collection()
     print("  Loading directly into pgSTAC...")
     load_direct(collection, PGDSN)
