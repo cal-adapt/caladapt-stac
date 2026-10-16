@@ -14,7 +14,7 @@ Census tracts and IOU/POUs are excluded to match the HDD/CDD tool's launch
 scope (see ingest_wrf_hdd_cdd_tool_boundary_csv.py).
 
 S3 path structure:
-    wrf/heat wave-frequency/multimodel_per_boundary/{boundary}/gwl/csv/{thresh}/duration_{n}d/
+    wrf/heat-wave-frequency/multimodel_per_boundary/{boundary}/gwl/csv/{thresh}/duration_{n}d/
     Files within: {Region_Name}_{thresh}_{n}d.csv
 
 Duration is stored as its S3 storage name (e.g. "duration_3d") in
@@ -74,7 +74,7 @@ def parse_csv_prefix(prefix):
     ----------
     prefix : str
         S3 prefix, e.g.
-        wrf/heat wave-frequency/multimodel_per_boundary/ca_counties/gwl/csv/t2max_ge95F/duration_3d/
+        wrf/heat-wave-frequency/multimodel_per_boundary/ca_counties/gwl/csv/t2max_ge95F/duration_3d/
 
     Returns
     -------
@@ -109,7 +109,7 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="hwf-metrics-mm-boundary-csv",
-        title="Cal-Adapt heat wave frequency tool (boundary CSV)",
+        title="Cal-Adapt heat wave frequency tool",
         keywords=[
             "climate model",
             "California",
@@ -122,9 +122,9 @@ def build_collection():
         description=(
             "Multi-model mean CSVs of WRF annual heat wave counts for California at "
             "global warming levels (0.8°C–3.0°C), aggregated by boundary region, for "
-            "each threshold and minimum duration. Covers 4 boundary types: counties, "
-            "watersheds, forecast zones, and electric balancing areas. Each CSV "
-            "contains median/p10/p90 values for one region."
+            "each threshold and minimum duration. Each CSV contains median/p10/p90 "
+            "values at each warming level, and their change from the 0.8°C baseline, "
+            "for one region."
         ),
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -150,7 +150,7 @@ def build_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href=f"{ICON_BASE_URL}wrf_extreme_heat_ridgeplot.png",
+            href=f"{ICON_BASE_URL}wrf_heat_wave_frequency.png",
             media_type="image/png",
             roles=["thumbnail"],
             title="WRF heat wave frequency tool preview",

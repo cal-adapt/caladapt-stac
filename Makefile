@@ -11,23 +11,6 @@ deploy: build
 run:
 	uv run python -m uvicorn app.main:app --reload
 
-ingest-all:
-	$(MAKE) clim-prof
-	$(MAKE) loca2-county
-	$(MAKE) loca2
-	$(MAKE) wrf-ucla
-	$(MAKE) eh-metrics-mm-boundary-csv
-	$(MAKE) hdd-cdd-metrics-mm-boundary-csv
-	$(MAKE) hwf-metrics-mm-boundary-csv
-	$(MAKE) hwl-metrics-mm-boundary-csv
-	$(MAKE) ehs-metrics-mm-boundary-csv
-	$(MAKE) wrf-derived-vars
-	$(MAKE) wrf-climate-metrics-map
-	$(MAKE) hadisd
-	$(MAKE) hdp
-	$(MAKE) ren
-	$(MAKE) slr
-
 queryables:
 	uv run python -m scripts.register_queryables
 
@@ -109,6 +92,7 @@ hadisd:
 hdp:
 	uv run python -m scripts.ingest_hdp
 	uv run python -m scripts.register_queryables --collection historical-data-platform
+	$(MAKE) invalidate-search-cache
 
 ren:
 	uv run python -m scripts.ingest_ren
