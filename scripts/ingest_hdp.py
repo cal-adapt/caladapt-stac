@@ -67,7 +67,8 @@ def build_hdp_collection():
         extra_fields={"caladapt:spatial_type": "point"},
         description=(
             "Standardized and quality-controlled historical weather "
-            "station data from 27 stations within the WECC region."
+            "station data from 15,000+ weather stations within the "
+            "WECC region."
         ),
         extent=pystac.Extent(
             spatial=pystac.SpatialExtent(bboxes=[WECC_BBOX]),

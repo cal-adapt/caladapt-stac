@@ -14,7 +14,7 @@ Census tracts and IOU/POUs are excluded to match the HDD/CDD and heat wave
 frequency tools' launch scope (see ingest_wrf_hdd_cdd_tool_boundary_csv.py).
 
 S3 path structure:
-    wrf/heat wave-length/multimodel_per_boundary/{boundary}/gwl/csv/{thresh}/
+    wrf/heat-wave-length/multimodel_per_boundary/{boundary}/gwl/csv/{thresh}/
     Files within: {Region_Name}_{thresh}.csv
 
 One STAC item per (boundary × threshold) combination.
@@ -70,7 +70,7 @@ def parse_csv_prefix(prefix):
     ----------
     prefix : str
         S3 prefix, e.g.
-        wrf/heat wave-length/multimodel_per_boundary/ca_counties/gwl/csv/t2max_ge100F/
+        wrf/heat-wave-length/multimodel_per_boundary/ca_counties/gwl/csv/t2max_ge100F/
 
     Returns
     -------
@@ -100,7 +100,7 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="hwl-metrics-mm-boundary-csv",
-        title="Cal-Adapt heat wave length tool (boundary CSV)",
+        title="Cal-Adapt heat wave length tool",
         keywords=[
             "climate model",
             "California",
@@ -113,9 +113,8 @@ def build_collection():
         description=(
             "Multi-model mean CSVs of WRF annual mean heat wave length for California "
             "at global warming levels (0.8°C–3.0°C), aggregated by boundary region, for "
-            "each threshold. Covers 4 boundary types: counties, watersheds, forecast "
-            "zones, and electric balancing areas. Each CSV contains median/p10/p90 "
-            "values for one region."
+            "each threshold. Each CSV contains median/p10/p90 values at each warming "
+            "level, and their change from the 0.8°C baseline, for one region."
         ),
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -141,7 +140,7 @@ def build_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href=f"{ICON_BASE_URL}wrf_extreme_heat_ridgeplot.png",
+            href=f"{ICON_BASE_URL}wrf_heat_wave_length.png",
             media_type="image/png",
             roles=["thumbnail"],
             title="WRF heat wave length tool preview",

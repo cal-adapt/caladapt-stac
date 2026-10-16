@@ -75,7 +75,7 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="hdd-cdd-metrics-mm-boundary-csv",
-        title="Cal-Adapt heating and cooling degree days tool (boundary CSV)",
+        title="Cal-Adapt heating and cooling degree days tool",
         keywords=[
             "climate model",
             "California",
@@ -90,9 +90,8 @@ def build_collection():
         ],
         description=(
             "Multi-model ensemble annual HDD65/CDD65 timeseries CSVs of WRF projections "
-            "for California, aggregated by boundary region. Covers 4 boundary types: "
-            "counties, watersheds, forecast zones, and electric balancing areas. Each CSV "
-            "contains multi-model mean/min/max annual HDD and CDD (65 degF threshold) for "
+            "for California, aggregated by boundary region. Each CSV contains "
+            "multi-model mean/min/max annual HDD and CDD (65 degF threshold) for "
             "one region, spanning the historical period through the ssp370 projection "
             "(1981-2099)."
         ),

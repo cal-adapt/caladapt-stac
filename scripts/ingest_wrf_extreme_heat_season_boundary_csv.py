@@ -101,7 +101,7 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="ehs-metrics-mm-boundary-csv",
-        title="Cal-Adapt extreme heat season tool (boundary CSV)",
+        title="Cal-Adapt extreme heat season tool",
         keywords=[
             "climate model",
             "California",
@@ -114,9 +114,8 @@ def build_collection():
         description=(
             "Multi-model mean CSVs of WRF day-of-year threshold exceedance frequency for "
             "California at global warming levels (0.8°C–3.0°C), aggregated by boundary "
-            "region, for each threshold. Covers 4 boundary types: counties, watersheds, "
-            "forecast zones, and electric balancing areas. Each CSV contains one value "
-            "per warming level and day of year for one region."
+            "region, for each threshold. Each CSV contains one value per warming level "
+            "and day of year for one region."
         ),
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -142,7 +141,7 @@ def build_collection():
     collection.add_asset(
         "thumbnail",
         pystac.Asset(
-            href=f"{ICON_BASE_URL}wrf_extreme_heat_ridgeplot.png",
+            href=f"{ICON_BASE_URL}wrf_extreme_heat_season.png",
             media_type="image/png",
             roles=["thumbnail"],
             title="WRF extreme heat season tool preview",
