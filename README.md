@@ -118,13 +118,7 @@ Export `PGDSN` for your session (replace `PASSWORD` and `<RDS_ENDPOINT>` with th
 export PGDSN='postgresql://postgres:PASSWORD@<RDS_ENDPOINT>:5432/caladapt?sslmode=require'
 ```
 
-Ingest all collections:
-
-```bash
-make ingest-all
-```
-
-Or ingest a single collection (also registers queryables):
+Ingest a single collection (also registers queryables):
 
 ```bash
 make clim-prof                  # typical-met-year, standard-year, xmy-persist, xmy-shock
