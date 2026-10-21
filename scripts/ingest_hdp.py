@@ -8,7 +8,7 @@ Council (WECC) region, covering the period from 1980 to 2022. Methods documented
 at https://github.com/Eagle-Rock-Analytics/historical-obs-platform.
 
 Station data are stored as zarr archives at s3://cadcat/histwxstns/{network}/{era_id}.
-There are 27 networks totaling 14,927 stations.
+There are 27 networks totaling 15,064 stations.
 
 Workflow:
 1. Read station metadata from historical_wx_stations.csv in S3
@@ -24,11 +24,13 @@ Requires:
 
 import pandas as pd
 import pystac
+from pystac.extensions.scientific import ScientificExtension
 from datetime import datetime, timezone
 
 from scripts.constants import (
     BUCKET_CADCAT,
     CALADAPT_DATA_LICENSE,
+    HDP_DOI,
     HDP_PREFIX,
     HDP_STATION_COORDS_URL,
     ICON_BASE_URL,
@@ -113,6 +115,7 @@ def build_hdp_collection():
             title="Item geometries",
         ),
     )
+    ScientificExtension.ext(collection, add_if_missing=True).doi = HDP_DOI
 
     df = pd.read_csv(HDP_STATIONS_CSV_URL, parse_dates=["start-date", "end-date"])
 
