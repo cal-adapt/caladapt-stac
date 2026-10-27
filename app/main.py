@@ -90,8 +90,16 @@ class LambdaSettings(Settings):
     db_max_conn_size: int = 1
     db_min_conn_size: int = 1
     stac_fastapi_title: str = "Cal-Adapt STAC API"
+    # Markdown; STAC Browser renders it on its landing page
     stac_fastapi_description: str = (
-        "Searchable spatiotemporal catalog of climate datasets hosted on Cal-Adapt."
+        "Searchable spatiotemporal catalog of climate datasets hosted on Cal-Adapt.\n\n"
+        "It includes downscaled climate projections (LOCA2 and WRF), historical "
+        "weather station observations, sea level projections, climate profiles for "
+        "building and energy planning, renewable energy generation profiles, and "
+        "summaries by county and other regions.\n\n"
+        "All data is free to access. Files are stored in public cloud storage on AWS "
+        "and can be read without an account. Most datasets are licensed CC-BY-4.0; "
+        "check each dataset for its license."
     )
     openapi_url: str = "/openapi.json"
     docs_url: str = "/docs"
