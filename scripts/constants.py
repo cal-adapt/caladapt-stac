@@ -71,6 +71,9 @@ CALADAPT_DATA_LICENSE_URL = "https://creativecommons.org/licenses/by/4.0/"
 # DOI for climate profile collections (TMY, SMY, XMY persist/shock)
 CLIM_PROF_DOI = "10.5281/zenodo.18135273"
 
+# DOI for the Historical Data Platform weather station collection
+HDP_DOI = "10.5281/zenodo.23422582"
+
 # Mapping of California county FIPS codes to county names (without "County" suffix)
 # Matches the countyname property used in STAC items and the cal-adapt-de-website data download tool
 CA_COUNTY_FIPS = {
