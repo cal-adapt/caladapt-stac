@@ -3,18 +3,22 @@
 Ingest WRF HDD/CDD tool multi-model boundary timeseries CSV data into pgSTAC.
 
 Multi-model ensemble annual HDD65/CDD65 timeseries CSVs (mean/min/max across
-4 WRF models, historical + ssp370, 1981-2099) organized by boundary. Covers 4
+4 WRF models, historical + ssp370, 1981-2099) organized by boundary. Covers 5
 of the 6 California boundary types produced by the pipeline: counties,
-watersheds, forecast zones, and electric balancing areas.
+watersheds, forecast zones, electric balancing areas, and census tracts.
 
-Census tracts and IOU/POUs are excluded at this launch scope -- the IOU/POU
-boundary raster mask only assigns 42 of 52 utility geometries (see
-HDD/CDD MVP Requirements doc, "Outstanding Questions"), the same known issue
-that scopes the extreme heat tool's boundary options.
+IOU/POUs are excluded at this launch scope -- the IOU/POU boundary raster
+mask only assigns 42 of 52 utility geometries (see HDD/CDD MVP Requirements
+doc, "Outstanding Questions"), the same known issue that scopes the extreme
+heat tool's boundary options.
 
 S3 path structure:
     wrf/hdd-cdd-tool/multimodel_per_boundary/{boundary}/ssp370/timeseries/csv/
     Files within: {Region_Name}.csv
+
+    Census tracts use the weighted median outputs, one level deeper:
+    wrf/hdd-cdd-tool/multimodel_per_boundary/ca_census_tracts/weighted_median/ssp370/timeseries/csv/
+    Files within: {GEOID}.csv
 
 One STAC item per boundary type. Each item has one asset pointing to the S3
 prefix directory.
@@ -46,16 +50,23 @@ MULTIMODEL_CSV_PREFIX = WRF_HDD_CDD_TOOL_PREFIX + "multimodel_per_boundary/"
 SCENARIO = "ssp370"
 THRESHOLD_NAME = "65F"
 
-# Launch scope: 4 of the 6 boundary types the pipeline produces. Census
-# tracts and IOU/POUs are intentionally excluded (see module docstring), so
-# this is a deliberate allowlist rather than something to discover from S3.
+# Launch scope: 5 of the 6 boundary types the pipeline produces. IOU/POUs
+# are intentionally excluded (see module docstring), so this is a deliberate
+# allowlist rather than something to discover from S3.
 BOUNDARY_LABELS = {
     "ca_counties": "California counties",
     "ca_watersheds": "California watersheds (HUC8)",
     "forecast_zones": "California forecast zones",
     "electric_balancing_areas": "California electric balancing areas",
+    "ca_census_tracts": "California census tracts",
 }
 VALID_BOUNDARIES = list(BOUNDARY_LABELS)
+
+# Census tract outputs sit under an extra aggregation directory. Only the
+# weighted median is ingested; the weighted mean is not used.
+BOUNDARY_SUBDIRS = {
+    "ca_census_tracts": "weighted_median/",
+}
 
 # Historical (1981) through the end of the ssp370 projection (2099), matching
 # the continuous per-region timeseries CSVs.
@@ -130,7 +141,8 @@ def build_collection():
 
     items_built = 0
     for boundary in VALID_BOUNDARIES:
-        path = f"{MULTIMODEL_CSV_PREFIX}{boundary}/{SCENARIO}/timeseries/csv/"
+        subdir = BOUNDARY_SUBDIRS.get(boundary, "")
+        path = f"{MULTIMODEL_CSV_PREFIX}{boundary}/{subdir}{SCENARIO}/timeseries/csv/"
         boundary_label = BOUNDARY_LABELS[boundary]
         item_id = f"hdd-cdd-metrics-mm-boundary-csv-{boundary}"
 
