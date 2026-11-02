@@ -32,7 +32,7 @@ from scripts.constants import (
     HADISD_WECC_STATION_COORDS_URL,
     ICON_BASE_URL,
     PGDSN,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import load_direct
 
@@ -67,16 +67,8 @@ def build_hadisd_collection():
     collection = pystac.Collection(
         id="hadisd",
         title="HadISD",
-        keywords=[
-            "cloud-optimized",
-            "historical data",
-            "weather station",
-            "air temperature",
-        ],
-        extra_fields={
-            "caladapt:spatial_type": "point",
-            "caladapt:topics": COLLECTION_TOPICS["hadisd"],
-        },
+        keywords=COLLECTION_KEYWORDS["hadisd"],
+        extra_fields={"caladapt:spatial_type": "point"},
         description=("Met Office HadISD sub-daily station data for the WECC region."),
         license=HADISD_LICENSE,
         providers=[

@@ -43,7 +43,7 @@ from scripts.constants import (
     ICON_BASE_URL,
     PGDSN,
     WRF_HEAT_WAVE_FREQUENCY_PREFIX,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -111,19 +111,8 @@ def build_collection():
     collection = pystac.Collection(
         id="hwf-metrics-mm-boundary-csv",
         title="Cal-Adapt heat wave frequency tool",
-        keywords=[
-            "climate model",
-            "California",
-            "extreme heat",
-            "heat waves",
-            "heat wave frequency",
-            "global warming levels",
-            "CSV",
-        ],
-        extra_fields={
-            "caladapt:boundary_labels": BOUNDARY_LABELS,
-            "caladapt:topics": COLLECTION_TOPICS["hwf-metrics-mm-boundary-csv"],
-        },
+        keywords=COLLECTION_KEYWORDS["hwf-metrics-mm-boundary-csv"],
+        extra_fields={"caladapt:boundary_labels": BOUNDARY_LABELS},
         description=(
             "Multi-model mean CSVs of WRF annual heat wave counts for California at "
             "global warming levels (0.8°C–3.0°C), aggregated by boundary region, for "

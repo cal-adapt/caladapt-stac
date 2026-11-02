@@ -29,7 +29,7 @@ from scripts.constants import (
     WRF_DERIVED_VARS_PREFIX,
     WRF_UCLA_GRID_BBOXES,
     WRF_VARIABLE_LABELS,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -85,20 +85,8 @@ def build_wrf_derived_vars_collection():
     collection = pystac.Collection(
         id="wrf-derived-vars",
         title="WRF derived climate variables",
-        keywords=[
-            "climate model",
-            "cloud-optimized",
-            "California",
-            "geospatial",
-            "CMIP6",
-            "dynamical",
-            "fire weather",
-            "wind",
-        ],
-        extra_fields={
-            "caladapt:spatial_type": "grid",
-            "caladapt:topics": COLLECTION_TOPICS["wrf-derived-vars"],
-        },
+        keywords=COLLECTION_KEYWORDS["wrf-derived-vars"],
+        extra_fields={"caladapt:spatial_type": "grid"},
         description=(
             "Hourly derived climate variables (FFWI, relative humidity, wind speed) for California, "
             "produced from WRF-downscaled CMIP6 outputs at 3 km resolution."

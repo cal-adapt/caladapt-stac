@@ -35,7 +35,7 @@ from scripts.constants import (
     LOCA2_GRIDDED_PREFIX,
     LOCA2_VARIABLE_LABELS,
     PGDSN,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -106,19 +106,8 @@ def build_loca2_gridded_collection():
     collection = pystac.Collection(
         id="loca2",
         title="LOCA2",
-        keywords=[
-            "climate model",
-            "cloud-optimized",
-            "geospatial",
-            "California",
-            "future projections",
-            "CMIP6",
-            "statistical",
-        ],
-        extra_fields={
-            "caladapt:spatial_type": "grid",
-            "caladapt:topics": COLLECTION_TOPICS["loca2"],
-        },
+        keywords=COLLECTION_KEYWORDS["loca2"],
+        extra_fields={"caladapt:spatial_type": "grid"},
         description="Hybrid-statistically downscaled climate projections for California produced by UCSD using the Localized Constructed Analogs version 2 (LOCA2) method.",
         license=CALADAPT_DATA_LICENSE,
         providers=[

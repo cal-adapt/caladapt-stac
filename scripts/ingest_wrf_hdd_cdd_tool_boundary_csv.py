@@ -42,7 +42,7 @@ from scripts.constants import (
     ICON_BASE_URL,
     PGDSN,
     WRF_HDD_CDD_TOOL_PREFIX,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import bbox_to_geometry, load_direct
 
@@ -88,22 +88,8 @@ def build_collection():
     collection = pystac.Collection(
         id="hdd-cdd-metrics-mm-boundary-csv",
         title="Cal-Adapt heating and cooling degree days tool",
-        keywords=[
-            "climate model",
-            "California",
-            "CMIP6",
-            "dynamical",
-            "heating degree days",
-            "cooling degree days",
-            "HDD",
-            "CDD",
-            "boundaries",
-            "CSV",
-        ],
-        extra_fields={
-            "caladapt:boundary_labels": BOUNDARY_LABELS,
-            "caladapt:topics": COLLECTION_TOPICS["hdd-cdd-metrics-mm-boundary-csv"],
-        },
+        keywords=COLLECTION_KEYWORDS["hdd-cdd-metrics-mm-boundary-csv"],
+        extra_fields={"caladapt:boundary_labels": BOUNDARY_LABELS},
         description=(
             "Multi-model ensemble annual HDD65/CDD65 timeseries CSVs of WRF projections "
             "for California, aggregated by boundary region. Each CSV contains "
