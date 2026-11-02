@@ -8,7 +8,7 @@ import pandas as pd
 import pystac
 from unittest.mock import patch, MagicMock
 
-from scripts.constants import COLLECTION_TOPICS, TOPICS
+from scripts.constants import COLLECTION_KEYWORDS, KEYWORDS
 from scripts.ingest_climate_profiles import (
     build_tmy_collection,
     build_smy_collection,
@@ -69,22 +69,23 @@ def _check_metadata(collection, expected_id, expected_license="CC-BY-4.0"):
     assert collection.id == expected_id
     assert collection.license == expected_license
     assert collection.description
-    assert collection.keywords
+    assert collection.keywords == COLLECTION_KEYWORDS[expected_id]
     assert collection.providers
     assert "thumbnail" in collection.assets
-    assert collection.extra_fields["caladapt:topics"] == COLLECTION_TOPICS[expected_id]
 
 
-class TestCollectionTopics:
-    def test_every_collection_has_known_topics(self):
-        for collection_id, topics in COLLECTION_TOPICS.items():
-            assert topics, f"{collection_id} has no topics"
-            assert set(topics) <= set(TOPICS), f"{collection_id}: unknown topic"
-            assert len(topics) == len(set(topics)), f"{collection_id}: duplicate topic"
+class TestCollectionKeywords:
+    def test_every_collection_has_known_keywords(self):
+        for collection_id, keywords in COLLECTION_KEYWORDS.items():
+            assert keywords, f"{collection_id} has no keywords"
+            assert set(keywords) <= set(KEYWORDS), f"{collection_id}: unknown keyword"
+            assert len(keywords) == len(
+                set(keywords)
+            ), f"{collection_id}: duplicate keyword"
 
-    def test_every_topic_is_used(self):
-        used = {t for topics in COLLECTION_TOPICS.values() for t in topics}
-        assert used == set(TOPICS)
+    def test_every_keyword_is_used(self):
+        used = {k for keywords in COLLECTION_KEYWORDS.values() for k in keywords}
+        assert used == set(KEYWORDS)
 
 
 class TestBuildTmyCollection:
@@ -145,9 +146,8 @@ class TestBuildHadisdCollection:
         assert col.id == "hadisd"
         assert col.license == "proprietary"
         assert col.description
-        assert col.keywords
+        assert col.keywords == COLLECTION_KEYWORDS["hadisd"]
         assert "thumbnail" in col.assets
-        assert col.extra_fields["caladapt:topics"] == COLLECTION_TOPICS["hadisd"]
 
     @patch("scripts.ingest_hadisd.requests.get")
     def test_builds_one_item_per_feature(self, mock_get):

@@ -34,7 +34,7 @@ from scripts.constants import (
     WRF_UCLA_GRID_BBOXES,
     WRF_UCLA_PREFIX,
     WRF_VARIABLE_LABELS,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -106,18 +106,8 @@ def build_wrf_ucla_collection():
     collection = pystac.Collection(
         id="wrf-ucla",
         title="WRF",
-        keywords=[
-            "climate model",
-            "cloud-optimized",
-            "western US",
-            "geospatial",
-            "CMIP6",
-            "dynamical",
-        ],
-        extra_fields={
-            "caladapt:spatial_type": "grid",
-            "caladapt:topics": COLLECTION_TOPICS["wrf-ucla"],
-        },
+        keywords=COLLECTION_KEYWORDS["wrf-ucla"],
+        extra_fields={"caladapt:spatial_type": "grid"},
         description="Dynamically downscaled climate projections for California using the Weather Research & Forecasting Model (WRF).",
         license=CALADAPT_DATA_LICENSE,
         providers=[

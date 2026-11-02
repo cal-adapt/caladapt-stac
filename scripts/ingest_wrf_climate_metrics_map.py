@@ -30,7 +30,7 @@ from scripts.constants import (
     WRF_CLIMATE_METRICS_MAP_PREFIX,
     WRF_UCLA_GRID_BBOXES,
     WRF_VARIABLE_LABELS,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -81,22 +81,8 @@ def build_wrf_climate_metrics_map_collection():
     collection = pystac.Collection(
         id="wrf-climate-metrics-map",
         title="Cal-Adapt climate metrics map data",
-        keywords=[
-            "climate model",
-            "cloud-optimized",
-            "California",
-            "geospatial",
-            "CMIP6",
-            "dynamical",
-            "extreme heat",
-            "precipitation",
-            "fire weather",
-            "global warming levels",
-        ],
-        extra_fields={
-            "caladapt:spatial_type": "grid",
-            "caladapt:topics": COLLECTION_TOPICS["wrf-climate-metrics-map"],
-        },
+        keywords=COLLECTION_KEYWORDS["wrf-climate-metrics-map"],
+        extra_fields={"caladapt:spatial_type": "grid"},
         description=(
             "Ensemble statistics for gridded WRF-downscaled climate extremes (heat, precipitation, fire weather) "
             "at global warming levels for California, supporting the Cal-Adapt Climate Metrics Map tool."

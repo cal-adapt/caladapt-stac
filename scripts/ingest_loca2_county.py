@@ -33,7 +33,7 @@ from scripts.constants import (
     LOCA2_COUNTY_NETCDF_PREFIX,
     LOCA2_VARIABLE_LABELS,
     PGDSN,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import list_keys, load_direct
 
@@ -100,18 +100,8 @@ def build_loca2_county_collection():
     collection = pystac.Collection(
         id="loca2-county",
         title="Aggregated LOCA2 county data",
-        keywords=[
-            "climate model",
-            "California",
-            "geospatial",
-            "counties",
-            "future projections",
-            "statistical",
-        ],
-        extra_fields={
-            "caladapt:spatial_type": "county",
-            "caladapt:topics": COLLECTION_TOPICS["loca2-county"],
-        },
+        keywords=COLLECTION_KEYWORDS["loca2-county"],
+        extra_fields={"caladapt:spatial_type": "county"},
         description="LOCA2 hybrid-statistically downscaled climate projections aggregated by California counties.",
         license=CALADAPT_DATA_LICENSE,
         providers=[

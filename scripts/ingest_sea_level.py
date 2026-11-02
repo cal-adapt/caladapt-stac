@@ -43,7 +43,7 @@ from scripts.constants import (
     ICON_BASE_URL,
     PGDSN,
     SEA_LEVEL_STATION_COORDS_URL,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import list_keys, load_direct
 
@@ -120,18 +120,8 @@ def build_sea_level_collection():
     collection = pystac.Collection(
         id="sea-level-projections",
         title="Sea level projections",
-        keywords=[
-            "climate model",
-            "tide stations",
-            "California",
-            "sea level rise",
-            "future projections",
-            "CMIP6",
-        ],
-        extra_fields={
-            "caladapt:spatial_type": "point",
-            "caladapt:topics": COLLECTION_TOPICS["sea-level-projections"],
-        },
+        keywords=COLLECTION_KEYWORDS["sea-level-projections"],
+        extra_fields={"caladapt:spatial_type": "point"},
         description=(
             "Hourly sea level projections for 13 NOAA tide stations along the California "
             "coast and San Francisco Bay across low, intermediate, and high "

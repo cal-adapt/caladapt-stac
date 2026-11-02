@@ -36,7 +36,7 @@ from scripts.constants import (
     WRF_UCLA_GRID_BBOXES,
     WRF_UCSD_GRID_BBOXES,
     RENEWABLES_VARIABLE_LABELS,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -180,22 +180,8 @@ def build_pv_collection():
     collection = pystac.Collection(
         id="pv-generation",
         title="Photovoltaic power generation profiles",
-        keywords=[
-            "climate model",
-            "cloud-optimized",
-            "renewable energy",
-            "California",
-            "capacity",
-            "generation",
-            "future projections",
-            "CMIP6",
-            "geospatial",
-            "dynamical",
-        ],
-        extra_fields={
-            "caladapt:spatial_type": "grid",
-            "caladapt:topics": COLLECTION_TOPICS["pv-generation"],
-        },
+        keywords=COLLECTION_KEYWORDS["pv-generation"],
+        extra_fields={"caladapt:spatial_type": "grid"},
         description="Photovoltaic power generation profiles (capacity factor and power output) for utility-scale and distributed solar PV, covering California (3 km) and WECC (9 km).",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -251,22 +237,8 @@ def build_wind_collection():
     collection = pystac.Collection(
         id="wind-generation",
         title="Wind power generation profiles",
-        keywords=[
-            "climate model",
-            "cloud-optimized",
-            "renewable energy",
-            "California",
-            "geospatial",
-            "capacity",
-            "generation",
-            "future projections",
-            "CMIP6",
-            "dynamical",
-        ],
-        extra_fields={
-            "caladapt:spatial_type": "grid",
-            "caladapt:topics": COLLECTION_TOPICS["wind-generation"],
-        },
+        keywords=COLLECTION_KEYWORDS["wind-generation"],
+        extra_fields={"caladapt:spatial_type": "grid"},
         description="Wind power generation profiles (capacity factor and power output) for onshore and offshore wind, covering California (3 km) and WECC (9 km).",
         license=CALADAPT_DATA_LICENSE,
         providers=[

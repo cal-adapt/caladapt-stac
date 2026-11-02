@@ -64,41 +64,41 @@ HDP_PREFIX = "histwxstns/"
 HADISD_PREFIX = "hadisd/"
 HMET_PREFIX = "hmet/"
 
-# Topics for browsing, stored on each collection as caladapt:topics. The map
-# (caladapt-stac-map) and STAC Browser show them with the hyphen as a space and
-# the first letter capitalized ("station-data" -> "Station data").
-TOPICS = (
-    "extreme-heat",
+# Keywords: a short, fixed list used for browsing by topic. The map
+# (caladapt-stac-map) and STAC Browser filter on them, and the map shows them
+# with the first letter capitalized ("station data" -> "Station data").
+KEYWORDS = (
+    "extreme heat",
     "temperature",
     "precipitation",
     "wind",
-    "fire-weather",
-    "sea-level",
+    "fire weather",
+    "sea level",
     "energy",
-    "station-data",
-    "climate-profiles",
+    "station data",
+    "climate profiles",
 )
 
-COLLECTION_TOPICS = {
-    "eh-metrics-mm-boundary-csv": ["extreme-heat"],
-    "ehs-metrics-mm-boundary-csv": ["extreme-heat"],
-    "hwf-metrics-mm-boundary-csv": ["extreme-heat"],
-    "hwl-metrics-mm-boundary-csv": ["extreme-heat"],
+COLLECTION_KEYWORDS = {
+    "eh-metrics-mm-boundary-csv": ["extreme heat"],
+    "ehs-metrics-mm-boundary-csv": ["extreme heat"],
+    "hwf-metrics-mm-boundary-csv": ["extreme heat"],
+    "hwl-metrics-mm-boundary-csv": ["extreme heat"],
     "hdd-cdd-metrics-mm-boundary-csv": ["energy"],
-    "wrf-climate-metrics-map": ["extreme-heat", "precipitation", "fire-weather"],
-    "wrf-derived-vars": ["wind", "fire-weather"],
+    "wrf-climate-metrics-map": ["extreme heat", "precipitation", "fire weather"],
+    "wrf-derived-vars": ["wind", "fire weather"],
     "wrf-ucla": ["temperature", "precipitation", "wind"],
     "loca2": ["temperature", "precipitation", "wind"],
     "loca2-county": ["temperature", "precipitation", "wind"],
-    "hadisd": ["temperature", "station-data"],
-    "historical-data-platform": ["temperature", "station-data"],
+    "hadisd": ["temperature", "station data"],
+    "historical-data-platform": ["temperature", "station data"],
     "pv-generation": ["energy"],
     "wind-generation": ["energy", "wind"],
-    "sea-level-projections": ["sea-level"],
-    "typical-met-year": ["climate-profiles"],
-    "standard-year": ["climate-profiles"],
-    "xmy-persist": ["climate-profiles"],
-    "xmy-shock": ["climate-profiles"],
+    "sea-level-projections": ["sea level"],
+    "typical-met-year": ["climate profiles"],
+    "standard-year": ["climate profiles"],
+    "xmy-persist": ["climate profiles"],
+    "xmy-shock": ["climate profiles"],
 }
 
 # License for all Cal-Adapt data (CMIP6-derived products)

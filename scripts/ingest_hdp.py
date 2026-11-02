@@ -36,7 +36,7 @@ from scripts.constants import (
     ICON_BASE_URL,
     PGDSN,
     WECC_BBOX,
-    COLLECTION_TOPICS,
+    COLLECTION_KEYWORDS,
 )
 from scripts.utils import load_direct
 
@@ -60,17 +60,8 @@ def build_hdp_collection():
     collection = pystac.Collection(
         id="historical-data-platform",
         title="Historical data platform",
-        keywords=[
-            "cloud-optimized",
-            "historical data",
-            "weather station",
-            "quality controlled",
-            "western US",
-        ],
-        extra_fields={
-            "caladapt:spatial_type": "point",
-            "caladapt:topics": COLLECTION_TOPICS["historical-data-platform"],
-        },
+        keywords=COLLECTION_KEYWORDS["historical-data-platform"],
+        extra_fields={"caladapt:spatial_type": "point"},
         description=(
             "Standardized and quality-controlled historical weather "
             "station data from 15,000+ weather stations within the "
