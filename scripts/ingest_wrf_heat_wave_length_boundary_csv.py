@@ -103,7 +103,10 @@ def build_collection():
         id="hwl-metrics-mm-boundary-csv",
         title="Cal-Adapt heat wave length tool",
         keywords=COLLECTION_KEYWORDS["hwl-metrics-mm-boundary-csv"],
-        extra_fields={"caladapt:boundary_labels": BOUNDARY_LABELS},
+        extra_fields={
+            "caladapt:spatial_type": "boundary",
+            "caladapt:boundary_labels": BOUNDARY_LABELS,
+        },
         description=(
             "Multi-model mean CSVs of WRF annual mean heat wave length for California "
             "at global warming levels (0.8°C–3.0°C), aggregated by boundary region, for "

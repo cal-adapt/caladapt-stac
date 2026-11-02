@@ -97,7 +97,10 @@ def build_collection():
         id="eh-metrics-mm-boundary-csv",
         title="Cal-Adapt extreme heat tool",
         keywords=COLLECTION_KEYWORDS["eh-metrics-mm-boundary-csv"],
-        extra_fields={"caladapt:boundary_labels": BOUNDARY_LABELS},
+        extra_fields={
+            "caladapt:spatial_type": "boundary",
+            "caladapt:boundary_labels": BOUNDARY_LABELS,
+        },
         description=(
             "Multi-model ensemble summary CSVs of WRF projections of extreme heat days "
             "and warm nights for California at global warming levels (0.8°C–3.0°C), "
