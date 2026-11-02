@@ -153,7 +153,6 @@ def build_collection():
                 "cmip6:experiment_id": SCENARIO,
                 "threshold_name": THRESHOLD_NAME,
                 "boundary": boundary,
-                "boundary_label": boundary_label,
                 "caladapt:spatial_type": "boundary-aggregate",
                 "bias_adjusted": True,
             },

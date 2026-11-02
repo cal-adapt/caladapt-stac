@@ -181,7 +181,6 @@ def build_collection():
                 "variable_id": "heat_wave_length",
                 "threshold_name": thresh,
                 "boundary": boundary,
-                "boundary_label": boundary_label,
                 "caladapt:spatial_type": "boundary-aggregate",
                 "bias_adjusted": True,
             },

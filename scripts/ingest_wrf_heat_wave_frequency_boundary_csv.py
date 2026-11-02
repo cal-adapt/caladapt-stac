@@ -193,7 +193,6 @@ def build_collection():
                 "threshold_name": thresh,
                 "duration_name": duration,
                 "boundary": boundary,
-                "boundary_label": boundary_label,
                 "caladapt:spatial_type": "boundary-aggregate",
                 "bias_adjusted": True,
             },

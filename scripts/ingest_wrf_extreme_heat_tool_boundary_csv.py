@@ -170,7 +170,6 @@ def build_collection():
                 "variable_id": metric,
                 "threshold_name": thresh,
                 "boundary": boundary,
-                "boundary_label": BOUNDARY_LABELS.get(boundary, boundary),
                 "caladapt:spatial_type": "boundary-aggregate",
                 "bias_adjusted": True,
             },
