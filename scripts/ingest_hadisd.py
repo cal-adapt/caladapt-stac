@@ -32,6 +32,7 @@ from scripts.constants import (
     HADISD_WECC_STATION_COORDS_URL,
     ICON_BASE_URL,
     PGDSN,
+    COLLECTION_TOPICS,
 )
 from scripts.utils import load_direct
 
@@ -72,7 +73,10 @@ def build_hadisd_collection():
             "weather station",
             "air temperature",
         ],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:topics": COLLECTION_TOPICS["hadisd"],
+        },
         description=("Met Office HadISD sub-daily station data for the WECC region."),
         license=HADISD_LICENSE,
         providers=[

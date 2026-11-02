@@ -34,6 +34,7 @@ from scripts.constants import (
     WRF_UCLA_GRID_BBOXES,
     WRF_UCLA_PREFIX,
     WRF_VARIABLE_LABELS,
+    COLLECTION_TOPICS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -113,7 +114,10 @@ def build_wrf_ucla_collection():
             "CMIP6",
             "dynamical",
         ],
-        extra_fields={"caladapt:spatial_type": "grid"},
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:topics": COLLECTION_TOPICS["wrf-ucla"],
+        },
         description="Dynamically downscaled climate projections for California using the Weather Research & Forecasting Model (WRF).",
         license=CALADAPT_DATA_LICENSE,
         providers=[

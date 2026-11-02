@@ -8,6 +8,7 @@ import pandas as pd
 import pystac
 from unittest.mock import patch, MagicMock
 
+from scripts.constants import COLLECTION_TOPICS, TOPICS
 from scripts.ingest_climate_profiles import (
     build_tmy_collection,
     build_smy_collection,
@@ -71,6 +72,19 @@ def _check_metadata(collection, expected_id, expected_license="CC-BY-4.0"):
     assert collection.keywords
     assert collection.providers
     assert "thumbnail" in collection.assets
+    assert collection.extra_fields["caladapt:topics"] == COLLECTION_TOPICS[expected_id]
+
+
+class TestCollectionTopics:
+    def test_every_collection_has_known_topics(self):
+        for collection_id, topics in COLLECTION_TOPICS.items():
+            assert topics, f"{collection_id} has no topics"
+            assert set(topics) <= set(TOPICS), f"{collection_id}: unknown topic"
+            assert len(topics) == len(set(topics)), f"{collection_id}: duplicate topic"
+
+    def test_every_topic_is_used(self):
+        used = {t for topics in COLLECTION_TOPICS.values() for t in topics}
+        assert used == set(TOPICS)
 
 
 class TestBuildTmyCollection:
@@ -133,6 +147,7 @@ class TestBuildHadisdCollection:
         assert col.description
         assert col.keywords
         assert "thumbnail" in col.assets
+        assert col.extra_fields["caladapt:topics"] == COLLECTION_TOPICS["hadisd"]
 
     @patch("scripts.ingest_hadisd.requests.get")
     def test_builds_one_item_per_feature(self, mock_get):

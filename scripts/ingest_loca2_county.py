@@ -33,6 +33,7 @@ from scripts.constants import (
     LOCA2_COUNTY_NETCDF_PREFIX,
     LOCA2_VARIABLE_LABELS,
     PGDSN,
+    COLLECTION_TOPICS,
 )
 from scripts.utils import list_keys, load_direct
 
@@ -107,7 +108,10 @@ def build_loca2_county_collection():
             "future projections",
             "statistical",
         ],
-        extra_fields={"caladapt:spatial_type": "county"},
+        extra_fields={
+            "caladapt:spatial_type": "county",
+            "caladapt:topics": COLLECTION_TOPICS["loca2-county"],
+        },
         description="LOCA2 hybrid-statistically downscaled climate projections aggregated by California counties.",
         license=CALADAPT_DATA_LICENSE,
         providers=[

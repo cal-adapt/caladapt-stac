@@ -36,6 +36,7 @@ from scripts.constants import (
     ICON_BASE_URL,
     PGDSN,
     WECC_BBOX,
+    COLLECTION_TOPICS,
 )
 from scripts.utils import load_direct
 
@@ -66,7 +67,10 @@ def build_hdp_collection():
             "quality controlled",
             "western US",
         ],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:topics": COLLECTION_TOPICS["historical-data-platform"],
+        },
         description=(
             "Standardized and quality-controlled historical weather "
             "station data from 15,000+ weather stations within the "
