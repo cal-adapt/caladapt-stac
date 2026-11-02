@@ -95,7 +95,6 @@ def load_direct(collection, dsn):
     collection_dict["links"] = [
         l for l in collection_dict.get("links", []) if l.get("href")
     ]
-    collection_dict["features"] = []
 
     items = list(collection.get_items())
     print(f"  Loading {len(items)} items directly into pgSTAC...")
