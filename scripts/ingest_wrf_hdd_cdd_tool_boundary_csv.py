@@ -42,6 +42,7 @@ from scripts.constants import (
     ICON_BASE_URL,
     PGDSN,
     WRF_HDD_CDD_TOOL_PREFIX,
+    COLLECTION_TOPICS,
 )
 from scripts.utils import bbox_to_geometry, load_direct
 
@@ -99,6 +100,10 @@ def build_collection():
             "boundaries",
             "CSV",
         ],
+        extra_fields={
+            "caladapt:boundary_labels": BOUNDARY_LABELS,
+            "caladapt:topics": COLLECTION_TOPICS["hdd-cdd-metrics-mm-boundary-csv"],
+        },
         description=(
             "Multi-model ensemble annual HDD65/CDD65 timeseries CSVs of WRF projections "
             "for California, aggregated by boundary region. Each CSV contains "
@@ -176,7 +181,6 @@ def build_collection():
         collection.add_item(item)
         items_built += 1
 
-    collection.extra_fields["caladapt:boundary_labels"] = BOUNDARY_LABELS
     print(f"  Built {items_built} items.")
     return collection
 

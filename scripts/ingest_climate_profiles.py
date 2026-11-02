@@ -42,6 +42,7 @@ from scripts.constants import (
     WRF_VARIABLE_LABELS,
     XMY_PERSIST_PREFIX,
     XMY_SHOCK_PREFIX,
+    COLLECTION_TOPICS,
 )
 from scripts.utils import build_item, list_keys, load_direct
 
@@ -197,7 +198,10 @@ def build_tmy_collection():
             "building standards",
             "energy efficiency",
         ],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:topics": COLLECTION_TOPICS["typical-met-year"],
+        },
         description="Typical Meteorological Year climate profiles (8760) generated with dynamically-downscaled (WRF) global climate models at weather station locations for 50th percentile (p50) and 4 warming level planning horizons. A climate profile represents every hour of a 1-year period (e.g., 8760 hours). TMY profiles are in the time zone of the selected station.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -306,7 +310,10 @@ def build_smy_collection():
             "future projections",
             "CMIP6",
         ],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:topics": COLLECTION_TOPICS["standard-year"],
+        },
         description="Standard Year climate profiles (8760) generated with dynamically downscaled (WRF) global climate models at weather station locations for 50th, 5th, and 95th percentiles and 4 warming level planning horizons. A climate profile represents every hour of a 1-year period (e.g., 8760 hours). Standard Year profiles are in the time zone of the selected station.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -418,7 +425,10 @@ def build_xmy_persist_collection():
             "CMIP6",
             "extreme events",
         ],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:topics": COLLECTION_TOPICS["xmy-persist"],
+        },
         description="Extreme Meteorological Year (XMY) persistence climate profiles (8760) generated with dynamically-downscaled (WRF) global climate models at weather station locations, representing sustained extremes at 5th, 10th, 40th, 60th, 90th, and 95th percentiles across 4 warming level planning horizons. A climate profile represents every hour of a 1-year period (e.g., 8760 hours). XMY persistence profiles are in the time zone of the selected station.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -524,7 +534,10 @@ def build_xmy_shock_collection():
             "CMIP6",
             "extreme events",
         ],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:topics": COLLECTION_TOPICS["xmy-shock"],
+        },
         description="Extreme Meteorological Year (XMY) shock climate profiles (8760) generated with dynamically-downscaled (WRF) global climate models at weather station locations, representing short-duration hot and cold shock extremes across 4 warming level planning horizons. A climate profile represents every hour of a 1-year period (e.g., 8760 hours). XMY shock profiles are in the time zone of the selected station.",
         license=CALADAPT_DATA_LICENSE,
         providers=[

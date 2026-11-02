@@ -29,6 +29,7 @@ from scripts.constants import (
     WRF_DERIVED_VARS_PREFIX,
     WRF_UCLA_GRID_BBOXES,
     WRF_VARIABLE_LABELS,
+    COLLECTION_TOPICS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -92,8 +93,12 @@ def build_wrf_derived_vars_collection():
             "CMIP6",
             "dynamical",
             "fire weather",
-            "wind",        ],
-        extra_fields={"caladapt:spatial_type": "grid"},
+            "wind",
+        ],
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:topics": COLLECTION_TOPICS["wrf-derived-vars"],
+        },
         description=(
             "Hourly derived climate variables (FFWI, relative humidity, wind speed) for California, "
             "produced from WRF-downscaled CMIP6 outputs at 3 km resolution."

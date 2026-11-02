@@ -36,6 +36,7 @@ from scripts.constants import (
     WRF_UCLA_GRID_BBOXES,
     WRF_UCSD_GRID_BBOXES,
     RENEWABLES_VARIABLE_LABELS,
+    COLLECTION_TOPICS,
 )
 from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
@@ -191,7 +192,10 @@ def build_pv_collection():
             "geospatial",
             "dynamical",
         ],
-        extra_fields={"caladapt:spatial_type": "grid"},
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:topics": COLLECTION_TOPICS["pv-generation"],
+        },
         description="Photovoltaic power generation profiles (capacity factor and power output) for utility-scale and distributed solar PV, covering California (3 km) and WECC (9 km).",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -259,7 +263,10 @@ def build_wind_collection():
             "CMIP6",
             "dynamical",
         ],
-        extra_fields={"caladapt:spatial_type": "grid"},
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:topics": COLLECTION_TOPICS["wind-generation"],
+        },
         description="Wind power generation profiles (capacity factor and power output) for onshore and offshore wind, covering California (3 km) and WECC (9 km).",
         license=CALADAPT_DATA_LICENSE,
         providers=[
