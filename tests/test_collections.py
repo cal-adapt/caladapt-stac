@@ -211,14 +211,14 @@ class TestBuildHddCddBoundaryCollection:
         )
 
     def test_one_item_per_boundary(self):
-        # Also covers the intentional exclusion of census tracts and
-        # IOU/POUs at this launch scope -- see module docstring.
+        # Also covers census tracts being included and the intentional
+        # exclusion of IOU/POUs at this launch scope -- see module docstring.
         collection = build_hdd_cdd_boundary_collection()
         items = list(collection.get_items())
         assert len(items) == len(HDD_CDD_VALID_BOUNDARIES)
         boundaries = {item.properties["boundary"] for item in items}
         assert boundaries == set(HDD_CDD_VALID_BOUNDARIES)
-        assert "ca_census_tracts" not in boundaries
+        assert "ca_census_tracts" in boundaries
         assert "ious_pous" not in boundaries
 
     def test_items_have_data_asset(self):
