@@ -101,7 +101,7 @@ def build_loca2_county_collection():
         id="loca2-county",
         title="Aggregated LOCA2 county data",
         keywords=COLLECTION_KEYWORDS["loca2-county"],
-        extra_fields={"caladapt:spatial_type": "county"},
+        extra_fields={"caladapt:spatial_type": "boundary-aggregate"},
         description="LOCA2 hybrid-statistically downscaled climate projections aggregated by California counties.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
