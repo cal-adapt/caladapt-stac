@@ -105,7 +105,7 @@ def build_collection():
         title="Cal-Adapt extreme heat season tool",
         keywords=COLLECTION_KEYWORDS["ehs-metrics-mm-boundary-csv"],
         extra_fields={
-            "caladapt:spatial_type": "boundary-aggregate",
+            "caladapt:spatial_type": "spatial-aggregate",
             "caladapt:boundary_labels": BOUNDARY_LABELS,
         },
         description=(
@@ -182,7 +182,7 @@ def build_collection():
                 "variable_id": "frequency_percent",
                 "threshold_name": thresh,
                 "boundary": boundary,
-                "caladapt:spatial_type": "boundary-aggregate",
+                "caladapt:spatial_type": "spatial-aggregate",
                 "bias_adjusted": True,
             },
         )

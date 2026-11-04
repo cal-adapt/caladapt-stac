@@ -90,7 +90,7 @@ def build_collection():
         title="Cal-Adapt heating and cooling degree days tool",
         keywords=COLLECTION_KEYWORDS["hdd-cdd-metrics-mm-boundary-csv"],
         extra_fields={
-            "caladapt:spatial_type": "boundary-aggregate",
+            "caladapt:spatial_type": "spatial-aggregate",
             "caladapt:boundary_labels": BOUNDARY_LABELS,
         },
         description=(
@@ -153,7 +153,7 @@ def build_collection():
                 "cmip6:experiment_id": SCENARIO,
                 "threshold_name": THRESHOLD_NAME,
                 "boundary": boundary,
-                "caladapt:spatial_type": "boundary-aggregate",
+                "caladapt:spatial_type": "spatial-aggregate",
                 "bias_adjusted": True,
             },
         )

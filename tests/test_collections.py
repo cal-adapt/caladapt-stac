@@ -66,7 +66,7 @@ def _mock_response(data):
 
 
 # The values apps use to describe a collection's data form
-SPATIAL_TYPES = {"grid", "point", "boundary-aggregate"}
+SPATIAL_TYPES = {"grid", "point", "spatial-aggregate"}
 
 
 def _check_metadata(collection, expected_id, expected_license="CC-BY-4.0"):

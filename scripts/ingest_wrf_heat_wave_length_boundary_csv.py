@@ -104,7 +104,7 @@ def build_collection():
         title="Cal-Adapt heat wave length tool",
         keywords=COLLECTION_KEYWORDS["hwl-metrics-mm-boundary-csv"],
         extra_fields={
-            "caladapt:spatial_type": "boundary-aggregate",
+            "caladapt:spatial_type": "spatial-aggregate",
             "caladapt:boundary_labels": BOUNDARY_LABELS,
         },
         description=(
@@ -181,7 +181,7 @@ def build_collection():
                 "variable_id": "heat_wave_length",
                 "threshold_name": thresh,
                 "boundary": boundary,
-                "caladapt:spatial_type": "boundary-aggregate",
+                "caladapt:spatial_type": "spatial-aggregate",
                 "bias_adjusted": True,
             },
         )
