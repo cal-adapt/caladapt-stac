@@ -112,7 +112,10 @@ def build_collection():
         id="hwf-metrics-mm-boundary-csv",
         title="Cal-Adapt heat wave frequency tool",
         keywords=COLLECTION_KEYWORDS["hwf-metrics-mm-boundary-csv"],
-        extra_fields={"caladapt:boundary_labels": BOUNDARY_LABELS},
+        extra_fields={
+            "caladapt:spatial_type": "spatial-aggregate",
+            "caladapt:boundary_labels": BOUNDARY_LABELS,
+        },
         description=(
             "Multi-model mean CSVs of WRF annual heat wave counts for California at "
             "global warming levels (0.8°C–3.0°C), aggregated by boundary region, for "
@@ -190,8 +193,7 @@ def build_collection():
                 "threshold_name": thresh,
                 "duration_name": duration,
                 "boundary": boundary,
-                "boundary_label": boundary_label,
-                "caladapt:spatial_type": "boundary",
+                "caladapt:spatial_type": "spatial-aggregate",
                 "bias_adjusted": True,
             },
         )

@@ -65,11 +65,16 @@ def _mock_response(data):
     return m
 
 
+# The values apps use to describe a collection's data form
+SPATIAL_TYPES = {"grid", "point", "spatial-aggregate"}
+
+
 def _check_metadata(collection, expected_id, expected_license="CC-BY-4.0"):
     assert collection.id == expected_id
     assert collection.license == expected_license
     assert collection.description
     assert collection.keywords == COLLECTION_KEYWORDS[expected_id]
+    assert collection.extra_fields["caladapt:spatial_type"] in SPATIAL_TYPES
     assert collection.providers
     assert "thumbnail" in collection.assets
 
@@ -147,6 +152,7 @@ class TestBuildHadisdCollection:
         assert col.license == "proprietary"
         assert col.description
         assert col.keywords == COLLECTION_KEYWORDS["hadisd"]
+        assert col.extra_fields["caladapt:spatial_type"] == "point"
         assert "thumbnail" in col.assets
 
     @patch("scripts.ingest_hadisd.requests.get")

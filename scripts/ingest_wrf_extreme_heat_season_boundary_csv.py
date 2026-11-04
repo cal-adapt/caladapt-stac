@@ -104,7 +104,10 @@ def build_collection():
         id="ehs-metrics-mm-boundary-csv",
         title="Cal-Adapt extreme heat season tool",
         keywords=COLLECTION_KEYWORDS["ehs-metrics-mm-boundary-csv"],
-        extra_fields={"caladapt:boundary_labels": BOUNDARY_LABELS},
+        extra_fields={
+            "caladapt:spatial_type": "spatial-aggregate",
+            "caladapt:boundary_labels": BOUNDARY_LABELS,
+        },
         description=(
             "Multi-model mean CSVs of WRF day-of-year threshold exceedance frequency for "
             "California at global warming levels (0.8°C–3.0°C), aggregated by boundary "
@@ -179,8 +182,7 @@ def build_collection():
                 "variable_id": "frequency_percent",
                 "threshold_name": thresh,
                 "boundary": boundary,
-                "boundary_label": boundary_label,
-                "caladapt:spatial_type": "boundary",
+                "caladapt:spatial_type": "spatial-aggregate",
                 "bias_adjusted": True,
             },
         )

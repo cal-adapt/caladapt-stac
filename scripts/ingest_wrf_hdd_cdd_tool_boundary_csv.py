@@ -89,7 +89,10 @@ def build_collection():
         id="hdd-cdd-metrics-mm-boundary-csv",
         title="Cal-Adapt heating and cooling degree days tool",
         keywords=COLLECTION_KEYWORDS["hdd-cdd-metrics-mm-boundary-csv"],
-        extra_fields={"caladapt:boundary_labels": BOUNDARY_LABELS},
+        extra_fields={
+            "caladapt:spatial_type": "spatial-aggregate",
+            "caladapt:boundary_labels": BOUNDARY_LABELS,
+        },
         description=(
             "Multi-model ensemble annual HDD65/CDD65 timeseries CSVs of WRF projections "
             "for California, aggregated by boundary region. Each CSV contains "
@@ -150,8 +153,7 @@ def build_collection():
                 "cmip6:experiment_id": SCENARIO,
                 "threshold_name": THRESHOLD_NAME,
                 "boundary": boundary,
-                "boundary_label": boundary_label,
-                "caladapt:spatial_type": "boundary",
+                "caladapt:spatial_type": "spatial-aggregate",
                 "bias_adjusted": True,
             },
         )
