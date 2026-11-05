@@ -23,8 +23,13 @@ CalAdapt-STAC is a SpatioTemporal Asset Catalog (STAC) compliant [web API](https
 ## Architecture
 
 ```
-Client → API Gateway → Lambda (stac-fastapi) → RDS Postgres (pgSTAC)
+Client → CloudFront (stac.cal-adapt.org) → API Gateway → Lambda (stac-fastapi) → RDS Postgres (pgSTAC)
 ```
+
+**CloudFront:** Caches API responses at `https://stac.cal-adapt.org` (distribution `E2ON6INEGWTHQ1`). It isn't defined in `template.yaml`; it was set up in the AWS console. Two custom policies control caching:
+
+- **Cache policy `CachingOptimizedQueryParams`:** how long CloudFront keeps responses. The API sends no cache header, so CloudFront uses the default of 7 days (minimum 1 day). Each query string and `Origin` header gets its own cached copy. Only GET and HEAD are cached, so POST searches always reach the API. After an ingest, `make invalidate-search-cache` clears `/collections*` and `/search*`.
+- **Response headers policy `CacheControl`:** adds `Cache-Control: max-age=300` to responses, which tells browsers to reuse a response for 5 minutes. An invalidation can't clear browser caches, so this keeps the delay after an ingest short. Only this distribution uses the policy.
 
 **API Gateway:** Public HTTPS endpoint. Forwards requests to Lambda and returns responses.
 
@@ -44,7 +49,7 @@ Client → API Gateway → Lambda (stac-fastapi) → RDS Postgres (pgSTAC)
 ![RDS Endpoint](images/README/endpoint.png)
 > The RDS endpoint can be found under the **Connectivity & security** tab → **Additional configurations** → **Endpoint & port**.
 
-The live API is at `https://stac.cal-adapt.org`. The raw API Gateway URL `https://8dawjspn5g.execute-api.us-west-2.amazonaws.com` redirects to `https://stac.cal-adapt.org`.
+The live API is at `https://stac.cal-adapt.org`. The raw API Gateway URL `https://8dawjspn5g.execute-api.us-west-2.amazonaws.com` also serves the API directly, without CloudFront's cache.
 
 ## Prerequisites
 
