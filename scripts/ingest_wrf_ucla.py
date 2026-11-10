@@ -35,8 +35,14 @@ from scripts.constants import (
     WRF_UCLA_PREFIX,
     WRF_VARIABLE_LABELS,
     COLLECTION_KEYWORDS,
+    WRF_RELATED_LINKS,
 )
-from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
+from scripts.utils import (
+    add_related_links,
+    bbox_to_geometry,
+    list_zarr_stores,
+    load_direct,
+)
 
 # UCLA source_ids (as they appear in S3 paths) without a-priori bias adjustment
 UCLA_NON_BA_SOURCE_IDS = {"fgoals-g3", "cnrm-esm2-1", "cesm2", "ensmean"}
@@ -201,6 +207,7 @@ def build_wrf_ucla_collection():
     collection.extra_fields["caladapt:variable_labels"] = {
         var: WRF_VARIABLE_LABELS.get(var, var) for var in seen_variables
     }
+    add_related_links(collection, WRF_RELATED_LINKS)
     return collection
 
 

@@ -24,6 +24,19 @@ def bbox_to_geometry(bbox):
     }
 
 
+def add_related_links(collection, links):
+    """
+    Add `related` links to a collection from (title, href, media_type) tuples.
+
+    The media type matters: without one, STAC Browser treats a related link as
+    possible STAC and tries to open it inside the browser.
+    """
+    for title, href, media_type in links:
+        collection.add_link(
+            pystac.Link(rel="related", target=href, media_type=media_type, title=title)
+        )
+
+
 def list_zarr_stores(prefix, bucket, depth):
     """
     List Zarr store paths at a fixed directory depth using delimiter-based listing.
