@@ -90,7 +90,7 @@ def build_wrf_derived_vars_collection():
 
     collection = pystac.Collection(
         id="wrf-derived-vars",
-        title="WRF derived climate variables",
+        title="WRF-derived climate variables",
         keywords=COLLECTION_KEYWORDS["wrf-derived-vars"],
         extra_fields={
             "caladapt:spatial_type": "grid",
