@@ -25,7 +25,9 @@ BLOCKED_STATUSES = {401, 403, 405, 429}
 
 def check_url(url):
     """Return ("ok" | "warning" | "failure", detail)."""
-    request = urllib.request.Request(url, headers={"User-Agent": "caladapt-link-checker/1.0"})
+    request = urllib.request.Request(
+        url, headers={"User-Agent": "caladapt-link-checker/1.0"}
+    )
     try:
         with urllib.request.urlopen(request, timeout=15) as response:
             return "ok", str(response.status)
@@ -67,7 +69,9 @@ def main():
                 print(f"  ✓ {detail} {url}")
 
     if results["warning"]:
-        print(f"\n⚠️  {len(results['warning'])} link(s) could not be checked automatically (check in a browser):")
+        print(
+            f"\n⚠️  {len(results['warning'])} link(s) could not be checked automatically (check in a browser):"
+        )
         print("\n".join(results["warning"]))
 
     if results["failure"]:

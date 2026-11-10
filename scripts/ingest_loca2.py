@@ -113,7 +113,10 @@ def build_loca2_gridded_collection():
         id="loca2",
         title="LOCA2",
         keywords=COLLECTION_KEYWORDS["loca2"],
-        extra_fields={"caladapt:spatial_type": "grid"},
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:source": "loca2",
+        },
         description="Hybrid-statistically downscaled climate projections for California produced by UCSD using the Localized Constructed Analogs version 2 (LOCA2) method.",
         license=CALADAPT_DATA_LICENSE,
         providers=[

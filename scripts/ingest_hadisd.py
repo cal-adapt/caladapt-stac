@@ -68,7 +68,10 @@ def build_hadisd_collection():
         id="hadisd",
         title="HadISD",
         keywords=COLLECTION_KEYWORDS["hadisd"],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:source": "observations",
+        },
         description=("Met Office HadISD sub-daily station data for the WECC region."),
         license=HADISD_LICENSE,
         providers=[

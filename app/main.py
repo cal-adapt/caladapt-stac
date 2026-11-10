@@ -88,6 +88,11 @@ COLLECTION_QUERYABLES = {
             "type": "string",
             "enum": ["grid", "point", "spatial-aggregate"],
         },
+        "caladapt:source": {
+            "title": "Source",
+            "type": "string",
+            "enum": ["wrf", "loca2", "observations", "other"],
+        },
     },
 }
 

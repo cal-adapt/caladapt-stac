@@ -113,7 +113,10 @@ def build_wrf_ucla_collection():
         id="wrf-ucla",
         title="WRF",
         keywords=COLLECTION_KEYWORDS["wrf-ucla"],
-        extra_fields={"caladapt:spatial_type": "grid"},
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:source": "wrf",
+        },
         description="Dynamically downscaled climate projections for California using the Weather Research & Forecasting Model (WRF).",
         license=CALADAPT_DATA_LICENSE,
         providers=[

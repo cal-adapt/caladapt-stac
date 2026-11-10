@@ -1,7 +1,7 @@
 """Tests for the API routes that don't need a database."""
 
 from app.main import COLLECTION_QUERYABLES, app
-from tests.test_collections import SPATIAL_TYPES
+from tests.test_collections import SOURCES, SPATIAL_TYPES
 
 
 def test_collection_queryables_route_comes_before_collection_route():
@@ -15,3 +15,8 @@ def test_collection_queryables_route_comes_before_collection_route():
 def test_queryables_list_every_spatial_type():
     spatial_type = COLLECTION_QUERYABLES["properties"]["caladapt:spatial_type"]
     assert set(spatial_type["enum"]) == SPATIAL_TYPES
+
+
+def test_queryables_list_every_source():
+    source = COLLECTION_QUERYABLES["properties"]["caladapt:source"]
+    assert set(source["enum"]) == SOURCES

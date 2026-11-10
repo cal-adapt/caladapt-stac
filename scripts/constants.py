@@ -66,7 +66,7 @@ HMET_PREFIX = "hmet/"
 
 # Keywords: a short, fixed list used for browsing by topic. The map
 # (caladapt-stac-map) and STAC Browser filter on them, and the map shows them
-# with the first letter capitalized ("station data" -> "Station data").
+# with the first letter capitalized ("extreme heat" -> "Extreme heat").
 KEYWORDS = (
     "extreme heat",
     "temperature",
@@ -75,36 +75,35 @@ KEYWORDS = (
     "fire weather",
     "sea level",
     "energy",
-    "station data",
     "climate profiles",
-    "climate projections",
+    "Cal-Adapt tools",
 )
 
 COLLECTION_KEYWORDS = {
-    "eh-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "ehs-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "hwf-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "hwl-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "hdd-cdd-metrics-mm-boundary-csv": ["energy", "climate projections"],
+    "eh-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
+    "ehs-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
+    "hwf-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
+    "hwl-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
+    "hdd-cdd-metrics-mm-boundary-csv": ["energy", "Cal-Adapt tools"],
     "wrf-climate-metrics-map": [
         "extreme heat",
         "precipitation",
         "fire weather",
-        "climate projections",
+        "Cal-Adapt tools",
     ],
-    "wrf-derived-vars": ["wind", "fire weather", "climate projections"],
-    "wrf-ucla": ["temperature", "precipitation", "wind", "climate projections"],
-    "loca2": ["temperature", "precipitation", "wind", "climate projections"],
-    "loca2-county": ["temperature", "precipitation", "wind", "climate projections"],
-    "hadisd": ["temperature", "station data"],
-    "historical-data-platform": ["temperature", "station data"],
-    "pv-generation": ["energy", "climate projections"],
-    "wind-generation": ["energy", "wind", "climate projections"],
-    "sea-level-projections": ["sea level", "climate projections"],
-    "typical-met-year": ["climate profiles", "climate projections"],
-    "standard-year": ["climate profiles", "climate projections"],
-    "xmy-persist": ["climate profiles", "climate projections"],
-    "xmy-shock": ["climate profiles", "climate projections"],
+    "wrf-derived-vars": ["wind", "fire weather"],
+    "wrf-ucla": ["temperature", "precipitation", "wind"],
+    "loca2": ["temperature", "precipitation", "wind"],
+    "loca2-county": ["temperature", "precipitation", "wind"],
+    "hadisd": ["temperature"],
+    "historical-data-platform": ["temperature"],
+    "pv-generation": ["energy"],
+    "wind-generation": ["energy", "wind"],
+    "sea-level-projections": ["sea level"],
+    "typical-met-year": ["climate profiles", "energy"],
+    "standard-year": ["climate profiles", "energy"],
+    "xmy-persist": ["climate profiles", "energy"],
+    "xmy-shock": ["climate profiles", "energy"],
 }
 
 # License for all Cal-Adapt data (CMIP6-derived products)

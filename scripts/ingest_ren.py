@@ -181,7 +181,10 @@ def build_pv_collection():
         id="pv-generation",
         title="Photovoltaic power generation profiles",
         keywords=COLLECTION_KEYWORDS["pv-generation"],
-        extra_fields={"caladapt:spatial_type": "grid"},
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:source": "wrf",
+        },
         description="Photovoltaic power generation profiles (capacity factor and power output) for utility-scale and distributed solar PV, covering California (3 km) and WECC (9 km).",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -238,7 +241,10 @@ def build_wind_collection():
         id="wind-generation",
         title="Wind power generation profiles",
         keywords=COLLECTION_KEYWORDS["wind-generation"],
-        extra_fields={"caladapt:spatial_type": "grid"},
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:source": "wrf",
+        },
         description="Wind power generation profiles (capacity factor and power output) for onshore and offshore wind, covering California (3 km) and WECC (9 km).",
         license=CALADAPT_DATA_LICENSE,
         providers=[
