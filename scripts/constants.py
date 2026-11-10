@@ -66,7 +66,7 @@ HMET_PREFIX = "hmet/"
 
 # Keywords: a short, fixed list used for browsing by topic. The map
 # (caladapt-stac-map) and STAC Browser filter on them, and the map shows them
-# with the first letter capitalized ("station data" -> "Station data").
+# with the first letter capitalized ("extreme heat" -> "Extreme heat").
 KEYWORDS = (
     "extreme heat",
     "temperature",
@@ -75,7 +75,6 @@ KEYWORDS = (
     "fire weather",
     "sea level",
     "energy",
-    "station data",
     "climate profiles",
     "climate projections",
 )
@@ -96,8 +95,8 @@ COLLECTION_KEYWORDS = {
     "wrf-ucla": ["temperature", "precipitation", "wind", "climate projections"],
     "loca2": ["temperature", "precipitation", "wind", "climate projections"],
     "loca2-county": ["temperature", "precipitation", "wind", "climate projections"],
-    "hadisd": ["temperature", "station data"],
-    "historical-data-platform": ["temperature", "station data"],
+    "hadisd": ["temperature"],
+    "historical-data-platform": ["temperature"],
     "pv-generation": ["energy", "climate projections"],
     "wind-generation": ["energy", "wind", "climate projections"],
     "sea-level-projections": ["sea level", "climate projections"],
