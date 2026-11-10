@@ -34,8 +34,9 @@ from scripts.constants import (
     LOCA2_VARIABLE_LABELS,
     PGDSN,
     COLLECTION_KEYWORDS,
+    LOCA2_RELATED_LINKS,
 )
-from scripts.utils import list_keys, load_direct
+from scripts.utils import add_related_links, list_keys, load_direct
 
 
 def parse_loca2_county_key(key):
@@ -210,6 +211,7 @@ def build_loca2_county_collection():
             )
         collection.add_item(item)
 
+    add_related_links(collection, LOCA2_RELATED_LINKS)
     return collection
 
 

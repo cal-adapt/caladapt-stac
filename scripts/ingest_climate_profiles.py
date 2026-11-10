@@ -43,8 +43,11 @@ from scripts.constants import (
     XMY_PERSIST_PREFIX,
     XMY_SHOCK_PREFIX,
     COLLECTION_KEYWORDS,
+    SMY_RELATED_LINKS,
+    TMY_RELATED_LINKS,
+    XMY_RELATED_LINKS,
 )
-from scripts.utils import build_item, list_keys, load_direct
+from scripts.utils import add_related_links, build_item, list_keys, load_direct
 
 
 def parse_tmy_key(key):
@@ -277,6 +280,7 @@ def build_tmy_collection():
         collection.add_item(item)
 
     collection.extra_fields["caladapt:station_labels"] = station_labels
+    add_related_links(collection, TMY_RELATED_LINKS)
     return collection
 
 
@@ -382,6 +386,7 @@ def build_smy_collection():
 
     collection.extra_fields["caladapt:variable_labels"] = variable_labels
     collection.extra_fields["caladapt:station_labels"] = station_labels
+    add_related_links(collection, SMY_RELATED_LINKS)
     return collection
 
 
@@ -481,6 +486,7 @@ def build_xmy_persist_collection():
         collection.add_item(item)
 
     collection.extra_fields["caladapt:station_labels"] = station_labels
+    add_related_links(collection, XMY_RELATED_LINKS)
     return collection
 
 
@@ -580,6 +586,7 @@ def build_xmy_shock_collection():
         collection.add_item(item)
 
     collection.extra_fields["caladapt:station_labels"] = station_labels
+    add_related_links(collection, XMY_RELATED_LINKS)
     return collection
 
 

@@ -237,3 +237,91 @@ LOCA2_VARIABLE_LABELS: dict[str, str] = _load_variable_labels(
 RENEWABLES_VARIABLE_LABELS: dict[str, str] = _load_variable_labels(
     _VAR_MAPPING_DIR / "renewables.csv"
 )
+
+
+# Reference documents added as `related` links on collection pages, as
+# (title, href, media_type). The CEC memos are the references the guidance site
+# cites for WRF and LOCA2 (data-tools/data-documentation/climate-model-sims.qmd).
+_GUIDANCE_URL = "https://analytics.cal-adapt.org"
+_CEC_MEMO_URL = "https://www.energy.ca.gov/sites/default/files"
+
+MEMO_BIAS_CORRECTION = (
+    "Bias correction in the WRF and LOCA2 projections (Fifth Climate Change Assessment data adoption memo)",
+    f"{_CEC_MEMO_URL}/2024-03/01_BiasCorrectioninWRF_and_LOCA2Projections_DataJustificationMemo_Pierce_Adopted_ada.pdf",
+    "application/pdf",
+)
+GUIDE_CLIMATE_MODEL_SIMS = (
+    "Climate model simulations (Cal-Adapt guidance)",
+    f"{_GUIDANCE_URL}/data-tools/data-documentation/climate-model-sims.html",
+    "text/html",
+)
+GUIDE_WRF_VS_LOCA2 = (
+    "Choosing between WRF and LOCA2-Hybrid (Cal-Adapt guidance)",
+    f"{_GUIDANCE_URL}/scientific-guidance/WRF-vs-LOCA2-Hybrid.html",
+    "text/html",
+)
+GUIDE_CLIMATE_PROFILES = (
+    "Climate profiles (Cal-Adapt guidance)",
+    f"{_GUIDANCE_URL}/scientific-guidance/climate_profiles/index.html",
+    "text/html",
+)
+
+WRF_RELATED_LINKS = [
+    MEMO_BIAS_CORRECTION,
+    (
+        "Dynamically downscaled datasets (Fifth Climate Change Assessment data adoption memo)",
+        f"{_CEC_MEMO_URL}/2024-06/02_DynamicalDownscaling_DataJustificationMemo_Rahimi_Adopted_v2May2024_ada.pdf",
+        "application/pdf",
+    ),
+    (
+        "CMIP6 downscaling using WRF (UCLA)",
+        "https://atmos.ucla.edu/alexhall/cmip6-downscaling-using-wrf/",
+        "text/html",
+    ),
+    GUIDE_CLIMATE_MODEL_SIMS,
+    GUIDE_WRF_VS_LOCA2,
+]
+LOCA2_RELATED_LINKS = [
+    MEMO_BIAS_CORRECTION,
+    (
+        "LOCA2 training data (Fifth Climate Change Assessment data adoption memo)",
+        f"{_CEC_MEMO_URL}/2024-03/03_LOCA2-forCA-TrainingData_DataJustificationMemo_Pierce_Adopted_ada.pdf",
+        "application/pdf",
+    ),
+    (
+        "LOCA2 hybrid downscaling (Fifth Climate Change Assessment data adoption memo)",
+        f"{_CEC_MEMO_URL}/2024-03/04_HybridDownscaling_DataJustificationMemo_Pierce_Adopted_ada.pdf",
+        "application/pdf",
+    ),
+    GUIDE_CLIMATE_MODEL_SIMS,
+    GUIDE_WRF_VS_LOCA2,
+]
+SMY_RELATED_LINKS = [
+    GUIDE_CLIMATE_PROFILES,
+    (
+        "Standard year 8760s (Cal-Adapt guidance)",
+        f"{_GUIDANCE_URL}/scientific-guidance/climate_profiles/standard-year.html",
+        "text/html",
+    ),
+]
+TMY_RELATED_LINKS = [
+    GUIDE_CLIMATE_PROFILES,
+    (
+        "Typical meteorological year 8760s (Cal-Adapt guidance)",
+        f"{_GUIDANCE_URL}/scientific-guidance/climate_profiles/typical-met-year.html",
+        "text/html",
+    ),
+]
+XMY_RELATED_LINKS = [
+    GUIDE_CLIMATE_PROFILES,
+    (
+        "Extreme meteorological year 8760s (Cal-Adapt guidance)",
+        f"{_GUIDANCE_URL}/scientific-guidance/climate_profiles/extreme-met-year.html",
+        "text/html",
+    ),
+    (
+        "Preparing for the Exceptional: Extreme Meteorological Years in Energy System Planning (white paper)",
+        "https://zenodo.org/records/21401751",
+        "text/html",
+    ),
+]

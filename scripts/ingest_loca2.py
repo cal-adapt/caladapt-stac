@@ -36,8 +36,14 @@ from scripts.constants import (
     LOCA2_VARIABLE_LABELS,
     PGDSN,
     COLLECTION_KEYWORDS,
+    LOCA2_RELATED_LINKS,
 )
-from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
+from scripts.utils import (
+    add_related_links,
+    bbox_to_geometry,
+    list_zarr_stores,
+    load_direct,
+)
 
 # Date ranges by experiment_id
 EXPERIMENT_DATE_RANGES = {
@@ -202,6 +208,7 @@ def build_loca2_gridded_collection():
     collection.extra_fields["caladapt:variable_labels"] = {
         var: LOCA2_VARIABLE_LABELS.get(var, var) for var in seen_variables
     }
+    add_related_links(collection, LOCA2_RELATED_LINKS)
     return collection
 
 
