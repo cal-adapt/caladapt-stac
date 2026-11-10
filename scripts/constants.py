@@ -122,10 +122,10 @@ COLLECTION_KEYWORDS = {
     "pv-generation": ["energy", "climate projections"],
     "wind-generation": ["energy", "wind", "climate projections"],
     "sea-level-projections": ["sea level", "climate projections"],
-    "typical-met-year": ["climate profiles", "climate projections"],
-    "standard-year": ["climate profiles", "climate projections"],
-    "xmy-persist": ["climate profiles", "climate projections"],
-    "xmy-shock": ["climate profiles", "climate projections"],
+    "typical-met-year": ["climate profiles", "energy", "climate projections"],
+    "standard-year": ["climate profiles", "energy", "climate projections"],
+    "xmy-persist": ["climate profiles", "energy", "climate projections"],
+    "xmy-shock": ["climate profiles", "energy", "climate projections"],
 }
 
 # License for all Cal-Adapt data (CMIP6-derived products)
