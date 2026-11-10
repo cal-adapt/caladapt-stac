@@ -8,8 +8,12 @@ California boundary types: counties, watersheds, census tracts, IOU/POUs,
 forecast zones, and electric balancing areas.
 
 S3 path structure:
-    wrf/extreme-heat-tool/multimodel_per_boundary/{metric}/{boundary}/ssp370/csv/{thresh}/
+    wrf/extreme-heat-tool/multimodel_per_boundary/{metric}/{boundary}/ssp370/{thresh}/
     Files within: {Region_Name}_{thresh}.csv
+
+    Census tracts use the weighted median outputs, one level deeper:
+    wrf/extreme-heat-tool/multimodel_per_boundary/{metric}/ca_census_tracts/weighted_median/ssp370/{thresh}/
+    Files within: {GEOID}.csv
 
 One STAC item per (metric × boundary × threshold) combination.
 Each item has one asset pointing to the S3 prefix directory.
@@ -40,6 +44,12 @@ from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
 MULTIMODEL_CSV_PREFIX = WRF_EXTREME_HEAT_TOOL_PREFIX + "multimodel_per_boundary/"
 
+METRICS = ["eh_days", "warm_nights"]
+SCENARIO = "ssp370"
+
+# All 6 boundary types the pipeline produces. This is a deliberate allowlist
+# rather than something to discover from S3, so older outputs left on S3
+# (e.g. the unweighted census tract folder) are never picked up.
 BOUNDARY_LABELS = {
     "ca_counties": "California counties",
     "ca_watersheds": "California watersheds (HUC8)",
@@ -48,41 +58,18 @@ BOUNDARY_LABELS = {
     "forecast_zones": "California forecast zones",
     "electric_balancing_areas": "California electric balancing areas",
 }
+VALID_BOUNDARIES = list(BOUNDARY_LABELS)
+
+# Census tract outputs sit under an extra aggregation directory. Only the
+# weighted median is ingested; the weighted mean is not used.
+BOUNDARY_SUBDIRS = {
+    "ca_census_tracts": "weighted_median/",
+}
 
 EXPERIMENT_DATE_RANGE = (
     datetime(2015, 1, 1, tzinfo=timezone.utc),
     datetime(2100, 12, 31, tzinfo=timezone.utc),
 )
-
-
-def parse_csv_prefix(prefix):
-    """
-    Parse a multimodel boundary CSV S3 prefix into components.
-
-    Parameters
-    ----------
-    prefix : str
-        S3 prefix, e.g.
-        wrf/extreme-heat-tool/multimodel_per_boundary/eh_days/ca_counties/ssp370/t2max_ge95F/
-
-    Returns
-    -------
-    dict or None
-        Parsed components, or None if prefix does not match expected structure.
-    """
-    inner = prefix.removeprefix(MULTIMODEL_CSV_PREFIX).rstrip("/")
-    parts = inner.split("/")
-    # expected: [metric, boundary, ssp370, thresh]
-    if len(parts) != 4 or parts[2] != "ssp370":
-        return None
-    metric, boundary, scenario, thresh = parts
-    return {
-        "metric": metric,
-        "boundary": boundary,
-        "scenario": scenario,
-        "thresh": thresh,
-        "path": f"s3://{BUCKET_CADCAT}/{prefix}",
-    }
 
 
 def build_collection():
@@ -137,57 +124,54 @@ def build_collection():
         ),
     )
 
-    print("  Discovering boundary CSV prefixes from S3...")
-    seen_metrics: set[str] = set()
+    print("  Discovering threshold CSV prefixes from S3...")
+    geometry = bbox_to_geometry(CA_BBOX)
+    start_dt, end_dt = EXPERIMENT_DATE_RANGE
     items_built = 0
 
-    # depth=4: metric / boundary / ssp370 / thresh
-    for prefix in list_zarr_stores(MULTIMODEL_CSV_PREFIX, BUCKET_CADCAT, depth=4):
-        parsed = parse_csv_prefix(prefix)
-        if parsed is None:
-            continue
+    for metric in METRICS:
+        for boundary in VALID_BOUNDARIES:
+            subdir = BOUNDARY_SUBDIRS.get(boundary, "")
+            boundary_prefix = (
+                f"{MULTIMODEL_CSV_PREFIX}{metric}/{boundary}/{subdir}{SCENARIO}/"
+            )
+            # depth=1: thresh
+            for prefix in list_zarr_stores(boundary_prefix, BUCKET_CADCAT, depth=1):
+                thresh = prefix.rstrip("/").rsplit("/", 1)[-1]
+                item_id = f"eh-metrics-mm-boundary-csv-{metric}-{boundary}-{thresh}"
 
-        metric = parsed["metric"]
-        boundary = parsed["boundary"]
-        scenario = parsed["scenario"]
-        thresh = parsed["thresh"]
-        seen_metrics.add(metric)
-
-        start_dt, end_dt = EXPERIMENT_DATE_RANGE
-        item_id = f"eh-metrics-mm-boundary-csv-{metric}-{boundary}-{thresh}"
-
-        item = pystac.Item(
-            id=item_id,
-            geometry=bbox_to_geometry(CA_BBOX),
-            bbox=CA_BBOX,
-            datetime=None,
-            properties={
-                "start_datetime": start_dt.isoformat(),
-                "end_datetime": end_dt.isoformat(),
-                "cmip6:activity_id": "WRF",
-                "cmip6:institution_id": "CAE",
-                "cmip6:experiment_id": scenario,
-                "variable_id": metric,
-                "threshold_name": thresh,
-                "boundary": boundary,
-                "caladapt:spatial_type": "spatial-aggregate",
-                "bias_adjusted": True,
-            },
-        )
-        item.add_asset(
-            "data",
-            pystac.Asset(
-                href=parsed["path"],
-                media_type="text/csv",
-                title=f"{BOUNDARY_LABELS.get(boundary, boundary)} — {metric} | {thresh}",
-                roles=["data"],
-            ),
-        )
-        collection.add_item(item)
-        items_built += 1
+                item = pystac.Item(
+                    id=item_id,
+                    geometry=geometry,
+                    bbox=CA_BBOX,
+                    datetime=None,
+                    properties={
+                        "start_datetime": start_dt.isoformat(),
+                        "end_datetime": end_dt.isoformat(),
+                        "cmip6:activity_id": "WRF",
+                        "cmip6:institution_id": "CAE",
+                        "cmip6:experiment_id": SCENARIO,
+                        "variable_id": metric,
+                        "threshold_name": thresh,
+                        "boundary": boundary,
+                        "caladapt:spatial_type": "spatial-aggregate",
+                        "bias_adjusted": True,
+                    },
+                )
+                item.add_asset(
+                    "data",
+                    pystac.Asset(
+                        href=f"s3://{BUCKET_CADCAT}/{prefix}",
+                        media_type="text/csv",
+                        title=f"{BOUNDARY_LABELS[boundary]} — {metric} | {thresh}",
+                        roles=["data"],
+                    ),
+                )
+                collection.add_item(item)
+                items_built += 1
 
     collection.extra_fields["caladapt:variable_labels"] = {
-        var: WRF_VARIABLE_LABELS.get(var, var) for var in seen_metrics
+        var: WRF_VARIABLE_LABELS.get(var, var) for var in METRICS
     }
 
     print(f"  Built {items_built} items.")
