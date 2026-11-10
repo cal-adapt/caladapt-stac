@@ -92,7 +92,10 @@ def build_wrf_derived_vars_collection():
         id="wrf-derived-vars",
         title="WRF derived climate variables",
         keywords=COLLECTION_KEYWORDS["wrf-derived-vars"],
-        extra_fields={"caladapt:spatial_type": "grid"},
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:source": "wrf",
+        },
         description=(
             "Hourly derived climate variables (FFWI, relative humidity, wind speed) for California, "
             "produced from WRF-downscaled CMIP6 outputs at 3 km resolution."

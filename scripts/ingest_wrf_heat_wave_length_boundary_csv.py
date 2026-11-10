@@ -105,6 +105,7 @@ def build_collection():
         keywords=COLLECTION_KEYWORDS["hwl-metrics-mm-boundary-csv"],
         extra_fields={
             "caladapt:spatial_type": "spatial-aggregate",
+            "caladapt:source": "wrf",
             "caladapt:boundary_labels": BOUNDARY_LABELS,
         },
         description=(

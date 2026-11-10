@@ -61,7 +61,10 @@ def build_hdp_collection():
         id="historical-data-platform",
         title="Historical data platform",
         keywords=COLLECTION_KEYWORDS["historical-data-platform"],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:source": "observations",
+        },
         description=(
             "Standardized and quality-controlled historical weather "
             "station data from 15,000+ weather stations within the "

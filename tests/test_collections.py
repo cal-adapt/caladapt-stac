@@ -68,6 +68,9 @@ def _mock_response(data):
 # The values apps use to describe a collection's data form
 SPATIAL_TYPES = {"grid", "point", "spatial-aggregate"}
 
+# Where a collection's data comes from, for the STAC Browser Source filter
+SOURCES = {"wrf", "loca2", "observations", "other"}
+
 
 def _check_metadata(collection, expected_id, expected_license="CC-BY-4.0"):
     assert collection.id == expected_id
@@ -75,6 +78,7 @@ def _check_metadata(collection, expected_id, expected_license="CC-BY-4.0"):
     assert collection.description
     assert collection.keywords == COLLECTION_KEYWORDS[expected_id]
     assert collection.extra_fields["caladapt:spatial_type"] in SPATIAL_TYPES
+    assert collection.extra_fields["caladapt:source"] in SOURCES
     assert collection.providers
     assert "thumbnail" in collection.assets
 

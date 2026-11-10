@@ -82,7 +82,10 @@ def build_wrf_climate_metrics_map_collection():
         id="wrf-climate-metrics-map",
         title="Cal-Adapt climate metrics map data",
         keywords=COLLECTION_KEYWORDS["wrf-climate-metrics-map"],
-        extra_fields={"caladapt:spatial_type": "grid"},
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:source": "wrf",
+        },
         description=(
             "Ensemble statistics for gridded WRF-downscaled climate extremes (heat, precipitation, fire weather) "
             "at global warming levels for California, supporting the Cal-Adapt Climate Metrics Map tool."
@@ -136,7 +139,9 @@ def build_wrf_climate_metrics_map_collection():
 
         seen_variables.add(metric)
         start_dt, end_dt = EXPERIMENT_DATE_RANGES[scenario]
-        item_id = f"wrf-climate-metrics-map-{statistic}-{scenario}-gwl-{metric}-{grid_label}"
+        item_id = (
+            f"wrf-climate-metrics-map-{statistic}-{scenario}-gwl-{metric}-{grid_label}"
+        )
 
         props = {
             "cmip6:activity_id": "WRF",

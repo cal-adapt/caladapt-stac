@@ -121,7 +121,10 @@ def build_sea_level_collection():
         id="sea-level-projections",
         title="Sea level projections",
         keywords=COLLECTION_KEYWORDS["sea-level-projections"],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:source": "other",
+        },
         description=(
             "Hourly sea level projections for 13 NOAA tide stations along the California "
             "coast and San Francisco Bay across low, intermediate, and high "
