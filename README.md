@@ -153,7 +153,7 @@ make queryables
 
 **Link checker:**
 
-A GitHub Actions workflow (`.github/workflows/check-links.yml`) runs every Monday at 9am UTC and on every push to `main`. It fetches all collections from the live API and checks that every `related` link returns a valid response. Failed checks are reported in the Actions tab. You can also trigger it manually via `workflow_dispatch`.
+A GitHub Actions workflow (`.github/workflows/check-links.yml`) runs every Monday at 9am UTC and on every push to `main`. It runs `scripts/check_links.py`, which fetches all collections from the live API and checks every collection link (except the API's own), asset href and provider URL. The job fails only for dead links (404, 410, DNS errors, timeouts). Sites that block automated requests (401, 403, 405, 429) or send an incomplete certificate chain are listed as warnings to check in a browser. Results are in the Actions tab. You can also trigger it manually via `workflow_dispatch`, or run `python3 scripts/check_links.py` locally.
 
 **Delete a collection:**
 
