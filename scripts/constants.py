@@ -77,19 +77,41 @@ KEYWORDS = (
     "energy",
     "climate profiles",
     "climate projections",
+    "Cal-Adapt tools",
 )
 
 COLLECTION_KEYWORDS = {
-    "eh-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "ehs-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "hwf-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "hwl-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "hdd-cdd-metrics-mm-boundary-csv": ["energy", "climate projections"],
+    "eh-metrics-mm-boundary-csv": [
+        "extreme heat",
+        "climate projections",
+        "Cal-Adapt tools",
+    ],
+    "ehs-metrics-mm-boundary-csv": [
+        "extreme heat",
+        "climate projections",
+        "Cal-Adapt tools",
+    ],
+    "hwf-metrics-mm-boundary-csv": [
+        "extreme heat",
+        "climate projections",
+        "Cal-Adapt tools",
+    ],
+    "hwl-metrics-mm-boundary-csv": [
+        "extreme heat",
+        "climate projections",
+        "Cal-Adapt tools",
+    ],
+    "hdd-cdd-metrics-mm-boundary-csv": [
+        "energy",
+        "climate projections",
+        "Cal-Adapt tools",
+    ],
     "wrf-climate-metrics-map": [
         "extreme heat",
         "precipitation",
         "fire weather",
         "climate projections",
+        "Cal-Adapt tools",
     ],
     "wrf-derived-vars": ["wind", "fire weather", "climate projections"],
     "wrf-ucla": ["temperature", "precipitation", "wind", "climate projections"],
