@@ -48,6 +48,7 @@ from stac_fastapi.extensions.core.query import QueryConformanceClasses
 from stac_fastapi.extensions.core.sort import SortConformanceClasses
 from stac_fastapi.extensions.third_party import BulkTransactionExtension
 from stac_fastapi.types.extension import ApiExtension
+from stac_fastapi.types.requests import get_base_url
 from stac_fastapi.types.search import APIRequest
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
@@ -77,11 +78,37 @@ EXTRA_LINKS = [
 ]
 
 
+# Filters for collection search. stac-fastapi doesn't serve these, and
+# STAC Browser needs them to offer filters on its Collections search tab.
+COLLECTION_QUERYABLES = {
+    "type": "object",
+    "properties": {
+        "caladapt:spatial_type": {
+            "title": "Data type",
+            "type": "string",
+            "enum": ["grid", "point", "spatial-aggregate"],
+        },
+    },
+}
+
+
 class CalAdaptCrudClient(CoreCrudClient):
     async def landing_page(self, **kwargs):
         # Extend the default landing page links with Cal-Adapt specific resources
         response = await super().landing_page(**kwargs)
         response["links"].extend(EXTRA_LINKS)
+        return response
+
+    async def all_collections(self, request, *args, **kwargs):
+        # STAC Browser finds the collection queryables through this link
+        response = await super().all_collections(request, *args, **kwargs)
+        response["links"].append(
+            {
+                "rel": "http://www.opengis.net/def/rel/ogc/1.0/queryables",
+                "type": "application/schema+json",
+                "href": f"{get_base_url(request)}collections/queryables",
+            }
+        )
         return response
 
 
@@ -262,6 +289,17 @@ api = StacApi(
     health_check=health_check,  # type: ignore [arg-type]
 )
 app = api.app
+
+
+@app.get(f"{settings.prefix_path}/collections/queryables", tags=["Filter Extension"])
+async def get_collection_queryables() -> JSONResponse:
+    return JSONResponse(COLLECTION_QUERYABLES, media_type="application/schema+json")
+
+
+# FastAPI matches routes in order, and /collections/{collection_id} was
+# registered first, so move this route ahead of it or "queryables" is read
+# as a collection ID
+app.router.routes.insert(0, app.router.routes.pop())
 
 
 # Fix OpenAPI spec: stac-fastapi uses snake_case path params (collection_id)
