@@ -102,7 +102,7 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="ehs-metrics-mm-boundary-csv",
-        title="Cal-Adapt extreme heat season tool",
+        title="Extreme heat season by region",
         keywords=COLLECTION_KEYWORDS["ehs-metrics-mm-boundary-csv"],
         extra_fields={
             "caladapt:spatial_type": "spatial-aggregate",

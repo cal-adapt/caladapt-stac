@@ -87,7 +87,7 @@ def build_collection():
     """
     collection = pystac.Collection(
         id="hdd-cdd-metrics-mm-boundary-csv",
-        title="Cal-Adapt heating and cooling degree days tool",
+        title="Heating and cooling degree days by region",
         keywords=COLLECTION_KEYWORDS["hdd-cdd-metrics-mm-boundary-csv"],
         extra_fields={
             "caladapt:spatial_type": "spatial-aggregate",

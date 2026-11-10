@@ -80,7 +80,7 @@ def build_wrf_climate_metrics_map_collection():
 
     collection = pystac.Collection(
         id="wrf-climate-metrics-map",
-        title="Cal-Adapt climate metrics map data",
+        title="Climate extremes at warming levels (gridded)",
         keywords=COLLECTION_KEYWORDS["wrf-climate-metrics-map"],
         extra_fields={
             "caladapt:spatial_type": "grid",
