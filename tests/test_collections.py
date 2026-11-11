@@ -273,15 +273,21 @@ class TestBuildHddCddBoundaryCollection:
         )
 
     def test_one_item_per_boundary(self):
-        # Also covers census tracts being included and the intentional
-        # exclusion of IOU/POUs at this launch scope -- see module docstring.
         collection = build_hdd_cdd_boundary_collection()
         items = list(collection.get_items())
         assert len(items) == len(HDD_CDD_VALID_BOUNDARIES)
         boundaries = {item.properties["boundary"] for item in items}
         assert boundaries == set(HDD_CDD_VALID_BOUNDARIES)
-        assert "ca_census_tracts" in boundaries
-        assert "ious_pous" not in boundaries
+        assert {"ca_census_tracts", "ious_pous"} <= boundaries
+
+    def test_weighted_boundaries_use_weighted_median(self):
+        for item in build_hdd_cdd_boundary_collection().get_items():
+            href = item.assets["data"].href
+            boundary = item.properties["boundary"]
+            if boundary in ("ca_census_tracts", "ious_pous"):
+                assert f"/{boundary}/weighted_median/ssp370/" in href
+            else:
+                assert "weighted_median" not in href
 
     def test_items_have_data_asset(self):
         collection = build_hdd_cdd_boundary_collection()
