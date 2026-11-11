@@ -337,6 +337,21 @@ class TestParseHwfCsvPrefix:
         prefix = f"{self.PREFIX}ca_counties/gwl/csv/t2max_ge95F/duration_xd/"
         assert parse_hwf_csv_prefix(prefix) is None
 
+    def test_weighted_median(self):
+        prefix = f"{self.PREFIX}ca_census_tracts/weighted_median/gwl/csv/t2max_ge95pctl/duration_14d/"
+        result = parse_hwf_csv_prefix(prefix)
+        assert result["boundary"] == "ca_census_tracts"
+        assert result["thresh"] == "t2max_ge95pctl"
+        assert result["path"] == f"s3://cadcat/{prefix}"
+
+    def test_unweighted_census_tracts_skipped(self):
+        assert (
+            parse_hwf_csv_prefix(
+                f"{self.PREFIX}ca_census_tracts/gwl/csv/t2max_ge95pctl/duration_14d/"
+            )
+            is None
+        )
+
 
 class TestParseHwlCsvPrefix:
     PREFIX = "wrf/heat-wave-length/multimodel_per_boundary/"
@@ -356,6 +371,23 @@ class TestParseHwlCsvPrefix:
         prefix = f"{self.PREFIX}ca_counties/gwl/zarr/t2max_ge99pctl/"
         assert parse_hwl_csv_prefix(prefix) is None
 
+    def test_weighted_median(self):
+        prefix = (
+            f"{self.PREFIX}ca_census_tracts/weighted_median/gwl/csv/t2max_ge99pctl/"
+        )
+        result = parse_hwl_csv_prefix(prefix)
+        assert result["boundary"] == "ca_census_tracts"
+        assert result["thresh"] == "t2max_ge99pctl"
+        assert result["path"] == f"s3://cadcat/{prefix}"
+
+    def test_unweighted_census_tracts_skipped(self):
+        assert (
+            parse_hwl_csv_prefix(
+                f"{self.PREFIX}ca_census_tracts/gwl/csv/t2max_ge99pctl/"
+            )
+            is None
+        )
+
 
 class TestParseEhsCsvPrefix:
     PREFIX = "wrf/extreme-heat-season/multimodel_per_boundary/"
@@ -374,3 +406,20 @@ class TestParseEhsCsvPrefix:
     def test_zarr_not_csv(self):
         prefix = f"{self.PREFIX}ca_counties/gwl/zarr/t2max_ge90pctl/"
         assert parse_ehs_csv_prefix(prefix) is None
+
+    def test_weighted_median(self):
+        prefix = (
+            f"{self.PREFIX}ca_census_tracts/weighted_median/gwl/csv/t2max_ge90pctl/"
+        )
+        result = parse_ehs_csv_prefix(prefix)
+        assert result["boundary"] == "ca_census_tracts"
+        assert result["thresh"] == "t2max_ge90pctl"
+        assert result["path"] == f"s3://cadcat/{prefix}"
+
+    def test_unweighted_census_tracts_skipped(self):
+        assert (
+            parse_ehs_csv_prefix(
+                f"{self.PREFIX}ca_census_tracts/gwl/csv/t2max_ge90pctl/"
+            )
+            is None
+        )
