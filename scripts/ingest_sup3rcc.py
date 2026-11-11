@@ -110,7 +110,6 @@ PUBLICATIONS = [
     ),
 ]
 DATASET_DOI = "10.25984/1970814"
-DATASET_CITATION = "Buster, G., Benton, B., Glaws, A., and King, R. (2023): Super-Resolution for Renewable Energy Resource Data with Climate Change Impacts (Sup3rCC). National Laboratory of the Rockies."
 
 
 def parse_sup3rcc_store(store_prefix):
@@ -203,7 +202,6 @@ def build_sup3rcc_collection():
     add_related_links(collection, RELATED_LINKS)
     sci_ext = ScientificExtension.ext(collection, add_if_missing=True)
     sci_ext.doi = DATASET_DOI
-    sci_ext.citation = DATASET_CITATION
     sci_ext.publications = PUBLICATIONS
 
     seen_variables: set[str] = set()

@@ -190,7 +190,7 @@ Some collections (county, station-based) attach a GeoJSON file as a collection-l
 
 ```bash
 make geometries
-aws s3 cp data/geometries/ s3://cadcat/geometries/ --recursive --profile era-de
+aws s3 cp data/geometries/ s3://cadcat/geometries/ --recursive
 ```
 
 ## Database setup (first time only)
