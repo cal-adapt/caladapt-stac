@@ -99,6 +99,10 @@ ren:
 	uv run python -m scripts.register_queryables --collection pv-generation
 	uv run python -m scripts.register_queryables --collection wind-generation
 
+sup3rcc:
+	uv run python -m scripts.ingest_sup3rcc
+	uv run python -m scripts.register_queryables --collection sup3rcc
+
 slr:
 	uv run python -m scripts.ingest_sea_level
 	uv run python -m scripts.register_queryables --collection sea-level-projections

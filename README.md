@@ -140,6 +140,7 @@ make wrf-climate-metrics-map    # WRF climate metrics map
 make hadisd                     # HadISD station Zarrs
 make hdp                        # Historical Data Platform
 make ren                        # PV + wind generation
+make sup3rcc                    # NLR Sup3rCC downscaled meteorology
 make slr                        # Sea level projections
 ```
 

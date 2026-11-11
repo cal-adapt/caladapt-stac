@@ -63,6 +63,7 @@ WRF_CLIMATE_METRICS_MAP_PREFIX = "wrf/climate-metrics-map/"
 HDP_PREFIX = "histwxstns/"
 HADISD_PREFIX = "hadisd/"
 HMET_PREFIX = "hmet/"
+SUP3RCC_PREFIX = "sup3r/nlr/"
 
 # Keywords: a short, fixed list used for browsing by topic. STAC Browser shows
 # them as Topic filter pills on its home page.
@@ -98,6 +99,7 @@ COLLECTION_KEYWORDS = {
     "historical-data-platform": ["temperature"],
     "pv-generation": ["energy"],
     "wind-generation": ["energy", "wind"],
+    "sup3rcc": ["energy", "wind"],
     "sea-level-projections": ["sea level"],
     "typical-met-year": ["climate profiles", "energy"],
     "standard-year": ["climate profiles", "energy"],
@@ -234,6 +236,9 @@ LOCA2_VARIABLE_LABELS: dict[str, str] = _load_variable_labels(
 )
 RENEWABLES_VARIABLE_LABELS: dict[str, str] = _load_variable_labels(
     _VAR_MAPPING_DIR / "renewables.csv"
+)
+SUP3RCC_VARIABLE_LABELS: dict[str, str] = _load_variable_labels(
+    _VAR_MAPPING_DIR / "sup3rcc.csv"
 )
 
 
