@@ -168,3 +168,6 @@ samconfig.toml
 
 # Local output of scripts/generate_geometries.py, manually uploaded to S3
 data/geometries/
+
+# macOS Finder metadata
+.DS_Store
