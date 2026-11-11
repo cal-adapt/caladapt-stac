@@ -140,6 +140,7 @@ make wrf-climate-metrics-map    # WRF climate metrics map
 make hadisd                     # HadISD station Zarrs
 make hdp                        # Historical Data Platform
 make ren                        # PV + wind generation
+make sup3rcc                    # NLR Sup3rCC downscaled meteorology
 make slr                        # Sea level projections
 ```
 
@@ -189,7 +190,7 @@ Some collections (county, station-based) attach a GeoJSON file as a collection-l
 
 ```bash
 make geometries
-aws s3 cp data/geometries/ s3://cadcat/geometries/ --recursive --profile era-de
+aws s3 cp data/geometries/ s3://cadcat/geometries/ --recursive
 ```
 
 ## Database setup (first time only)

@@ -1,0 +1,14 @@
+variable_id,variable_label
+psfc,Surface pressure
+rh,Relative humidity
+swddif,Diffuse horizontal irradiance
+swddni,Direct normal irradiance
+swdnb,Global horizontal irradiance
+t2,Air temperature at 2 m
+wd10,Wind direction at 10 m
+wd100,Wind direction at 100 m
+wd200,Wind direction at 200 m
+ws10,Wind speed at 10 m
+ws100,Wind speed at 100 m
+ws200,Wind speed at 200 m
+prec,Precipitation
