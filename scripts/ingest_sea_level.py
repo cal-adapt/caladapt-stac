@@ -121,7 +121,10 @@ def build_sea_level_collection():
         id="sea-level-projections",
         title="Sea level projections",
         keywords=COLLECTION_KEYWORDS["sea-level-projections"],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:source": "other",
+        },
         description=(
             "Hourly sea level projections for 13 NOAA tide stations along the California "
             "coast and San Francisco Bay across low, intermediate, and high "
@@ -156,6 +159,7 @@ def build_sea_level_collection():
         pystac.Link(
             rel="related",
             target="https://tidesandcurrents.noaa.gov/tide_predictions.html?gid=1393",
+            media_type="text/html",
             title="NOAA Tides and Currents — California tide predictions",
         )
     )
@@ -163,6 +167,7 @@ def build_sea_level_collection():
         pystac.Link(
             rel="related",
             target="https://digitalcommons.humboldt.edu/cgi/viewcontent.cgi?article=1062&context=hsuslri_state",
+            media_type="application/pdf",
             title="California Sea Level Rise Guidance: 2024 Science and Policy Update",
         )
     )
@@ -170,6 +175,7 @@ def build_sea_level_collection():
         pystac.Link(
             rel="related",
             target="https://www.energy.ca.gov/sites/default/files/2019-11/Projections_CCCA4-CEC-2018-006_ADA.pdf",
+            media_type="application/pdf",
             title="Pierce et al. (2018). Climate, Drought, and Sea Level Rise Scenarios for the Fourth California Climate Assessment. CEC Publication CCCA4-CEC-2018-006.",
         )
     )

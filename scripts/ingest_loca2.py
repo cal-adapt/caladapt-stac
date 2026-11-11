@@ -36,8 +36,14 @@ from scripts.constants import (
     LOCA2_VARIABLE_LABELS,
     PGDSN,
     COLLECTION_KEYWORDS,
+    LOCA2_RELATED_LINKS,
 )
-from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
+from scripts.utils import (
+    add_related_links,
+    bbox_to_geometry,
+    list_zarr_stores,
+    load_direct,
+)
 
 # Date ranges by experiment_id
 EXPERIMENT_DATE_RANGES = {
@@ -107,7 +113,10 @@ def build_loca2_gridded_collection():
         id="loca2",
         title="LOCA2",
         keywords=COLLECTION_KEYWORDS["loca2"],
-        extra_fields={"caladapt:spatial_type": "grid"},
+        extra_fields={
+            "caladapt:spatial_type": "grid",
+            "caladapt:source": "loca2",
+        },
         description="Hybrid-statistically downscaled climate projections for California produced by UCSD using the Localized Constructed Analogs version 2 (LOCA2) method.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -202,6 +211,7 @@ def build_loca2_gridded_collection():
     collection.extra_fields["caladapt:variable_labels"] = {
         var: LOCA2_VARIABLE_LABELS.get(var, var) for var in seen_variables
     }
+    add_related_links(collection, LOCA2_RELATED_LINKS)
     return collection
 
 

@@ -68,7 +68,10 @@ def build_hadisd_collection():
         id="hadisd",
         title="HadISD",
         keywords=COLLECTION_KEYWORDS["hadisd"],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:source": "observations",
+        },
         description=("Met Office HadISD sub-daily station data for the WECC region."),
         license=HADISD_LICENSE,
         providers=[
@@ -93,6 +96,7 @@ def build_hadisd_collection():
         pystac.Link(
             rel="related",
             target="https://www.metoffice.gov.uk/research/library-and-archive/publications/science/climate-science-technical-notes",
+            media_type="text/html",
             title="Dunn, R. J. H. (2019): HadISD version 3: monthly updates. Hadley Centre Technical Note 103.",
         )
     )

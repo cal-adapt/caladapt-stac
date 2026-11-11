@@ -64,9 +64,8 @@ HDP_PREFIX = "histwxstns/"
 HADISD_PREFIX = "hadisd/"
 HMET_PREFIX = "hmet/"
 
-# Keywords: a short, fixed list used for browsing by topic. The map
-# (caladapt-stac-map) and STAC Browser filter on them, and the map shows them
-# with the first letter capitalized ("station data" -> "Station data").
+# Keywords: a short, fixed list used for browsing by topic. STAC Browser shows
+# them as Topic filter pills on its home page.
 KEYWORDS = (
     "extreme heat",
     "temperature",
@@ -75,36 +74,35 @@ KEYWORDS = (
     "fire weather",
     "sea level",
     "energy",
-    "station data",
     "climate profiles",
-    "climate projections",
+    "Cal-Adapt tools",
 )
 
 COLLECTION_KEYWORDS = {
-    "eh-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "ehs-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "hwf-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "hwl-metrics-mm-boundary-csv": ["extreme heat", "climate projections"],
-    "hdd-cdd-metrics-mm-boundary-csv": ["energy", "climate projections"],
+    "eh-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
+    "ehs-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
+    "hwf-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
+    "hwl-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
+    "hdd-cdd-metrics-mm-boundary-csv": ["energy", "Cal-Adapt tools"],
     "wrf-climate-metrics-map": [
         "extreme heat",
         "precipitation",
         "fire weather",
-        "climate projections",
+        "Cal-Adapt tools",
     ],
-    "wrf-derived-vars": ["wind", "fire weather", "climate projections"],
-    "wrf-ucla": ["temperature", "precipitation", "wind", "climate projections"],
-    "loca2": ["temperature", "precipitation", "wind", "climate projections"],
-    "loca2-county": ["temperature", "precipitation", "wind", "climate projections"],
-    "hadisd": ["temperature", "station data"],
-    "historical-data-platform": ["temperature", "station data"],
-    "pv-generation": ["energy", "climate projections"],
-    "wind-generation": ["energy", "wind", "climate projections"],
-    "sea-level-projections": ["sea level", "climate projections"],
-    "typical-met-year": ["climate profiles", "climate projections"],
-    "standard-year": ["climate profiles", "climate projections"],
-    "xmy-persist": ["climate profiles", "climate projections"],
-    "xmy-shock": ["climate profiles", "climate projections"],
+    "wrf-derived-vars": ["wind", "fire weather"],
+    "wrf-ucla": ["temperature", "precipitation", "wind"],
+    "loca2": ["temperature", "precipitation", "wind"],
+    "loca2-county": ["temperature", "precipitation", "wind"],
+    "hadisd": ["temperature"],
+    "historical-data-platform": ["temperature"],
+    "pv-generation": ["energy"],
+    "wind-generation": ["energy", "wind"],
+    "sea-level-projections": ["sea level"],
+    "typical-met-year": ["climate profiles", "energy"],
+    "standard-year": ["climate profiles", "energy"],
+    "xmy-persist": ["climate profiles", "energy"],
+    "xmy-shock": ["climate profiles", "energy"],
 }
 
 # License for all Cal-Adapt data (CMIP6-derived products)
@@ -237,3 +235,91 @@ LOCA2_VARIABLE_LABELS: dict[str, str] = _load_variable_labels(
 RENEWABLES_VARIABLE_LABELS: dict[str, str] = _load_variable_labels(
     _VAR_MAPPING_DIR / "renewables.csv"
 )
+
+
+# Reference documents added as `related` links on collection pages, as
+# (title, href, media_type). The CEC memos are the references the guidance site
+# cites for WRF and LOCA2 (data-tools/data-documentation/climate-model-sims.qmd).
+_GUIDANCE_URL = "https://analytics.cal-adapt.org"
+_CEC_MEMO_URL = "https://www.energy.ca.gov/sites/default/files"
+
+MEMO_BIAS_CORRECTION = (
+    "Bias correction in the WRF and LOCA2 projections (Fifth Climate Change Assessment data adoption memo)",
+    f"{_CEC_MEMO_URL}/2024-03/01_BiasCorrectioninWRF_and_LOCA2Projections_DataJustificationMemo_Pierce_Adopted_ada.pdf",
+    "application/pdf",
+)
+GUIDE_CLIMATE_MODEL_SIMS = (
+    "Climate model simulations (Cal-Adapt guidance)",
+    f"{_GUIDANCE_URL}/data-tools/data-documentation/climate-model-sims.html",
+    "text/html",
+)
+GUIDE_WRF_VS_LOCA2 = (
+    "Choosing between WRF and LOCA2-Hybrid (Cal-Adapt guidance)",
+    f"{_GUIDANCE_URL}/scientific-guidance/WRF-vs-LOCA2-Hybrid.html",
+    "text/html",
+)
+GUIDE_CLIMATE_PROFILES = (
+    "Climate profiles (Cal-Adapt guidance)",
+    f"{_GUIDANCE_URL}/scientific-guidance/climate_profiles/index.html",
+    "text/html",
+)
+
+WRF_RELATED_LINKS = [
+    MEMO_BIAS_CORRECTION,
+    (
+        "Dynamically downscaled datasets (Fifth Climate Change Assessment data adoption memo)",
+        f"{_CEC_MEMO_URL}/2024-06/02_DynamicalDownscaling_DataJustificationMemo_Rahimi_Adopted_v2May2024_ada.pdf",
+        "application/pdf",
+    ),
+    (
+        "CMIP6 downscaling using WRF (UCLA)",
+        "https://atmos.ucla.edu/alexhall/cmip6-downscaling-using-wrf/",
+        "text/html",
+    ),
+    GUIDE_CLIMATE_MODEL_SIMS,
+    GUIDE_WRF_VS_LOCA2,
+]
+LOCA2_RELATED_LINKS = [
+    MEMO_BIAS_CORRECTION,
+    (
+        "LOCA2 training data (Fifth Climate Change Assessment data adoption memo)",
+        f"{_CEC_MEMO_URL}/2024-03/03_LOCA2-forCA-TrainingData_DataJustificationMemo_Pierce_Adopted_ada.pdf",
+        "application/pdf",
+    ),
+    (
+        "LOCA2 hybrid downscaling (Fifth Climate Change Assessment data adoption memo)",
+        f"{_CEC_MEMO_URL}/2024-03/04_HybridDownscaling_DataJustificationMemo_Pierce_Adopted_ada.pdf",
+        "application/pdf",
+    ),
+    GUIDE_CLIMATE_MODEL_SIMS,
+    GUIDE_WRF_VS_LOCA2,
+]
+SMY_RELATED_LINKS = [
+    GUIDE_CLIMATE_PROFILES,
+    (
+        "Standard year 8760s (Cal-Adapt guidance)",
+        f"{_GUIDANCE_URL}/scientific-guidance/climate_profiles/standard-year.html",
+        "text/html",
+    ),
+]
+TMY_RELATED_LINKS = [
+    GUIDE_CLIMATE_PROFILES,
+    (
+        "Typical meteorological year 8760s (Cal-Adapt guidance)",
+        f"{_GUIDANCE_URL}/scientific-guidance/climate_profiles/typical-met-year.html",
+        "text/html",
+    ),
+]
+XMY_RELATED_LINKS = [
+    GUIDE_CLIMATE_PROFILES,
+    (
+        "Extreme meteorological year 8760s (Cal-Adapt guidance)",
+        f"{_GUIDANCE_URL}/scientific-guidance/climate_profiles/extreme-met-year.html",
+        "text/html",
+    ),
+    (
+        "Preparing for the Exceptional: Extreme Meteorological Years in Energy System Planning (white paper)",
+        "https://zenodo.org/records/21401751",
+        "text/html",
+    ),
+]

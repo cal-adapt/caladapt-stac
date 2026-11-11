@@ -34,8 +34,9 @@ from scripts.constants import (
     LOCA2_VARIABLE_LABELS,
     PGDSN,
     COLLECTION_KEYWORDS,
+    LOCA2_RELATED_LINKS,
 )
-from scripts.utils import list_keys, load_direct
+from scripts.utils import add_related_links, list_keys, load_direct
 
 
 def parse_loca2_county_key(key):
@@ -101,7 +102,10 @@ def build_loca2_county_collection():
         id="loca2-county",
         title="Aggregated LOCA2 county data",
         keywords=COLLECTION_KEYWORDS["loca2-county"],
-        extra_fields={"caladapt:spatial_type": "spatial-aggregate"},
+        extra_fields={
+            "caladapt:spatial_type": "spatial-aggregate",
+            "caladapt:source": "loca2",
+        },
         description="LOCA2 hybrid-statistically downscaled climate projections aggregated by California counties.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -210,6 +214,7 @@ def build_loca2_county_collection():
             )
         collection.add_item(item)
 
+    add_related_links(collection, LOCA2_RELATED_LINKS)
     return collection
 
 

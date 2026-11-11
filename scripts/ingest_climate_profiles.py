@@ -43,8 +43,11 @@ from scripts.constants import (
     XMY_PERSIST_PREFIX,
     XMY_SHOCK_PREFIX,
     COLLECTION_KEYWORDS,
+    SMY_RELATED_LINKS,
+    TMY_RELATED_LINKS,
+    XMY_RELATED_LINKS,
 )
-from scripts.utils import build_item, list_keys, load_direct
+from scripts.utils import add_related_links, build_item, list_keys, load_direct
 
 
 def parse_tmy_key(key):
@@ -190,7 +193,10 @@ def build_tmy_collection():
         id="typical-met-year",
         title="Typical meteorological year",
         keywords=COLLECTION_KEYWORDS["typical-met-year"],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:source": "wrf",
+        },
         description="Typical Meteorological Year climate profiles (8760) generated with dynamically-downscaled (WRF) global climate models at weather station locations for 50th percentile (p50) and 4 warming level planning horizons. A climate profile represents every hour of a 1-year period (e.g., 8760 hours). TMY profiles are in the time zone of the selected station.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -249,7 +255,9 @@ def build_tmy_collection():
             else f"tmy-{props['location']}-{props['model']}-{props['time_period']}-{ext}"
         )
 
-        station_labels[props["location"]] = station_names.get(props["location"], props["location"])
+        station_labels[props["location"]] = station_names.get(
+            props["location"], props["location"]
+        )
 
         # Get the time period from the profiles lookup table
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
@@ -277,6 +285,7 @@ def build_tmy_collection():
         collection.add_item(item)
 
     collection.extra_fields["caladapt:station_labels"] = station_labels
+    add_related_links(collection, TMY_RELATED_LINKS)
     return collection
 
 
@@ -293,7 +302,10 @@ def build_smy_collection():
         id="standard-year",
         title="Standard year",
         keywords=COLLECTION_KEYWORDS["standard-year"],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:source": "wrf",
+        },
         description="Standard Year climate profiles (8760) generated with dynamically downscaled (WRF) global climate models at weather station locations for 50th, 5th, and 95th percentiles and 4 warming level planning horizons. A climate profile represents every hour of a 1-year period (e.g., 8760 hours). Standard Year profiles are in the time zone of the selected station.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -356,7 +368,9 @@ def build_smy_collection():
         props["start_datetime"] = start.isoformat()
         props["end_datetime"] = end.isoformat()
 
-        station_labels[props["location"]] = station_names.get(props["location"], props["location"])
+        station_labels[props["location"]] = station_names.get(
+            props["location"], props["location"]
+        )
         variable_labels[props["variable"]] = WRF_VARIABLE_LABELS.get(
             props["variable"], props["variable"]
         )
@@ -382,6 +396,7 @@ def build_smy_collection():
 
     collection.extra_fields["caladapt:variable_labels"] = variable_labels
     collection.extra_fields["caladapt:station_labels"] = station_labels
+    add_related_links(collection, SMY_RELATED_LINKS)
     return collection
 
 
@@ -398,7 +413,10 @@ def build_xmy_persist_collection():
         id="xmy-persist",
         title="Extreme year (persistence)",
         keywords=COLLECTION_KEYWORDS["xmy-persist"],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:source": "wrf",
+        },
         description="Extreme Meteorological Year (XMY) persistence climate profiles (8760) generated with dynamically-downscaled (WRF) global climate models at weather station locations, representing sustained extremes at 5th, 10th, 40th, 60th, 90th, and 95th percentiles across 4 warming level planning horizons. A climate profile represents every hour of a 1-year period (e.g., 8760 hours). XMY persistence profiles are in the time zone of the selected station.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -453,7 +471,9 @@ def build_xmy_persist_collection():
         media_type = "application/octet-stream" if ext == "epw" else "text/csv"
         item_id = f"xmy-persist-{props['location']}-{props['model']}-{props['time_period']}-{props['percentile']}-{ext}"
 
-        station_labels[props["location"]] = station_names.get(props["location"], props["location"])
+        station_labels[props["location"]] = station_names.get(
+            props["location"], props["location"]
+        )
 
         # Get the time period from the profiles lookup table
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
@@ -481,6 +501,7 @@ def build_xmy_persist_collection():
         collection.add_item(item)
 
     collection.extra_fields["caladapt:station_labels"] = station_labels
+    add_related_links(collection, XMY_RELATED_LINKS)
     return collection
 
 
@@ -497,7 +518,10 @@ def build_xmy_shock_collection():
         id="xmy-shock",
         title="Extreme year (shock)",
         keywords=COLLECTION_KEYWORDS["xmy-shock"],
-        extra_fields={"caladapt:spatial_type": "point"},
+        extra_fields={
+            "caladapt:spatial_type": "point",
+            "caladapt:source": "wrf",
+        },
         description="Extreme Meteorological Year (XMY) shock climate profiles (8760) generated with dynamically-downscaled (WRF) global climate models at weather station locations, representing short-duration hot and cold shock extremes across 4 warming level planning horizons. A climate profile represents every hour of a 1-year period (e.g., 8760 hours). XMY shock profiles are in the time zone of the selected station.",
         license=CALADAPT_DATA_LICENSE,
         providers=[
@@ -552,7 +576,9 @@ def build_xmy_shock_collection():
         media_type = "application/octet-stream" if ext == "epw" else "text/csv"
         item_id = f"xmy-shock-{props['location']}-{props['model']}-{props['time_period']}-{props['shock_type']}-{ext}"
 
-        station_labels[props["location"]] = station_names.get(props["location"], props["location"])
+        station_labels[props["location"]] = station_names.get(
+            props["location"], props["location"]
+        )
 
         # Get the time period from the profiles lookup table
         start, end = CLIM_PROF_GWL_PERIOD_DATES[props["time_period"]]
@@ -580,6 +606,7 @@ def build_xmy_shock_collection():
         collection.add_item(item)
 
     collection.extra_fields["caladapt:station_labels"] = station_labels
+    add_related_links(collection, XMY_RELATED_LINKS)
     return collection
 
 
