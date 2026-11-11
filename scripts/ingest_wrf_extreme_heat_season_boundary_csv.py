@@ -7,16 +7,17 @@ exceedance frequency at each global warming level, organized by boundary ×
 threshold. For each calendar day, frequency_percent is the share of years in
 the 30-year GWL window whose daily maximum temperature (t2max) exceeded the
 threshold. Days run 1-365 on a no-leap calendar (February 29 removed). This
-is not a heat wave event metric: consecutive days are not considered. Covers
-4 of the 6 California boundary types produced by the pipeline: counties,
-watersheds, forecast zones, and electric balancing areas.
-
-Census tracts and IOU/POUs are excluded to match the HDD/CDD and heat wave
-tools' launch scope (see ingest_wrf_hdd_cdd_tool_boundary_csv.py).
+is not a heat wave event metric: consecutive days are not considered. Covers all 6
+California boundary types produced by the pipeline: counties, watersheds,
+census tracts, IOU/POUs, forecast zones, and electric balancing areas.
 
 S3 path structure:
     wrf/extreme-heat-season/multimodel_per_boundary/{boundary}/gwl/csv/{thresh}/
     Files within: {Region_Name}_{thresh}.csv (1,825 rows: 5 GWLs × 365 days)
+
+    Census tracts and IOU/POUs use the weighted median outputs, one level deeper:
+    wrf/extreme-heat-season/multimodel_per_boundary/{boundary}/weighted_median/gwl/csv/{thresh}/
+    Files within: {GEOID}.csv for tracts, {Region_Name}.csv for IOU/POUs
 
 One STAC item per (boundary × threshold) combination.
 Each item has one asset pointing to the S3 prefix directory.
@@ -46,17 +47,31 @@ from scripts.utils import bbox_to_geometry, list_zarr_stores, load_direct
 
 MULTIMODEL_CSV_PREFIX = WRF_EXTREME_HEAT_SEASON_PREFIX + "multimodel_per_boundary/"
 
-# Launch scope: 4 of the 6 boundary types the pipeline produces, matching the
-# HDD/CDD tool. Census tracts and IOU/POUs are intentionally excluded (see
-# module docstring), so this is a deliberate allowlist rather than something
-# to discover from S3.
+# All 6 boundary types the pipeline produces. This is a deliberate allowlist
+# rather than something to discover from S3, so older outputs left on S3
+# (e.g. the unweighted census tract and IOU/POU folders) are never picked up.
 BOUNDARY_LABELS = {
     "ca_counties": "California counties",
     "ca_watersheds": "California watersheds (HUC8)",
+    "ca_census_tracts": "California census tracts",
+    "ious_pous": "California IOUs and POUs",
     "forecast_zones": "California forecast zones",
     "electric_balancing_areas": "California electric balancing areas",
 }
 VALID_BOUNDARIES = list(BOUNDARY_LABELS)
+
+# Census tracts and IOU/POUs are aggregated with area weights, and their outputs
+# sit one level deeper, under weighted_median/. Only the weighted median is
+# ingested; the weighted mean is not used.
+WEIGHTED_BOUNDARIES = {"ca_census_tracts", "ious_pous"}
+
+
+def boundary_dir(boundary):
+    """S3 folder for a boundary under multimodel_per_boundary/."""
+    if boundary in WEIGHTED_BOUNDARIES:
+        return f"{boundary}/weighted_median"
+    return boundary
+
 
 EXPERIMENT_DATE_RANGE = (
     datetime(2015, 1, 1, tzinfo=timezone.utc),
@@ -81,6 +96,10 @@ def parse_csv_prefix(prefix):
     """
     inner = prefix.removeprefix(MULTIMODEL_CSV_PREFIX).rstrip("/")
     parts = inner.split("/")
+    if parts[0] in WEIGHTED_BOUNDARIES:
+        if parts[1:2] != ["weighted_median"]:
+            return None
+        del parts[1]
     # expected: [boundary, gwl, csv, thresh]
     if len(parts) != 4 or parts[1:3] != ["gwl", "csv"]:
         return None
@@ -156,7 +175,9 @@ def build_collection():
         for boundary in VALID_BOUNDARIES
         # depth=1: thresh
         for prefix in list_zarr_stores(
-            f"{MULTIMODEL_CSV_PREFIX}{boundary}/gwl/csv/", BUCKET_CADCAT, depth=1
+            f"{MULTIMODEL_CSV_PREFIX}{boundary_dir(boundary)}/gwl/csv/",
+            BUCKET_CADCAT,
+            depth=1,
         )
     )
     for prefix in prefixes:

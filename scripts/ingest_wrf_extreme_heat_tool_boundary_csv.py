@@ -11,9 +11,9 @@ S3 path structure:
     wrf/extreme-heat-tool/multimodel_per_boundary/{metric}/{boundary}/ssp370/{thresh}/
     Files within: {Region_Name}_{thresh}.csv
 
-    Census tracts use the weighted median outputs, one level deeper:
-    wrf/extreme-heat-tool/multimodel_per_boundary/{metric}/ca_census_tracts/weighted_median/ssp370/{thresh}/
-    Files within: {GEOID}.csv
+    Census tracts and IOU/POUs use the weighted median outputs, one level deeper:
+    wrf/extreme-heat-tool/multimodel_per_boundary/{metric}/{boundary}/weighted_median/ssp370/{thresh}/
+    Files within: {GEOID}.csv for tracts, {Region_Name}.csv for IOU/POUs
 
 One STAC item per (metric × boundary × threshold) combination.
 Each item has one asset pointing to the S3 prefix directory.
@@ -49,7 +49,7 @@ SCENARIO = "ssp370"
 
 # All 6 boundary types the pipeline produces. This is a deliberate allowlist
 # rather than something to discover from S3, so older outputs left on S3
-# (e.g. the unweighted census tract folder) are never picked up.
+# (e.g. the unweighted census tract and IOU/POU folders) are never picked up.
 BOUNDARY_LABELS = {
     "ca_counties": "California counties",
     "ca_watersheds": "California watersheds (HUC8)",
@@ -60,11 +60,18 @@ BOUNDARY_LABELS = {
 }
 VALID_BOUNDARIES = list(BOUNDARY_LABELS)
 
-# Census tract outputs sit under an extra aggregation directory. Only the
-# weighted median is ingested; the weighted mean is not used.
-BOUNDARY_SUBDIRS = {
-    "ca_census_tracts": "weighted_median/",
-}
+# Census tracts and IOU/POUs are aggregated with area weights, and their outputs
+# sit one level deeper, under weighted_median/. Only the weighted median is
+# ingested; the weighted mean is not used.
+WEIGHTED_BOUNDARIES = {"ca_census_tracts", "ious_pous"}
+
+
+def boundary_dir(boundary):
+    """S3 folder for a boundary under multimodel_per_boundary/{metric}/."""
+    if boundary in WEIGHTED_BOUNDARIES:
+        return f"{boundary}/weighted_median"
+    return boundary
+
 
 EXPERIMENT_DATE_RANGE = (
     datetime(2015, 1, 1, tzinfo=timezone.utc),
@@ -132,9 +139,8 @@ def build_collection():
 
     for metric in METRICS:
         for boundary in VALID_BOUNDARIES:
-            subdir = BOUNDARY_SUBDIRS.get(boundary, "")
             boundary_prefix = (
-                f"{MULTIMODEL_CSV_PREFIX}{metric}/{boundary}/{subdir}{SCENARIO}/"
+                f"{MULTIMODEL_CSV_PREFIX}{metric}/{boundary_dir(boundary)}/{SCENARIO}/"
             )
             # depth=1: thresh
             for prefix in list_zarr_stores(boundary_prefix, BUCKET_CADCAT, depth=1):

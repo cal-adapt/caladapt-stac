@@ -254,13 +254,14 @@ class TestBuildEhBoundaryCollection:
             assert item.assets["data"].href.startswith("s3://")
 
     @patch("scripts.ingest_wrf_extreme_heat_tool_boundary_csv.list_zarr_stores")
-    def test_census_tracts_use_weighted_median(self, mock_list):
+    def test_weighted_boundaries_use_weighted_median(self, mock_list):
         mock_list.side_effect = lambda prefix, bucket, depth: [f"{prefix}t2max_ge95F/"]
         items = list(build_eh_boundary_collection().get_items())
         for item in items:
             href = item.assets["data"].href
-            if item.properties["boundary"] == "ca_census_tracts":
-                assert "/ca_census_tracts/weighted_median/ssp370/" in href
+            boundary = item.properties["boundary"]
+            if boundary in ("ca_census_tracts", "ious_pous"):
+                assert f"/{boundary}/weighted_median/ssp370/" in href
             else:
                 assert "weighted_median" not in href
 
@@ -298,19 +299,19 @@ class TestBuildHwfBoundaryCollection:
         _check_metadata(build_hwf_boundary_collection(), "hwf-metrics-mm-boundary-csv")
 
     @patch("scripts.ingest_wrf_heat_wave_frequency_boundary_csv.list_zarr_stores")
-    def test_only_lists_valid_boundaries(self, mock_list):
-        # Census tracts and IOU/POUs are excluded to match the HDD/CDD tool.
+    def test_lists_every_boundary(self, mock_list):
         mock_list.side_effect = lambda prefix, bucket, depth: [
             f"{prefix}t2max_ge95F/duration_3d/"
         ]
         items = list(build_hwf_boundary_collection().get_items())
         boundaries = {item.properties["boundary"] for item in items}
         assert boundaries == set(HWF_VALID_BOUNDARIES)
-        assert "ca_census_tracts" not in boundaries
-        assert "ious_pous" not in boundaries
+        assert {"ca_census_tracts", "ious_pous"} <= boundaries
         for item in items:
             assert "data" in item.assets
             assert item.assets["data"].href.startswith("s3://")
+            weighted = item.properties["boundary"] in ("ca_census_tracts", "ious_pous")
+            assert ("/weighted_median/" in item.assets["data"].href) == weighted
             assert item.properties["duration_name"] == "duration_3d"
 
 
@@ -323,17 +324,17 @@ class TestBuildHwlBoundaryCollection:
         _check_metadata(build_hwl_boundary_collection(), "hwl-metrics-mm-boundary-csv")
 
     @patch("scripts.ingest_wrf_heat_wave_length_boundary_csv.list_zarr_stores")
-    def test_only_lists_valid_boundaries(self, mock_list):
-        # Census tracts and IOU/POUs are excluded to match the HDD/CDD tool.
+    def test_lists_every_boundary(self, mock_list):
         mock_list.side_effect = lambda prefix, bucket, depth: [f"{prefix}t2max_ge100F/"]
         items = list(build_hwl_boundary_collection().get_items())
         boundaries = {item.properties["boundary"] for item in items}
         assert boundaries == set(HWL_VALID_BOUNDARIES)
-        assert "ca_census_tracts" not in boundaries
-        assert "ious_pous" not in boundaries
+        assert {"ca_census_tracts", "ious_pous"} <= boundaries
         for item in items:
             assert "data" in item.assets
             assert item.assets["data"].href.startswith("s3://")
+            weighted = item.properties["boundary"] in ("ca_census_tracts", "ious_pous")
+            assert ("/weighted_median/" in item.assets["data"].href) == weighted
             assert item.properties["threshold_name"] == "t2max_ge100F"
 
 
@@ -346,15 +347,15 @@ class TestBuildEhsBoundaryCollection:
         _check_metadata(build_ehs_boundary_collection(), "ehs-metrics-mm-boundary-csv")
 
     @patch("scripts.ingest_wrf_extreme_heat_season_boundary_csv.list_zarr_stores")
-    def test_only_lists_valid_boundaries(self, mock_list):
-        # Census tracts and IOU/POUs are excluded to match the HDD/CDD tool.
+    def test_lists_every_boundary(self, mock_list):
         mock_list.side_effect = lambda prefix, bucket, depth: [f"{prefix}t2max_ge90F/"]
         items = list(build_ehs_boundary_collection().get_items())
         boundaries = {item.properties["boundary"] for item in items}
         assert boundaries == set(EHS_VALID_BOUNDARIES)
-        assert "ca_census_tracts" not in boundaries
-        assert "ious_pous" not in boundaries
+        assert {"ca_census_tracts", "ious_pous"} <= boundaries
         for item in items:
             assert "data" in item.assets
             assert item.assets["data"].href.startswith("s3://")
+            weighted = item.properties["boundary"] in ("ca_census_tracts", "ious_pous")
+            assert ("/weighted_median/" in item.assets["data"].href) == weighted
             assert item.properties["threshold_name"] == "t2max_ge90F"
