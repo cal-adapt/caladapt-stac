@@ -64,9 +64,8 @@ HDP_PREFIX = "histwxstns/"
 HADISD_PREFIX = "hadisd/"
 HMET_PREFIX = "hmet/"
 
-# Keywords: a short, fixed list used for browsing by topic. The map
-# (caladapt-stac-map) and STAC Browser filter on them, and the map shows them
-# with the first letter capitalized ("extreme heat" -> "Extreme heat").
+# Keywords: a short, fixed list used for browsing by topic. STAC Browser shows
+# them as Topic filter pills on its home page.
 KEYWORDS = (
     "extreme heat",
     "temperature",
