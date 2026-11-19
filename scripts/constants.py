@@ -219,6 +219,7 @@ BOUNDARY_LABELS = {
     "ious_pous": "California IOUs and POUs",
     "forecast_zones": "California forecast zones",
     "electric_balancing_areas": "California electric balancing areas",
+    # "state": "US states",  # uncomment once the state mask exists
 }
 
 # Spatial extents
