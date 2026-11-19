@@ -64,9 +64,7 @@ hdd-cdd-metrics-mm-boundary-csv:
 
 acp-boundary-csv:
 	uv run python -m scripts.ingest_annual_climate_projections_boundary_csv
-	uv run python -m scripts.register_queryables --collection acp-wrf-boundary-csv
-	uv run python -m scripts.register_queryables --collection acp-loca2-boundary-csv
-	uv run python -m scripts.register_queryables --collection acp-era5-boundary-csv
+	uv run python -m scripts.register_queryables --collection acp-boundary-csv
 	$(MAKE) invalidate-search-cache
 
 hwf-metrics-mm-boundary-csv:

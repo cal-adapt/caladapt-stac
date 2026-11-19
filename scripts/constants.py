@@ -87,9 +87,7 @@ COLLECTION_KEYWORDS = {
     "hwf-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
     "hwl-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
     "hdd-cdd-metrics-mm-boundary-csv": ["energy", "Cal-Adapt tools"],
-    "acp-wrf-boundary-csv": ["temperature", "precipitation", "Cal-Adapt tools"],
-    "acp-loca2-boundary-csv": ["temperature", "precipitation", "Cal-Adapt tools"],
-    "acp-era5-boundary-csv": ["temperature", "precipitation", "Cal-Adapt tools"],
+    "acp-boundary-csv": ["temperature", "precipitation", "Cal-Adapt tools"],
     "wrf-climate-metrics-map": [
         "extreme heat",
         "precipitation",
