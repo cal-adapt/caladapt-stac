@@ -48,11 +48,17 @@ from scripts.utils import bbox_to_geometry, load_direct
 
 COLLECTION_ID = "acp-boundary-csv"
 
-# Only boundaries with data on S3. Add the other boundaries (and the new state
-# mask) as the pipeline produces them; census tracts and IOU/POUs will need the
-# weighted_median/ subdirectory like the HDD/CDD script.
+# Only boundaries with data on S3. Uncomment the others as the pipeline
+# produces them. If census tracts and IOU/POUs land under a weighted_median/
+# subdirectory, add a BOUNDARY_SUBDIRS lookup like the HDD/CDD script.
 BOUNDARY_LABELS = {
     "ca_counties": "California counties",
+    # "ca_watersheds": "California watersheds (HUC8)",
+    # "forecast_zones": "California forecast zones",
+    # "electric_balancing_areas": "California electric balancing areas",
+    # "ca_census_tracts": "California census tracts",
+    # "ious_pous": "California IOUs and POUs",
+    # "state": "California",  # placeholder: mask name and label not decided yet
 }
 
 WRF_VARIABLES = ["t2", "t2max", "t2min", "dew_point", "prec"]
