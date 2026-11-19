@@ -59,8 +59,10 @@ WRF_HEAT_WAVE_LENGTH_PREFIX = "wrf/heat-wave-length/"
 WRF_EXTREME_HEAT_SEASON_PREFIX = "wrf/extreme-heat-season/"
 WRF_DERIVED_VARS_PREFIX = "wrf/derived-vars/"
 WRF_CLIMATE_METRICS_MAP_PREFIX = "wrf/climate-metrics-map/"
-WRF_ANNUAL_CLIMATE_PROJECTIONS_PREFIX = "wrf/annual-climate-projections/"
-LOCA2_ANNUAL_CLIMATE_PROJECTIONS_PREFIX = "loca2/annual-climate-projections/"
+# Annual Climate Projections prototype data lives in tmp/. Drop "tmp/" once the
+# final outputs are on S3, then re-run `make acp-boundary-csv`.
+WRF_ANNUAL_CLIMATE_PROJECTIONS_PREFIX = "wrf/annual-climate-projections/tmp/"
+LOCA2_ANNUAL_CLIMATE_PROJECTIONS_PREFIX = "loca2/annual-climate-projections/tmp/"
 
 HDP_PREFIX = "histwxstns/"
 HADISD_PREFIX = "hadisd/"

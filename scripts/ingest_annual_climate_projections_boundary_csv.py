@@ -14,7 +14,7 @@ identify exactly one item. ERA5 items use activity WRF and experiment
 Each projection CSV holds one region's annual values: year, mean, min, max,
 then one column per simulation. Each ERA5 CSV holds year, value.
 
-S3 path structure (under DATA_SUBDIR while the data is a prototype):
+S3 path structure (under tmp/ while the data is a prototype; see constants.py):
     wrf/annual-climate-projections/per_boundary/{variable}/{boundary}/ssp370/csv/
         Files within: {Region}_{variable}_ssp370.csv
     loca2/annual-climate-projections/per_boundary/{variable}/{boundary}/{ssp}/csv/
@@ -47,10 +47,6 @@ from scripts.constants import (
 from scripts.utils import bbox_to_geometry, load_direct
 
 COLLECTION_ID = "acp-boundary-csv"
-
-# Prototype data lives in tmp/. Set to "" once the final outputs are on S3,
-# then delete and re-ingest the collection (asset hrefs change).
-DATA_SUBDIR = "tmp/"
 
 # Only boundaries with data on S3. Add the other boundaries (and the new state
 # mask) as the pipeline produces them; census tracts and IOU/POUs will need the
@@ -157,8 +153,8 @@ def build_collection():
         ),
     )
 
-    wrf_prefix = WRF_ANNUAL_CLIMATE_PROJECTIONS_PREFIX + DATA_SUBDIR
-    loca2_prefix = LOCA2_ANNUAL_CLIMATE_PROJECTIONS_PREFIX + DATA_SUBDIR
+    wrf_prefix = WRF_ANNUAL_CLIMATE_PROJECTIONS_PREFIX
+    loca2_prefix = LOCA2_ANNUAL_CLIMATE_PROJECTIONS_PREFIX
 
     for boundary, label in BOUNDARY_LABELS.items():
         for variable in WRF_VARIABLES:
