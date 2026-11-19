@@ -59,6 +59,10 @@ WRF_HEAT_WAVE_LENGTH_PREFIX = "wrf/heat-wave-length/"
 WRF_EXTREME_HEAT_SEASON_PREFIX = "wrf/extreme-heat-season/"
 WRF_DERIVED_VARS_PREFIX = "wrf/derived-vars/"
 WRF_CLIMATE_METRICS_MAP_PREFIX = "wrf/climate-metrics-map/"
+# Annual Climate Projections prototype data lives in tmp/. Drop "tmp/" once the
+# final outputs are on S3, then re-run `make acp-boundary-csv`.
+WRF_ANNUAL_CLIMATE_PROJECTIONS_PREFIX = "wrf/annual-climate-projections/tmp/"
+LOCA2_ANNUAL_CLIMATE_PROJECTIONS_PREFIX = "loca2/annual-climate-projections/tmp/"
 
 HDP_PREFIX = "histwxstns/"
 HADISD_PREFIX = "hadisd/"
@@ -85,6 +89,7 @@ COLLECTION_KEYWORDS = {
     "hwf-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
     "hwl-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
     "hdd-cdd-metrics-mm-boundary-csv": ["energy", "Cal-Adapt tools"],
+    "acp-boundary-csv": ["temperature", "precipitation", "Cal-Adapt tools"],
     "wrf-climate-metrics-map": [
         "extreme heat",
         "precipitation",
@@ -203,6 +208,18 @@ CLIM_PROF_GWL_PERIOD_DATES = {
         datetime(1981, 1, 1, tzinfo=timezone.utc),
         datetime(2019, 12, 31, tzinfo=timezone.utc),
     ),  # ERA5 reanalysis baseline period
+}
+
+# Boundary types for the tool boundary CSV collections, with their labels. Each
+# ingest script picks which of these it ingests.
+BOUNDARY_LABELS = {
+    "ca_counties": "California counties",
+    "ca_watersheds": "California watersheds (HUC8)",
+    "ca_census_tracts": "California census tracts",
+    "ious_pous": "California IOUs and POUs",
+    "forecast_zones": "California forecast zones",
+    "electric_balancing_areas": "California electric balancing areas",
+    # "state": "US states",  # uncomment once the state mask exists
 }
 
 # Spatial extents
