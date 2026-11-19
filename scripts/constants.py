@@ -59,6 +59,8 @@ WRF_HEAT_WAVE_LENGTH_PREFIX = "wrf/heat-wave-length/"
 WRF_EXTREME_HEAT_SEASON_PREFIX = "wrf/extreme-heat-season/"
 WRF_DERIVED_VARS_PREFIX = "wrf/derived-vars/"
 WRF_CLIMATE_METRICS_MAP_PREFIX = "wrf/climate-metrics-map/"
+WRF_ANNUAL_CLIMATE_PROJECTIONS_PREFIX = "wrf/annual-climate-projections/"
+LOCA2_ANNUAL_CLIMATE_PROJECTIONS_PREFIX = "loca2/annual-climate-projections/"
 
 HDP_PREFIX = "histwxstns/"
 HADISD_PREFIX = "hadisd/"
@@ -85,6 +87,9 @@ COLLECTION_KEYWORDS = {
     "hwf-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
     "hwl-metrics-mm-boundary-csv": ["extreme heat", "Cal-Adapt tools"],
     "hdd-cdd-metrics-mm-boundary-csv": ["energy", "Cal-Adapt tools"],
+    "acp-wrf-boundary-csv": ["temperature", "precipitation", "Cal-Adapt tools"],
+    "acp-loca2-boundary-csv": ["temperature", "precipitation", "Cal-Adapt tools"],
+    "acp-era5-boundary-csv": ["temperature", "precipitation", "Cal-Adapt tools"],
     "wrf-climate-metrics-map": [
         "extreme heat",
         "precipitation",
