@@ -36,6 +36,7 @@ from datetime import datetime, timezone
 import pystac
 
 from scripts.constants import (
+    BOUNDARY_LABELS,
     BUCKET_CADCAT,
     CA_BBOX,
     CALADAPT_DATA_LICENSE,
@@ -50,16 +51,17 @@ COLLECTION_ID = "acp-boundary-csv"
 
 # Only boundaries with data on S3. Uncomment the others as the pipeline
 # produces them. If census tracts and IOU/POUs land under a weighted_median/
-# subdirectory, add a BOUNDARY_SUBDIRS lookup like the HDD/CDD script.
-BOUNDARY_LABELS = {
-    "ca_counties": "California counties",
-    # "ca_watersheds": "California watersheds (HUC8)",
-    # "forecast_zones": "California forecast zones",
-    # "electric_balancing_areas": "California electric balancing areas",
-    # "ca_census_tracts": "California census tracts",
-    # "ious_pous": "California IOUs and POUs",
-    # "state": "California",  # placeholder: mask name and label not decided yet
-}
+# subdirectory, add a BOUNDARY_SUBDIRS lookup like the HDD/CDD script. A new
+# state boundary also needs an entry in BOUNDARY_LABELS in constants.py.
+VALID_BOUNDARIES = [
+    "ca_counties",
+    # "ca_watersheds",
+    # "ca_census_tracts",
+    # "ious_pous",
+    # "forecast_zones",
+    # "electric_balancing_areas",
+    # "state",
+]
 
 WRF_VARIABLES = ["t2", "t2max", "t2min", "dew_point", "prec"]
 LOCA2_VARIABLES = ["tasmax", "tasmin", "pr"]
@@ -121,7 +123,9 @@ def build_collection():
         keywords=COLLECTION_KEYWORDS[COLLECTION_ID],
         extra_fields={
             "caladapt:spatial_type": "spatial-aggregate",
-            "caladapt:boundary_labels": BOUNDARY_LABELS,
+            "caladapt:boundary_labels": {
+                b: BOUNDARY_LABELS[b] for b in VALID_BOUNDARIES
+            },
         },
         description=(
             "Annual temperature and total precipitation for California regions. "
@@ -162,7 +166,8 @@ def build_collection():
     wrf_prefix = WRF_ANNUAL_CLIMATE_PROJECTIONS_PREFIX
     loca2_prefix = LOCA2_ANNUAL_CLIMATE_PROJECTIONS_PREFIX
 
-    for boundary, label in BOUNDARY_LABELS.items():
+    for boundary in VALID_BOUNDARIES:
+        label = BOUNDARY_LABELS[boundary]
         for variable in WRF_VARIABLES:
             add_item(
                 collection,

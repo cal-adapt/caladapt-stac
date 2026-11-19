@@ -34,6 +34,7 @@ from datetime import datetime, timezone
 import pystac
 
 from scripts.constants import (
+    BOUNDARY_LABELS,
     BUCKET_CADCAT,
     CA_BBOX,
     CALADAPT_DATA_LICENSE,
@@ -52,15 +53,14 @@ THRESHOLD_NAME = "65F"
 # All 6 boundary types the pipeline produces. This is a deliberate allowlist
 # rather than something to discover from S3, so older outputs left on S3
 # (e.g. the unweighted census tract and IOU/POU folders) are never picked up.
-BOUNDARY_LABELS = {
-    "ca_counties": "California counties",
-    "ca_watersheds": "California watersheds (HUC8)",
-    "forecast_zones": "California forecast zones",
-    "electric_balancing_areas": "California electric balancing areas",
-    "ca_census_tracts": "California census tracts",
-    "ious_pous": "California IOUs and POUs",
-}
-VALID_BOUNDARIES = list(BOUNDARY_LABELS)
+VALID_BOUNDARIES = [
+    "ca_counties",
+    "ca_watersheds",
+    "ca_census_tracts",
+    "ious_pous",
+    "forecast_zones",
+    "electric_balancing_areas",
+]
 
 # Census tract and IOU/POU outputs sit under an extra aggregation directory.
 # Only the weighted median is ingested; the weighted mean is not used.
@@ -92,7 +92,9 @@ def build_collection():
         extra_fields={
             "caladapt:spatial_type": "spatial-aggregate",
             "caladapt:source": "wrf",
-            "caladapt:boundary_labels": BOUNDARY_LABELS,
+            "caladapt:boundary_labels": {
+                b: BOUNDARY_LABELS[b] for b in VALID_BOUNDARIES
+            },
         },
         description=(
             "Multi-model ensemble annual HDD65/CDD65 timeseries CSVs of WRF projections "

@@ -210,6 +210,17 @@ CLIM_PROF_GWL_PERIOD_DATES = {
     ),  # ERA5 reanalysis baseline period
 }
 
+# Boundary types for the tool boundary CSV collections, with their labels. Each
+# ingest script picks which of these it ingests.
+BOUNDARY_LABELS = {
+    "ca_counties": "California counties",
+    "ca_watersheds": "California watersheds (HUC8)",
+    "ca_census_tracts": "California census tracts",
+    "ious_pous": "California IOUs and POUs",
+    "forecast_zones": "California forecast zones",
+    "electric_balancing_areas": "California electric balancing areas",
+}
+
 # Spatial extents
 CA_BBOX = [-124.4, 32.5, -114.1, 42.0]
 WECC_BBOX = [-125.0, 25.0, -100.0, 52.0]
