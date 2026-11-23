@@ -149,7 +149,7 @@ def build_sup3rcc_collection():
     """
     collection = pystac.Collection(
         id="sup3rcc",
-        title="Sup3rCC downscaled meteorology for renewable energy",
+        title="Sup3rCC downscaled meteorology for renewable energy and energy systems analysis",
         keywords=COLLECTION_KEYWORDS["sup3rcc"],
         extra_fields={
             "caladapt:spatial_type": "grid",
