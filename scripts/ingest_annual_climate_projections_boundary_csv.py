@@ -127,14 +127,11 @@ def build_collection():
             },
         },
         description=(
-            "Annual temperature and total precipitation for California regions. "
-            "Projections come from bias-adjusted CMIP6 models dynamically downscaled "
-            "with WRF (historical through ssp370, 1981-2099) and CMIP6 models "
-            "statistically downscaled with LOCA2-Hybrid (historical through ssp245, "
-            "ssp370 and ssp585, 1950-2099). Each projection CSV holds one region's "
-            "annual mean, min and max across simulations, plus one column per "
-            "simulation. Observed values come from the ERA5 reanalysis dynamically "
-            "downscaled with WRF (1981-2019)."
+            "Annual average temperature and total precipitation for California "
+            "regions, from 1950 to 2099. Includes CMIP6 projections downscaled with "
+            "WRF and LOCA2-Hybrid, plus observed values from ERA5 reanalysis. Each "
+            "CSV has one region's ensemble mean, minimum and maximum, plus a column "
+            "for each simulation."
         ),
         license=CALADAPT_DATA_LICENSE,
         providers=[
