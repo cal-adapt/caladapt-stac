@@ -42,6 +42,7 @@ from scripts.constants import (
     CA_BBOX,
     CALADAPT_DATA_LICENSE,
     COLLECTION_KEYWORDS,
+    ICON_BASE_URL,
     LOCA2_ANNUAL_CLIMATE_PROJECTIONS_PREFIX,
     PGDSN,
     WRF_ANNUAL_CLIMATE_PROJECTIONS_PREFIX,
@@ -158,6 +159,15 @@ def build_collection():
             temporal=pystac.TemporalExtent(
                 intervals=[[LOCA2_DATE_RANGE[0], WRF_DATE_RANGE[1]]]
             ),
+        ),
+    )
+    collection.add_asset(
+        "thumbnail",
+        pystac.Asset(
+            href=f"{ICON_BASE_URL}annual_climate_projections.png",
+            media_type="image/png",
+            roles=["thumbnail"],
+            title="Annual climate projections tool preview",
         ),
     )
 
