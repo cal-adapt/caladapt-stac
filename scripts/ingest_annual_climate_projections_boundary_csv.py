@@ -11,10 +11,11 @@ collection, `acp-boundary-csv`, holding three kinds of items:
 identify exactly one item. ERA5 items use activity WRF and experiment
 `reanalysis`, matching the Cal-Adapt data catalog.
 
-Each projection CSV holds one region's annual values: year, mean, min, max,
-then one column per simulation. Each ERA5 CSV holds year, value.
+Each projection CSV holds one region's annual values: year, ensemble_mean,
+ensemble_min, ensemble_max, then one column per simulation. Each ERA5 CSV
+holds year, value.
 
-S3 path structure (under tmp/ while the data is a prototype; see constants.py):
+S3 path structure:
     wrf/annual-climate-projections/per_boundary/{variable}/{boundary}/ssp370/csv/
         Files within: {Region}_{variable}_ssp370.csv
     loca2/annual-climate-projections/per_boundary/{variable}/{boundary}/{ssp}/csv/
@@ -49,18 +50,15 @@ from scripts.utils import bbox_to_geometry, load_direct
 
 COLLECTION_ID = "acp-boundary-csv"
 
-# Only boundaries with data on S3. Uncomment the others as the pipeline
-# produces them. If census tracts and IOU/POUs land under a weighted_median/
-# subdirectory, add a BOUNDARY_SUBDIRS lookup like the HDD/CDD script. A new
-# state boundary also needs an entry in BOUNDARY_LABELS in constants.py.
+# Boundaries with data on S3. The pipeline doesn't produce census tracts or
+# IOU/POUs; if it does later, check whether they land under a weighted_median/
+# subdirectory and add a BOUNDARY_SUBDIRS lookup like the HDD/CDD script.
 VALID_BOUNDARIES = [
     "ca_counties",
-    # "ca_watersheds",
-    # "ca_census_tracts",
-    # "ious_pous",
-    # "forecast_zones",
-    # "electric_balancing_areas",
-    # "state",
+    "ca_watersheds",
+    "forecast_zones",
+    "electric_balancing_areas",
+    "state",
 ]
 
 WRF_VARIABLES = ["t2", "t2max", "t2min", "dew_point", "prec"]
